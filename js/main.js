@@ -55,20 +55,19 @@ function setupEventListeners() {
 
     // Manejar tabs de navegación (marcha <-> estación)
     
-DOMElements.tabButtons.forEach(button => {
+document.querySelectorAll(".tab-button").forEach(button => {
   button.addEventListener("click", () => {
     const destinoID = button.dataset.target;
 
-    // Desactivar pestañas
-    DOMElements.tabButtons.forEach(btn => btn.classList.remove("active"));
+    document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
     button.classList.add("active");
 
-    // Ocultar todas las pantallas y mostrar solo la seleccionada
     document.querySelectorAll(".pantalla").forEach(p => p.classList.remove("visible"));
     const destino = document.getElementById(destinoID);
     if (destino) destino.classList.add("visible");
   });
 });
+
 
 }
 
