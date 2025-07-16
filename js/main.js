@@ -5,6 +5,12 @@ import { login, cerrarSesion, verificarSesionGuardada, } from './auth.js';
 import { buscarTren, clearResultados, buscarEstacion, cargarMas } from './api.js';
 import { mostrarTrenAnterior, mostrarTrenSiguiente, autocompletarEstaciones } from './ui.js';
 
+
+function getAuthHeader() {
+  const token = sessionStorage.getItem("authToken");
+  return token ? `Bearer ${token}` : "";
+}
+
 // ALMACENAR ELEMENTOS DEL DOM UNA SOLA VEZ
 const DOMElements = {
     loginButton: document.getElementById("loginButton"),
@@ -23,16 +29,6 @@ const DOMElements = {
 };
 
 function setupEventListeners() {
-// Autocompletado Teleindicador
-  document.getElementById("numeroTeleEst")?.addEventListener("input", autocompletarEstaciones);
-  document.getElementById("numeroTeleEst")?.addEventListener("focus", autocompletarEstaciones);
-  document.addEventListener("click", function(event) {
-    const sugerenciasTele = document.getElementById("sugerenciasTele");
-    const inputTele = document.getElementById("numeroTeleEst");
-    if (sugerenciasTele && !sugerenciasTele.contains(event.target) && event.target !== inputTele) {
-      sugerenciasTele.classList.remove("visible");
-    }
-  });
   document.getElementById("buscarTele")?.addEventListener("click", buscarTeleindicador);
     DOMElements.loginButton.addEventListener("click", login);
     DOMElements.buscarTrenButton.addEventListener("click", buscarTren);
