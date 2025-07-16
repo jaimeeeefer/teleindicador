@@ -140,7 +140,7 @@ clearBtn.addEventListener('click', () => {
 
 
 // --- TELEINDICADOR ---
-import { estaciones } from './estaciones.js'; // asumiendo que estaciones vienen de ahí o CSV ya procesado
+import { getEstaciones } from './auth.js';
 
 document.getElementById("buscarTele").addEventListener("click", buscarTeleindicador);
 const inputTele = document.getElementById("teleEstacion");
@@ -150,58 +150,67 @@ inputTele.addEventListener("input", () => autocompletarEstaciones(inputTele, sug
 inputTele.addEventListener("focus", () => autocompletarEstaciones(inputTele, sugerenciasTele));
 
 async function buscarTeleindicador() {
-  const estacion = inputTele.value.trim();
+  const estaciones = getEstaciones();
+  const estacionesArray = Object.entries(estaciones);
+
+  const estacionNombre = inputTele.value.trim().toLowerCase();
   const modo = document.getElementById("modoTele").value;
   const tipo = document.getElementById("tipoTele").value;
   const contenedor = document.getElementById("resultadoTeleindicador");
   contenedor.innerHTML = "";
 
-  const codigoEstacion = estaciones.find(e => e.nombre === estacion)?.codigo;
-  if (!codigoEstacion) return contenedor.innerHTML = "<p>Estación no encontrada.</p>";
-
-  const response = await fetch(`https://adif-api.onrender.com/api/adif/estacion/${codigoEstacion}`);
-  if (!response.ok) {
-    contenedor.innerHTML = "<p>Error al obtener datos de la estación.</p>";
+  const coincidencia = estacionesArray.find(([_, nombre]) => nombre.toLowerCase() === estacionNombre);
+  if (!coincidencia) {
+    contenedor.innerHTML = "<p>Estación no encontrada.</p>";
     return;
   }
-  const data = await response.json();
+  const codigoEstacion = coincidencia[0];
 
-  const trenes = data.commercialPaths.filter(item => {
-    const info = item.commercialPathInfo;
-    const paso = item.passthroughStep;
-    const esSalida = paso.stationCode === codigoEstacion;
-    const cumpleModo = (modo === "salidas" && paso.departurePassthroughStepSides)
-                    || (modo === "llegadas" && paso.arrivalPassthroughStepSides);
-    const cumpleTipo = tipo === "TODOS" || info.trafficType === tipo;
-    return esSalida && cumpleModo && cumpleTipo;
-  });
+  try {
+    const response = await fetch(`https://tu-api-en-render.com/api/adif/estacion/${codigoEstacion}`);
+    if (!response.ok) throw new Error("Error al obtener datos de la estación.");
+    const data = await response.json();
 
-  trenes.sort((a, b) =>
-    (a.passthroughStep.departurePassthroughStepSides?.plannedTime || 0) -
-    (b.passthroughStep.departurePassthroughStepSides?.plannedTime || 0)
-  );
+    const trenes = data.commercialPaths.filter(item => {
+      const info = item.commercialPathInfo;
+      const paso = item.passthroughStep;
+      const esEnEstacion = paso.stationCode === codigoEstacion;
+      const cumpleModo = (modo === "salidas" && paso.departurePassthroughStepSides)
+                      || (modo === "llegadas" && paso.arrivalPassthroughStepSides);
+      const cumpleTipo = tipo === "TODOS" || info.trafficType === tipo;
+      return esEnEstacion && cumpleModo && cumpleTipo;
+    });
 
-  trenes.forEach(tren => {
-    const info = tren.commercialPathInfo;
-    const paso = tren.passthroughStep;
-    const salida = paso.departurePassthroughStepSides;
-    if (!salida) return;
+    trenes.sort((a, b) =>
+      (a.passthroughStep.departurePassthroughStepSides?.plannedTime || 0) -
+      (b.passthroughStep.departurePassthroughStepSides?.plannedTime || 0)
+    );
 
-    const hora = new Date(salida.plannedTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const destino = estaciones.find(e => e.codigo === info.commercialDestinationStationCode)?.nombre || "¿?";
-    const linea = info.commercialProduct || "";
-    const numero = info.commercialCirculationKey.commercialNumber;
-    const via = salida.plannedPlatform || "-";
+    trenes.forEach(tren => {
+      const info = tren.commercialPathInfo;
+      const paso = tren.passthroughStep;
+      const salida = paso.departurePassthroughStepSides;
+      if (!salida) return;
 
-    const fila = document.createElement("div");
-    fila.className = "teleindicador-row";
-    fila.innerHTML = `
-      <div>${hora}</div>
-      <div><span class="linea">${linea}</span></div>
-      <div>${destino}</div>
-      <div>${numero}</div>
-      <div>${via}</div>
-    `;
-    contenedor.appendChild(fila);
-  });
+      const hora = new Date(salida.plannedTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const destino = estaciones[info.commercialDestinationStationCode] || "¿?";
+      const linea = info.commercialProduct || "";
+      const numero = info.commercialCirculationKey.commercialNumber;
+      const via = salida.plannedPlatform || "-";
+
+      const fila = document.createElement("div");
+      fila.className = "teleindicador-row";
+      fila.innerHTML = `
+        <div>${hora}</div>
+        <div><span class="linea">${linea}</span></div>
+        <div>${destino}</div>
+        <div>${numero}</div>
+        <div>${via}</div>
+      `;
+      contenedor.appendChild(fila);
+    });
+
+  } catch (error) {
+    contenedor.innerHTML = `<p>Error: ${error.message}</p>`;
+  }
 }
