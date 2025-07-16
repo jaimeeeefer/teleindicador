@@ -3,7 +3,7 @@
 import { mostrarPantalla, setVerifyingState } from './ui.js';
 import { cargarCSV } from './api.js';
 
-const API_BASE_URL = "https://adif-api.onrender.com/";
+const API_BASE_URL = "https://adif-api.onrender.com";
 
 let authHeader = "";
 let estaciones = {};
