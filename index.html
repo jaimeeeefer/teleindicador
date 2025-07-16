@@ -127,6 +127,39 @@
           <input type="text" id="numeroEst" placeholder="Estación" autocomplete="off"/>
           <button type="button" id="clearNumeroEst" class="clear-input-btn" style="display:none;" aria-label="Borrar">×</button>
           <div id="sugerencias"></div>
+<div id="teleindicador" class="pantalla">
+
+<div class="consulta-container">
+  <div class="form-row">
+    <div class="input-sugerencias-wrapper">
+      <input type="text" id="numeroTeleEst" placeholder="Estación" autocomplete="off"/>
+      <button type="button" id="clearNumeroTeleEst" class="clear-input-btn" style="display:none;" aria-label="Borrar">×</button>
+      <div id="sugerenciasTele"></div>
+    </div>
+    <button type="button" id="buscarTele" class="boton-verde">Buscar</button>
+  </div>
+  <div class="form-row">
+    <div class="form-group">
+      <label for="modoTele">Mostrar:</label>
+      <button class="modo-btn selected" data-modo="salidas">Salidas</button>
+      <button class="modo-btn" data-modo="llegadas">Llegadas</button>
+    </div>
+    <div class="form-group">
+      <label for="tipoTele">Tipo:</label>
+      <select id="tipoTele">
+        <option value="TODOS">Todos</option>
+        <option value="AVLDMD">Viajeros</option>
+        <option value="GOODS">Mercancías</option>
+      </select>
+    </div>
+  </div>
+  <div class="resultado">
+    <label>Resultado:</label>
+    <div id="resultadoTele" class="bloque-resultado">Esperando consulta…</div>
+  </div>
+</div>
+
+</div>
         </div>
         <button id="buscarEstButton">Buscar</button>
       </div>
@@ -202,38 +235,5 @@
   </div>
 
   <script type="module" src="js/main.js"></script>
-<div id="teleindicador" class="pantalla">
-
-<div class="consulta-container">
-  <div class="form-row">
-    <div class="input-sugerencias-wrapper">
-      <input type="text" id="numeroTeleEst" placeholder="Estación" autocomplete="off"/>
-      <button type="button" id="clearNumeroTeleEst" class="clear-input-btn" style="display:none;" aria-label="Borrar">×</button>
-      <div id="sugerenciasTele"></div>
-    </div>
-    <button type="button" id="buscarTele" class="boton-verde">Buscar</button>
-  </div>
-  <div class="form-row">
-    <div class="form-group">
-      <label for="modoTele">Mostrar:</label>
-      <button class="modo-btn selected" data-modo="salidas">Salidas</button>
-      <button class="modo-btn" data-modo="llegadas">Llegadas</button>
-    </div>
-    <div class="form-group">
-      <label for="tipoTele">Tipo:</label>
-      <select id="tipoTele">
-        <option value="TODOS">Todos</option>
-        <option value="AVLDMD">Viajeros</option>
-        <option value="GOODS">Mercancías</option>
-      </select>
-    </div>
-  </div>
-  <div class="resultado">
-    <label>Resultado:</label>
-    <div id="resultadoTele" class="bloque-resultado">Esperando consulta…</div>
-  </div>
-</div>
-
-</div>
 </body>
 </html>
