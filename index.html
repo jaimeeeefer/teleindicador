@@ -20,7 +20,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="white">
   <meta property="og:title" content="Magallanes II" />
   <meta property="og:description" content="🤨🤨" />
-  <meta property="og:image" content="https://anderibarraa.github.io/magallanes/img/banner.png" />
+  <meta property="og:image" content="https://jaimeeeefer.github.io/teleindicador/img/banner.png" />
   <meta property="og:url" content="https://jaimeeeefer.github.io/teleindicador/" />
   <meta property="og:type" content="website" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -75,30 +75,12 @@
     </div>
   </div>
 
-  <div id="consulta" class="pantalla visible">
+  <div id="consulta" class="pantalla">
     <div class="consulta-container">
       <div class="form-row">
         <input type="text" id="numeroTren" inputmode="numeric" placeholder="Número de tren" autocomplete="off"/>
         <button id="buscarTrenButton">Buscar</button>
-      
-<div id="resultadoEstacion" class="hidden">
-    <h2 id="salidasLlegadasHeader" class="table-title">Salidas</h2>
-    <div class="table-wrapper">
-      <table id="tablaPanel">
-        <thead>
-          <tr>
-            <th>Hora</th>
-            <th>Retraso</th>
-            <th>Destino/Origen</th>
-            <th>Número</th>
-            <th>Operador</th>
-            <th>Vía</th>
-            <th>Estado</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div></div>
+      </div>
       <div class="resultado-header">Resultado:</div>
       <pre id="resultado">Esperando consulta...</pre>
     </div>
@@ -209,8 +191,6 @@
   </div>
   </div>
 
-  
-
   <div id="botonesCentro" class="botones-centro pantalla">
     <div class="botonesCentro2">
       <button id="clearResultadosButton">Limpiar</button>
@@ -220,38 +200,37 @@
   </div>
 
   <script type="module" src="js/main.js"></script>
-<div id="teleindicador" class="pantalla">
 
-<div class="consulta-container">
-  <div class="form-row">
-    <div class="input-sugerencias-wrapper">
-      <input type="text" id="numeroTeleEst" placeholder="Estación" autocomplete="off"/>
-      <button type="button" id="clearNumeroTeleEst" class="clear-input-btn" style="display:none;" aria-label="Borrar">×</button>
-      <div id="sugerenciasTele"></div>
+  <div id="teleindicador" class="pantalla">
+    <div class="consulta-container">
+      <div class="form-row">
+        <div class="input-sugerencias-wrapper">
+          <input type="text" id="numeroTeleEst" placeholder="Estación" autocomplete="off"/>
+          <button type="button" id="clearNumeroTeleEst" class="clear-input-btn" style="display:none;" aria-label="Borrar">×</button>
+          <div id="sugerenciasTele"></div>
+        </div>
+        <button type="button" id="buscarTele" class="boton-verde">Buscar</button>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="modoTele">Mostrar:</label>
+          <button class="modo-btn selected" data-modo="salidas">Salidas</button>
+          <button class="modo-btn" data-modo="llegadas">Llegadas</button>
+        </div>
+        <div class="form-group">
+          <label for="tipoTele">Tipo:</label>
+          <select id="tipoTele">
+            <option value="TODOS">Todos</option>
+            <option value="AVLDMD">Viajeros</option>
+            <option value="GOODS">Mercancías</option>
+          </select>
+        </div>
+      </div>
+      <div class="resultado">
+        <label>Resultado:</label>
+        <div id="resultadoTele" class="bloque-resultado">Esperando consulta…</div>
+      </div>
     </div>
-    <button type="button" id="buscarTele" class="boton-verde">Buscar</button>
   </div>
-  <div class="form-row">
-    <div class="form-group">
-      <label for="modoTele">Mostrar:</label>
-      <button class="modo-btn selected" data-modo="salidas">Salidas</button>
-      <button class="modo-btn" data-modo="llegadas">Llegadas</button>
-    </div>
-    <div class="form-group">
-      <label for="tipoTele">Tipo:</label>
-      <select id="tipoTele">
-        <option value="TODOS">Todos</option>
-        <option value="AVLDMD">Viajeros</option>
-        <option value="GOODS">Mercancías</option>
-      </select>
-    </div>
-  </div>
-  <div class="resultado">
-    <label>Resultado:</label>
-    <div id="resultadoTele" class="bloque-resultado">Esperando consulta…</div>
-  </div>
-</div>
-
-</div>
 </body>
 </html>
