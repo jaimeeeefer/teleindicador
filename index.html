@@ -201,24 +201,23 @@
 
   <script type="module" src="js/main.js"></script>
 
-<!-- Sección Teleindicador -->
-<div id="teleindicador" class="pantalla">
-  <div class="teleindicador-controles">
-    <input type="text" id="teleEstacion" placeholder="Buscar estación..." autocomplete="off" />
-    <div id="sugerenciasTele" class="sugerencias"></div>
-    <select id="modoTele">
-      <option value="salidas">Salidas</option>
-      <option value="llegadas">Llegadas</option>
-    </select>
-    <select id="tipoTele">
-      <option value="TODOS">Todos</option>
-      <option value="AVLDMD">Viajeros</option>
-      <option value="GOODS">Mercancías</option>
-    </select>
-    <button id="buscarTele">Buscar</button>
+  <div id="teleindicador" class="pantalla">
+    <div class="teleindicador-controles">
+      <input type="text" id="teleEstacion" placeholder="Buscar estación..." autocomplete="off" />
+      <div id="sugerenciasTele" class="sugerencias"></div>
+      <select id="modoTele">
+        <option value="salidas">Salidas</option>
+        <option value="llegadas">Llegadas</option>
+      </select>
+      <select id="tipoTele">
+        <option value="TODOS">Todos</option>
+        <option value="AVLDMD">Viajeros</option>
+        <option value="GOODS">Mercancías</option>
+      </select>
+      <button id="buscarTele">Buscar</button>
+    </div>
+    <div id="resultadoTeleindicador" class="teleindicador-tabla"></div>
   </div>
-  <div id="resultadoTeleindicador" class="teleindicador-tabla"></div>
-</div>
-
 </body>
+
 </html>
