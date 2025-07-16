@@ -15,7 +15,7 @@ const DOMElements = {
     btnAnterior: document.getElementById("btnAnterior"),
     btnSiguiente: document.getElementById("btnSiguiente"),
     tabButtons: document.querySelectorAll(".tab-button"),
-    pantallas: document.querySelectorAll(".pantalla"), // Asegúrate de que esto selecciona todos los divs con la clase 'pantalla'
+    pantallas: document.querySelectorAll(".pantalla"),
     inputEstación: document.getElementById("numeroEst"),
     sugerencias: document.getElementById("sugerencias"),
     buscarEstButton: document.getElementById("buscarEstButton"),
@@ -23,7 +23,7 @@ const DOMElements = {
 };
 
 function setupEventListeners() {
-    document.getElementById("buscarTele")?.addEventListener("click", buscarTeleindicador);
+  document.getElementById("buscarTele")?.addEventListener("click", buscarTeleindicador);
     DOMElements.loginButton.addEventListener("click", login);
     DOMElements.buscarTrenButton.addEventListener("click", buscarTren);
     DOMElements.clearResultadosButton.addEventListener("click", clearResultados);
