@@ -78,12 +78,7 @@
     </div>
   </div>
 
-  <div id="consulta" class="pantalla">
-    <div class="consulta-container">
-      <div class="form-row">
-        <input type="text" id="numeroTren" inputmode="numeric" placeholder="Número de tren" autocomplete="off"/>
-        <button id="buscarTrenButton">Buscar</button>
-      </div>
+  
       <div class="resultado-header">Resultado:</div>
       <pre id="resultado">Esperando consulta...</pre>
     </div>
@@ -123,13 +118,7 @@
     </div>
   </div>
 
-  <div id="estacion" class="pantalla">
-    <div class="consulta-container">
-      <div class="form-row">
-        <div class="input-sugerencias-wrapper">
-          <input type="text" id="numeroEst" placeholder="Estación" autocomplete="off"/>
-          <button type="button" id="clearNumeroEst" class="clear-input-btn" style="display:none;" aria-label="Borrar">×</button>
-          <div id="sugerencias"></div>
+  
         </div>
         <button id="buscarEstButton">Buscar</button>
       </div>
@@ -203,5 +192,20 @@
   </div>
 
   <script type="module" src="js/main.js"></script>
+<main>
+<div id="consulta" class="pantalla">
+    <div class="consulta-container">
+      <div class="form-row">
+        <input type="text" id="numeroTren" inputmode="numeric" placeholder="Número de tren" autocomplete="off"/>
+        <button id="buscarTrenButton">Buscar</button>
+      </div>
+<div id="estacion" class="pantalla">
+    <div class="consulta-container">
+      <div class="form-row">
+        <div class="input-sugerencias-wrapper">
+          <input type="text" id="numeroEst" placeholder="Estación" autocomplete="off"/>
+          <button type="button" id="clearNumeroEst" class="clear-input-btn" style="display:none;" aria-label="Borrar">×</button>
+          <div id="sugerencias"></div>
+</main>
 </body>
 </html>
