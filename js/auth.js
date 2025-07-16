@@ -35,7 +35,7 @@ async function verificarSesion(header) {
     }, 4000);
 
     try {
-        const response = await fetch(`${API_BASE_URL}/login`, {
+        const response = await fetch(`${API_BASE_URL.replace(/\/$/, '')}/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json", "Authorization": header },
         });
