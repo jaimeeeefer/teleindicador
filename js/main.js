@@ -23,6 +23,7 @@ const DOMElements = {
 };
 
 function setupEventListeners() {
+  document.getElementById("buscarTele")?.addEventListener("click", buscarTeleindicador);
     DOMElements.loginButton.addEventListener("click", login);
     DOMElements.buscarTrenButton.addEventListener("click", buscarTren);
     DOMElements.clearResultadosButton.addEventListener("click", clearResultados);
@@ -54,21 +55,24 @@ function setupEventListeners() {
     });
 
     // Manejar tabs de navegación (marcha <-> estación)
-    
-document.querySelectorAll(".tab-button").forEach(button => {
-  button.addEventListener("click", () => {
-    const destinoID = button.dataset.target;
+    DOMElements.tabButtons.forEach(button => {
+        button.addEventListener("click", () => {
+            const destinoID = button.dataset.target;
 
-    document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
-    button.classList.add("active");
+            // Cambiar pestaña activa
+            DOMElements.tabButtons.forEach(btn => btn.classList.remove("active"));
+            button.classList.add("active");
 
-    document.querySelectorAll(".pantalla").forEach(p => p.classList.remove("visible"));
-    const destino = document.getElementById(destinoID);
-    if (destino) destino.classList.add("visible");
-  });
-});
-
-
+            // Cambiar pantalla visible
+            if (destinoID === "consulta") {
+                document.getElementById("estacion")?.classList.remove("visible");
+                document.getElementById("consulta")?.classList.add("visible");
+            } else if (destinoID === "estacion") {
+                document.getElementById("consulta")?.classList.remove("visible");
+                document.getElementById("estacion")?.classList.add("visible");
+            }
+        });
+    });
 }
 
 async function init() {
@@ -134,3 +138,67 @@ clearBtn.addEventListener('click', () => {
   numeroEst.classList.remove('input-con-x');
   numeroEst.focus();
 });
+
+export async function buscarTeleindicador() {
+  const input = document.getElementById("numeroTeleEst");
+  const resultado = document.getElementById("resultadoTele");
+  const modo = document.querySelector(".modo-btn.selected")?.dataset.modo || "salidas";
+  const tipo = document.getElementById("tipoTele").value;
+  const numero = input.value.trim().padStart(5, '0');
+  const pagina = 0;
+  const viajeros = "BOTH";
+  const parada = "BOTH";
+
+  if (!numero) {
+    resultado.textContent = "Introduce una estación válida.";
+    return;
+  }
+
+  resultado.innerHTML = "Consultando…";
+
+  try {
+    const response = await fetch(`https://adif-api.onrender.com/${modo}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": getAuthHeader()
+      },
+      body: JSON.stringify({ numero, pagina, viajeros, parada, tipo })
+    });
+
+    if (!response.ok) throw new Error("Error en la consulta");
+
+    const data = await response.json();
+    const trenes = data.commercialPaths || [];
+
+    if (!trenes.length) {
+      resultado.innerHTML = "No hay resultados para la estación indicada.";
+      return;
+    }
+
+    resultado.innerHTML = trenes.map(tren => {
+      const info = tren.commercialPathInfo || {};
+      const paso = tren.passthroughStep || {};
+      const hora = new Date(paso.plannedTime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+      const destino = info.destinationStationName || "¿?";
+      const linea = info.circulationLineId || "";
+      const via = paso.plannedPlatform || "-";
+      const operador = tren.operatorName || "Renfe";
+      const numeroTren = tren.trainNumber || "—";
+
+      return `
+        <div class="tele-row">
+          <span class="tele-hora">${hora}</span>
+          <span class="tele-linea">${linea}</span>
+          <span class="tele-destino">${destino}</span>
+          <span class="tele-operador">${operador}</span>
+          <span class="tele-numero">${numeroTren}</span>
+          <span class="tele-via">${via}</span>
+        </div>
+      `;
+    }).join("");
+
+  } catch (error) {
+    resultado.textContent = "Error: " + error.message;
+  }
+}
