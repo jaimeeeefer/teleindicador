@@ -53,8 +53,8 @@ function setupEventListeners() {
         }
     });
 
+    // Manejar tabs de navegación (marcha <-> estación)
     
-// Manejar tabs de navegación dinámicamente (marchas, estaciones, teleindicador)
 DOMElements.tabButtons.forEach(button => {
   button.addEventListener("click", () => {
     const destinoID = button.dataset.target;
@@ -64,19 +64,12 @@ DOMElements.tabButtons.forEach(button => {
     button.classList.add("active");
 
     // Ocultar todas las pantallas y mostrar solo la seleccionada
-    DOMElements.pantallas.forEach(p => p.style.display = "none");
+    document.querySelectorAll(".pantalla").forEach(p => p.classList.remove("visible"));
     const destino = document.getElementById(destinoID);
-    if (destino) destino.style.display = "block";
+    if (destino) destino.classList.add("visible");
   });
 });
 
-    DOMElements.tabButtons.forEach(button => {
-        button.addEventListener("click", () => {
-            const destinoID = button.dataset.target;
-
-            // Cambiar pestaña activa
-            DOMElements.tabButtons.forEach(btn => btn.classList.remove("active"));
-            button.classList.add("active");
 
             // Cambiar pantalla visible
             if (destinoID === "consulta") {
@@ -153,80 +146,3 @@ clearBtn.addEventListener('click', () => {
   numeroEst.classList.remove('input-con-x');
   numeroEst.focus();
 });
-
-
-// --- TELEINDICADOR ---
-import { getEstaciones } from './auth.js';
-
-document.getElementById("buscarTele").addEventListener("click", buscarTeleindicador);
-const inputTele = document.getElementById("teleEstacion");
-const sugerenciasTele = document.getElementById("sugerenciasTele");
-
-inputTele.addEventListener("input", () => autocompletarEstaciones(inputTele, sugerenciasTele));
-inputTele.addEventListener("focus", () => autocompletarEstaciones(inputTele, sugerenciasTele));
-
-async function buscarTeleindicador() {
-  const estaciones = getEstaciones();
-  const estacionesArray = Object.entries(estaciones);
-
-  const estacionNombre = inputTele.value.trim().toLowerCase();
-  const modo = document.getElementById("modoTele").value;
-  const tipo = document.getElementById("tipoTele").value;
-  const contenedor = document.getElementById("resultadoTeleindicador");
-  contenedor.innerHTML = "";
-
-  const coincidencia = estacionesArray.find(([_, nombre]) => nombre.toLowerCase() === estacionNombre);
-  if (!coincidencia) {
-    contenedor.innerHTML = "<p>Estación no encontrada.</p>";
-    return;
-  }
-  const codigoEstacion = coincidencia[0];
-
-  try {
-    const response = await fetch(`https://tu-api-en-render.com/api/adif/estacion/${codigoEstacion}`);
-    if (!response.ok) throw new Error("Error al obtener datos de la estación.");
-    const data = await response.json();
-
-    const trenes = data.commercialPaths.filter(item => {
-      const info = item.commercialPathInfo;
-      const paso = item.passthroughStep;
-      const esEnEstacion = paso.stationCode === codigoEstacion;
-      const cumpleModo = (modo === "salidas" && paso.departurePassthroughStepSides)
-                      || (modo === "llegadas" && paso.arrivalPassthroughStepSides);
-      const cumpleTipo = tipo === "TODOS" || info.trafficType === tipo;
-      return esEnEstacion && cumpleModo && cumpleTipo;
-    });
-
-    trenes.sort((a, b) =>
-      (a.passthroughStep.departurePassthroughStepSides?.plannedTime || 0) -
-      (b.passthroughStep.departurePassthroughStepSides?.plannedTime || 0)
-    );
-
-    trenes.forEach(tren => {
-      const info = tren.commercialPathInfo;
-      const paso = tren.passthroughStep;
-      const salida = paso.departurePassthroughStepSides;
-      if (!salida) return;
-
-      const hora = new Date(salida.plannedTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      const destino = estaciones[info.commercialDestinationStationCode] || "¿?";
-      const linea = info.commercialProduct || "";
-      const numero = info.commercialCirculationKey.commercialNumber;
-      const via = salida.plannedPlatform || "-";
-
-      const fila = document.createElement("div");
-      fila.className = "teleindicador-row";
-      fila.innerHTML = `
-        <div>${hora}</div>
-        <div><span class="linea">${linea}</span></div>
-        <div>${destino}</div>
-        <div>${numero}</div>
-        <div>${via}</div>
-      `;
-      contenedor.appendChild(fila);
-    });
-
-  } catch (error) {
-    contenedor.innerHTML = `<p>Error: ${error.message}</p>`;
-  }
-}
