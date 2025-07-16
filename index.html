@@ -32,6 +32,10 @@
   <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.min.js"></script>
 </head>
 <body>
+<header>
+
+</header>
+
 
   <div id="cargando" class="pantalla">
     <div class="cargando-contenido">
@@ -71,7 +75,6 @@
     <div class="tabs">
       <button class="tab-button active" id="marchasButton" data-target="consulta">Marchas</button>
       <button class="tab-button" data-target="estacion">Estaciones</button>
-      <button class="tab-button" data-target="teleindicador">Teleindicador</button>
     </div>
   </div>
 
@@ -200,24 +203,5 @@
   </div>
 
   <script type="module" src="js/main.js"></script>
-
-  <div id="teleindicador" class="pantalla">
-    <div class="teleindicador-controles">
-      <input type="text" id="teleEstacion" placeholder="Buscar estación..." autocomplete="off" />
-      <div id="sugerenciasTele" class="sugerencias"></div>
-      <select id="modoTele">
-        <option value="salidas">Salidas</option>
-        <option value="llegadas">Llegadas</option>
-      </select>
-      <select id="tipoTele">
-        <option value="TODOS">Todos</option>
-        <option value="AVLDMD">Viajeros</option>
-        <option value="GOODS">Mercancías</option>
-      </select>
-      <button id="buscarTele">Buscar</button>
-    </div>
-    <div id="resultadoTeleindicador" class="teleindicador-tabla"></div>
-  </div>
 </body>
-
 </html>
