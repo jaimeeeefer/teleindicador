@@ -40,7 +40,7 @@
     </div>
   </div>
 
-  <div id="titulo" class="visible">
+  <div id="titulo" class="pantalla visible">
     <h2 class="titulo-magallanes">
       <img src="img/feve.svg" alt="Logo Feve" class="icono-magallanes">
       <img src="img/renfe.svg" alt="Logo Renfe" class="icono-magallanes">
@@ -67,7 +67,7 @@
     <p id="loginInfo" class="login-feedback"></p>
   </div>
 
-  <div id="tabs">
+  <div id="tabs" class="pantalla">
     <div class="tabs">
       <button class="tab-button active" id="marchasButton" data-target="consulta">Marchas</button>
       <button class="tab-button" data-target="estacion">Estaciones</button>
@@ -196,7 +196,7 @@
     <p>Aquí aparecerá la información del teleindicador próximamente...</p>
   </div>
 
-  <div id="botonesCentro" class="botones-centro">
+  <div id="botonesCentro" class="botones-centro pantalla">
     <div class="botonesCentro2">
       <button id="clearResultadosButton">Limpiar</button>
       <button id="toggleThemeBtn">🌙</button>
@@ -205,38 +205,5 @@
   </div>
 
   <script type="module" src="js/main.js"></script>
-
-<div id="teleindicador" class="pantalla">
-  <div class="consulta-container">
-    <div class="form-row">
-      <div class="input-sugerencias-wrapper">
-        <input type="text" id="numeroTeleEst" placeholder="Estación" autocomplete="off"/>
-        <button type="button" id="clearNumeroTeleEst" class="clear-input-btn" style="display:none;" aria-label="Borrar">×</button>
-        <div id="sugerenciasTele"></div>
-      </div>
-      <button type="button" id="buscarTele" class="boton-verde">Buscar</button>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label for="modoTele">Mostrar:</label>
-        <button class="modo-btn selected" data-modo="salidas">Salidas</button>
-        <button class="modo-btn" data-modo="llegadas">Llegadas</button>
-      </div>
-      <div class="form-group">
-        <label for="tipoTele">Tipo:</label>
-        <select id="tipoTele">
-          <option value="TODOS">Todos</option>
-          <option value="AVLDMD">Viajeros</option>
-          <option value="GOODS">Mercancías</option>
-        </select>
-      </div>
-    </div>
-    <div class="resultado">
-      <label>Resultado:</label>
-      <div id="resultadoTele" class="bloque-resultado">Esperando consulta…</div>
-    </div>
-  </div>
-</div>
-
 </body>
 </html>
