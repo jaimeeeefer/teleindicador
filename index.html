@@ -32,10 +32,6 @@
   <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.min.js"></script>
 </head>
 <body>
-<header>
-<!-- Header no encontrado correctamente -->
-</header>
-
 
   <div id="cargando" class="pantalla">
     <div class="cargando-contenido">
@@ -44,7 +40,7 @@
     </div>
   </div>
 
-  <div id="titulo" class="pantalla visible">
+  <div id="titulo" class="visible">
     <h2 class="titulo-magallanes">
       <img src="img/feve.svg" alt="Logo Feve" class="icono-magallanes">
       <img src="img/renfe.svg" alt="Logo Renfe" class="icono-magallanes">
@@ -71,14 +67,20 @@
     <p id="loginInfo" class="login-feedback"></p>
   </div>
 
-  <div id="tabs" class="pantalla">
+  <div id="tabs">
     <div class="tabs">
       <button class="tab-button active" id="marchasButton" data-target="consulta">Marchas</button>
       <button class="tab-button" data-target="estacion">Estaciones</button>
+      <button class="tab-button" id="teleindicadorButton" data-target="teleindicador">Teleindicador</button>
     </div>
   </div>
 
-  
+  <div id="consulta" class="pantalla">
+    <div class="consulta-container">
+      <div class="form-row">
+        <input type="text" id="numeroTren" inputmode="numeric" placeholder="Número de tren" autocomplete="off"/>
+        <button id="buscarTrenButton">Buscar</button>
+      </div>
       <div class="resultado-header">Resultado:</div>
       <pre id="resultado">Esperando consulta...</pre>
     </div>
@@ -118,7 +120,13 @@
     </div>
   </div>
 
-  
+  <div id="estacion" class="pantalla">
+    <div class="consulta-container">
+      <div class="form-row">
+        <div class="input-sugerencias-wrapper">
+          <input type="text" id="numeroEst" placeholder="Estación" autocomplete="off"/>
+          <button type="button" id="clearNumeroEst" class="clear-input-btn" style="display:none;" aria-label="Borrar">×</button>
+          <div id="sugerencias"></div>
         </div>
         <button id="buscarEstButton">Buscar</button>
       </div>
@@ -183,7 +191,12 @@
   </div>
   </div>
 
-  <div id="botonesCentro" class="botones-centro pantalla">
+  <div id="teleindicador" class="pantalla" style="display: none;">
+    <h1>Teleindicador</h1>
+    <p>Aquí aparecerá la información del teleindicador próximamente...</p>
+  </div>
+
+  <div id="botonesCentro" class="botones-centro">
     <div class="botonesCentro2">
       <button id="clearResultadosButton">Limpiar</button>
       <button id="toggleThemeBtn">🌙</button>
@@ -192,20 +205,5 @@
   </div>
 
   <script type="module" src="js/main.js"></script>
-<main>
-<div id="consulta" class="pantalla">
-    <div class="consulta-container">
-      <div class="form-row">
-        <input type="text" id="numeroTren" inputmode="numeric" placeholder="Número de tren" autocomplete="off"/>
-        <button id="buscarTrenButton">Buscar</button>
-      </div>
-<div id="estacion" class="pantalla">
-    <div class="consulta-container">
-      <div class="form-row">
-        <div class="input-sugerencias-wrapper">
-          <input type="text" id="numeroEst" placeholder="Estación" autocomplete="off"/>
-          <button type="button" id="clearNumeroEst" class="clear-input-btn" style="display:none;" aria-label="Borrar">×</button>
-          <div id="sugerencias"></div>
-</main>
 </body>
 </html>
