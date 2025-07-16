@@ -53,7 +53,23 @@ function setupEventListeners() {
         }
     });
 
-    // Manejar tabs de navegación (marcha <-> estación)
+    
+// Manejar tabs de navegación dinámicamente (marchas, estaciones, teleindicador)
+DOMElements.tabButtons.forEach(button => {
+  button.addEventListener("click", () => {
+    const destinoID = button.dataset.target;
+
+    // Quitar clase "active" de todos los botones y añadir solo al actual
+    DOMElements.tabButtons.forEach(btn => btn.classList.remove("active"));
+    button.classList.add("active");
+
+    // Ocultar todas las pantallas y mostrar solo la seleccionada
+    DOMElements.pantallas.forEach(p => p.style.display = "none");
+    const destino = document.getElementById(destinoID);
+    if (destino) destino.style.display = "block";
+  });
+});
+
     DOMElements.tabButtons.forEach(button => {
         button.addEventListener("click", () => {
             const destinoID = button.dataset.target;
