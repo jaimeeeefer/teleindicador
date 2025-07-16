@@ -54,7 +54,7 @@ function setupEventListeners() {
         }
     });
 
-    // Manejar tabs de navegación
+    // Manejar tabs de navegación (marcha <-> estación)
     DOMElements.tabButtons.forEach(button => {
         button.addEventListener("click", () => {
             const destinoID = button.dataset.target;
@@ -63,19 +63,13 @@ function setupEventListeners() {
             DOMElements.tabButtons.forEach(btn => btn.classList.remove("active"));
             button.classList.add("active");
 
-            // Ocultar todas las pantallas y luego mostrar la deseada
-            DOMElements.pantallas.forEach(pantalla => {
-                // Excluye las pantallas que deben estar siempre visibles (cargando, titulo, login, tabs, botonesCentro)
-                // Ajusta los IDs según tus necesidades.
-                if (!['cargando', 'titulo', 'login', 'tabs', 'botonesCentro'].includes(pantalla.id)) {
-                    pantalla.classList.remove("visible");
-                }
-            });
-
-            // Mostrar la pantalla correspondiente
-            const targetScreen = document.getElementById(destinoID);
-            if (targetScreen) {
-                targetScreen.classList.add("visible");
+            // Cambiar pantalla visible
+            if (destinoID === "consulta") {
+                document.getElementById("estacion")?.classList.remove("visible");
+                document.getElementById("consulta")?.classList.add("visible");
+            } else if (destinoID === "estacion") {
+                document.getElementById("consulta")?.classList.remove("visible");
+                document.getElementById("estacion")?.classList.add("visible");
             }
         });
     });
@@ -90,29 +84,6 @@ async function init() {
     }
     setupEventListeners();
     await verificarSesionGuardada();
-
-    // --- IMPORTANTE: Inicializar la visibilidad de las pantallas al cargar ---
-    // Ocultar todas las pantallas de contenido principal
-    DOMElements.pantallas.forEach(pantalla => {
-        // Asegúrate de que esta lista de IDs coincide con las pantallas que NO quieres ocultar
-        // como las de carga, título, login y los botones de control principales.
-        if (!['cargando', 'titulo', 'login', 'tabs', 'botonesCentro'].includes(pantalla.id)) {
-            pantalla.classList.remove("visible");
-        }
-    });
-
-    // Mostrar la pantalla de la pestaña activa por defecto (la que tiene 'active' en el botón)
-    const activeTabButton = document.querySelector('.tab-button.active');
-    if (activeTabButton) {
-        const targetScreenId = activeTabButton.dataset.target;
-        const targetScreen = document.getElementById(targetScreenId);
-        if (targetScreen) {
-            targetScreen.classList.add('visible');
-        }
-    }
-    // Si necesitas que los botones de centro se muestren siempre con las pestañas de contenido:
-    document.getElementById('botonesCentro').classList.add('visible');
-    // --- FIN IMPORTANTE ---
 }
 
 window.addEventListener('load', init);
@@ -167,28 +138,6 @@ clearBtn.addEventListener('click', () => {
   numeroEst.classList.remove('input-con-x');
   numeroEst.focus();
 });
-
-// Added a clear button for the teleindicador input
-const numeroTeleEst = document.getElementById('numeroTeleEst');
-const clearTeleBtn = document.getElementById('clearNumeroTeleEst');
-
-numeroTeleEst.addEventListener('input', () => {
-  if (numeroTeleEst.value) {
-    clearTeleBtn.style.display = 'flex';
-    numeroTeleEst.classList.add('input-con-x');
-  } else {
-    clearTeleBtn.style.display = 'none';
-    numeroTeleEst.classList.remove('input-con-x');
-  }
-});
-
-clearTeleBtn.addEventListener('click', () => {
-  numeroTeleEst.value = '';
-  clearTeleBtn.style.display = 'none';
-  numeroTeleEst.classList.remove('input-con-x');
-  numeroTeleEst.focus();
-});
-
 
 export async function buscarTeleindicador() {
   const input = document.getElementById("numeroTeleEst");
