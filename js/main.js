@@ -59,7 +59,7 @@ DOMElements.tabButtons.forEach(button => {
   button.addEventListener("click", () => {
     const destinoID = button.dataset.target;
 
-    // Quitar clase "active" de todos los botones y añadir solo al actual
+    // Desactivar pestañas
     DOMElements.tabButtons.forEach(btn => btn.classList.remove("active"));
     button.classList.add("active");
 
@@ -70,17 +70,6 @@ DOMElements.tabButtons.forEach(button => {
   });
 });
 
-
-            // Cambiar pantalla visible
-            if (destinoID === "consulta") {
-                document.getElementById("estacion")?.classList.remove("visible");
-                document.getElementById("consulta")?.classList.add("visible");
-            } else if (destinoID === "estacion") {
-                document.getElementById("consulta")?.classList.remove("visible");
-                document.getElementById("estacion")?.classList.add("visible");
-            }
-        });
-    });
 }
 
 async function init() {
