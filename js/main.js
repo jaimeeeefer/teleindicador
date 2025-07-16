@@ -159,7 +159,11 @@ async function buscarTeleindicador() {
   const codigoEstacion = estaciones.find(e => e.nombre === estacion)?.codigo;
   if (!codigoEstacion) return contenedor.innerHTML = "<p>Estación no encontrada.</p>";
 
-  const response = await fetch("respuesta_adif_estacion.json"); // o URL de la API si está hosteada
+  const response = await fetch(`https://adif-api.onrender.com/api/adif/estacion/${codigoEstacion}`);
+  if (!response.ok) {
+    contenedor.innerHTML = "<p>Error al obtener datos de la estación.</p>";
+    return;
+  }
   const data = await response.json();
 
   const trenes = data.commercialPaths.filter(item => {
