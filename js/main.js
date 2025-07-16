@@ -23,6 +23,16 @@ const DOMElements = {
 };
 
 function setupEventListeners() {
+// Autocompletado Teleindicador
+  document.getElementById("numeroTeleEst")?.addEventListener("input", autocompletarEstaciones);
+  document.getElementById("numeroTeleEst")?.addEventListener("focus", autocompletarEstaciones);
+  document.addEventListener("click", function(event) {
+    const sugerenciasTele = document.getElementById("sugerenciasTele");
+    const inputTele = document.getElementById("numeroTeleEst");
+    if (sugerenciasTele && !sugerenciasTele.contains(event.target) && event.target !== inputTele) {
+      sugerenciasTele.classList.remove("visible");
+    }
+  });
   document.getElementById("buscarTele")?.addEventListener("click", buscarTeleindicador);
     DOMElements.loginButton.addEventListener("click", login);
     DOMElements.buscarTrenButton.addEventListener("click", buscarTren);
