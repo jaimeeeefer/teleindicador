@@ -15,7 +15,7 @@ const DOMElements = {
     btnAnterior: document.getElementById("btnAnterior"),
     btnSiguiente: document.getElementById("btnSiguiente"),
     tabButtons: document.querySelectorAll(".tab-button"),
-    pantallas: document.querySelectorAll(".pantalla"), // Added to select all screens
+    pantallas: document.querySelectorAll(".pantalla"), // Asegúrate de que esto selecciona todos los divs con la clase 'pantalla'
     inputEstación: document.getElementById("numeroEst"),
     sugerencias: document.getElementById("sugerencias"),
     buscarEstButton: document.getElementById("buscarEstButton"),
@@ -23,7 +23,7 @@ const DOMElements = {
 };
 
 function setupEventListeners() {
-  document.getElementById("buscarTele")?.addEventListener("click", buscarTeleindicador);
+    document.getElementById("buscarTele")?.addEventListener("click", buscarTeleindicador);
     DOMElements.loginButton.addEventListener("click", login);
     DOMElements.buscarTrenButton.addEventListener("click", buscarTren);
     DOMElements.clearResultadosButton.addEventListener("click", clearResultados);
@@ -54,7 +54,7 @@ function setupEventListeners() {
         }
     });
 
-    // Manejar tabs de navegación (marcha <-> estación <-> teleindicador)
+    // Manejar tabs de navegación
     DOMElements.tabButtons.forEach(button => {
         button.addEventListener("click", () => {
             const destinoID = button.dataset.target;
@@ -65,7 +65,11 @@ function setupEventListeners() {
 
             // Ocultar todas las pantallas y luego mostrar la deseada
             DOMElements.pantallas.forEach(pantalla => {
-                pantalla.classList.remove("visible");
+                // Excluye las pantallas que deben estar siempre visibles (cargando, titulo, login, tabs, botonesCentro)
+                // Ajusta los IDs según tus necesidades.
+                if (!['cargando', 'titulo', 'login', 'tabs', 'botonesCentro'].includes(pantalla.id)) {
+                    pantalla.classList.remove("visible");
+                }
             });
 
             // Mostrar la pantalla correspondiente
@@ -87,8 +91,28 @@ async function init() {
     setupEventListeners();
     await verificarSesionGuardada();
 
-    // Set initial active tab and visible screen
-    document.querySelector('.tab-button.active')?.click(); // Simulate a click on the initially active tab
+    // --- IMPORTANTE: Inicializar la visibilidad de las pantallas al cargar ---
+    // Ocultar todas las pantallas de contenido principal
+    DOMElements.pantallas.forEach(pantalla => {
+        // Asegúrate de que esta lista de IDs coincide con las pantallas que NO quieres ocultar
+        // como las de carga, título, login y los botones de control principales.
+        if (!['cargando', 'titulo', 'login', 'tabs', 'botonesCentro'].includes(pantalla.id)) {
+            pantalla.classList.remove("visible");
+        }
+    });
+
+    // Mostrar la pantalla de la pestaña activa por defecto (la que tiene 'active' en el botón)
+    const activeTabButton = document.querySelector('.tab-button.active');
+    if (activeTabButton) {
+        const targetScreenId = activeTabButton.dataset.target;
+        const targetScreen = document.getElementById(targetScreenId);
+        if (targetScreen) {
+            targetScreen.classList.add('visible');
+        }
+    }
+    // Si necesitas que los botones de centro se muestren siempre con las pestañas de contenido:
+    document.getElementById('botonesCentro').classList.add('visible');
+    // --- FIN IMPORTANTE ---
 }
 
 window.addEventListener('load', init);
