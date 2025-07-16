@@ -15,7 +15,7 @@ const DOMElements = {
     btnAnterior: document.getElementById("btnAnterior"),
     btnSiguiente: document.getElementById("btnSiguiente"),
     tabButtons: document.querySelectorAll(".tab-button"),
-    pantallas: document.querySelectorAll(".pantalla"),
+    pantallas: document.querySelectorAll(".pantalla"), // Added to select all screens
     inputEstación: document.getElementById("numeroEst"),
     sugerencias: document.getElementById("sugerencias"),
     buscarEstButton: document.getElementById("buscarEstButton"),
@@ -54,7 +54,7 @@ function setupEventListeners() {
         }
     });
 
-    // Manejar tabs de navegación (marcha <-> estación)
+    // Manejar tabs de navegación (marcha <-> estación <-> teleindicador)
     DOMElements.tabButtons.forEach(button => {
         button.addEventListener("click", () => {
             const destinoID = button.dataset.target;
@@ -63,13 +63,15 @@ function setupEventListeners() {
             DOMElements.tabButtons.forEach(btn => btn.classList.remove("active"));
             button.classList.add("active");
 
-            // Cambiar pantalla visible
-            if (destinoID === "consulta") {
-                document.getElementById("estacion")?.classList.remove("visible");
-                document.getElementById("consulta")?.classList.add("visible");
-            } else if (destinoID === "estacion") {
-                document.getElementById("consulta")?.classList.remove("visible");
-                document.getElementById("estacion")?.classList.add("visible");
+            // Ocultar todas las pantallas y luego mostrar la deseada
+            DOMElements.pantallas.forEach(pantalla => {
+                pantalla.classList.remove("visible");
+            });
+
+            // Mostrar la pantalla correspondiente
+            const targetScreen = document.getElementById(destinoID);
+            if (targetScreen) {
+                targetScreen.classList.add("visible");
             }
         });
     });
@@ -84,6 +86,9 @@ async function init() {
     }
     setupEventListeners();
     await verificarSesionGuardada();
+
+    // Set initial active tab and visible screen
+    document.querySelector('.tab-button.active')?.click(); // Simulate a click on the initially active tab
 }
 
 window.addEventListener('load', init);
@@ -138,6 +143,28 @@ clearBtn.addEventListener('click', () => {
   numeroEst.classList.remove('input-con-x');
   numeroEst.focus();
 });
+
+// Added a clear button for the teleindicador input
+const numeroTeleEst = document.getElementById('numeroTeleEst');
+const clearTeleBtn = document.getElementById('clearNumeroTeleEst');
+
+numeroTeleEst.addEventListener('input', () => {
+  if (numeroTeleEst.value) {
+    clearTeleBtn.style.display = 'flex';
+    numeroTeleEst.classList.add('input-con-x');
+  } else {
+    clearTeleBtn.style.display = 'none';
+    numeroTeleEst.classList.remove('input-con-x');
+  }
+});
+
+clearTeleBtn.addEventListener('click', () => {
+  numeroTeleEst.value = '';
+  clearTeleBtn.style.display = 'none';
+  numeroTeleEst.classList.remove('input-con-x');
+  numeroTeleEst.focus();
+});
+
 
 export async function buscarTeleindicador() {
   const input = document.getElementById("numeroTeleEst");
