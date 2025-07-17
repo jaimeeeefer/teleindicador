@@ -1,6 +1,6 @@
 // js/ui.js
 
-import { getTrenActual, getTrenes, setTrenActual , getProximosTrenes, getPaginaActual, setPaginaActual, getTipoPanel } from './api.js';
+import { getTrenActual, getTrenes, setTrenActual , getProximosTrenes, getPaginaActual, setPaginaActual, getTipoPanel, mostrarTeleindicador } from './api.js';
 import { getEstaciones, getOperadores } from './auth.js';
 
 let lastDate = null;
@@ -400,6 +400,40 @@ function buscarTrenClick(numero, button) {
     document.getElementById("buscarTrenButton").click();
 }
 window.buscarTrenClick = buscarTrenClick;
+
+export function mostrarTeleindicador(trenes) {
+    const contenedor = document.getElementById("panelTeleindicador");
+    contenedor.innerHTML = "";
+
+    const tabla = document.createElement("table");
+    tabla.classList.add("teleindicador");
+
+    tabla.innerHTML = `
+        <thead>
+            <tr>
+                <th>Hora</th>
+                <th>Número</th>
+                <th>Destino</th>
+                <th>Vía</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${trenes.map(tren => `
+                <tr>
+                    <td>${formatearHora(tren.passthroughStep?.plannedTime)}</td>
+                    <td>${tren.trainNumber || "—"}</td>
+                    <td>${obtenerNombreEstacion(tren.commercialPathInfo?.destinationStationCode)}</td>
+                    <td>${tren.passthroughStep?.plannedPlatform || "—"}</td>
+                    <td>${tren.passthroughStep?.status || "—"}</td>
+                </tr>
+            `).join("")}
+        </tbody>
+    `;
+
+    contenedor.appendChild(tabla);
+}
+
 
 // FUNCIONES GENERALES
 
