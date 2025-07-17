@@ -270,6 +270,47 @@ export function autocompletarEstaciones() {
     }
 }
 
+export function autocompletarEstacionesTele() {
+    const estacionesArray = Object.entries(getEstaciones());
+    const estacion = document.getElementById("stationInputTele");
+    const estacionInput = estacion.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+    const sugerencias = document.getElementById("sugerenciasTele");
+    sugerencias.innerHTML = '';
+
+    if (estacionInput.length < 2) return;
+
+    const palabras = estacionInput.split(/[\s-]+/).filter(p => p.length > 0);
+
+    const coincidencias = estacionesArray.filter(([codigo, nombre]) => {
+        const nombreLower = nombre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        return palabras.every(palabra => nombreLower.includes(palabra));
+    });
+
+    if (coincidencias.length > 0) {
+        coincidencias.forEach(([codigo, nombre]) => {
+            const item = document.createElement('div');
+            item.innerHTML = `
+            <span>${nombre}</span>
+            <span class="codigo-estacion">${codigo.padStart(5, '0')}</span>
+            `;
+            item.dataset.codigo = codigo;
+            item.addEventListener('click', () => {
+                estacion.value = nombre;
+                sugerencias.classList.remove('visible');
+            });
+            sugerencias.appendChild(item);
+        });
+        sugerencias.classList.add('visible');
+    } else {
+        const sinCoincidencias = document.createElement("div");
+        sinCoincidencias.textContent = "(sin coincidencias)";
+        sinCoincidencias.classList.add("sugerencia", "no-click");
+        sugerencias.appendChild(sinCoincidencias);
+        return;
+    }
+}
+
+
 export function mostrarEstacion() {
     const trenes = getProximosTrenes();
     const paginaActual = getPaginaActual();
