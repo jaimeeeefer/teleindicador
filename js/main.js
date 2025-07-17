@@ -1,10 +1,11 @@
-// --- IMPORTACIONES ---
-import { initTheme, toggleTheme } from './theme.js';
-import { login, cerrarSesion, verificarSesionGuardada } from './auth.js';
-import { buscarTren, clearResultados, buscarEstacion, cargarMas, buscarEstacionPorCodigoParaTeleindicador } from './api.js';
-import { mostrarTrenAnterior, mostrarTrenSiguiente, autocompletarEstaciones, autocompletarEstacionesTele } from './ui.js';
+// js/main.js
 
-// --- REFERENCIAS DOM ---
+import { initTheme, toggleTheme } from './theme.js';
+import { login, cerrarSesion, verificarSesionGuardada, } from './auth.js';
+import { buscarTren, clearResultados, buscarEstacion, cargarMas } from './api.js';
+import { mostrarTrenAnterior, mostrarTrenSiguiente, autocompletarEstaciones } from './ui.js';
+
+// ALMACENAR ELEMENTOS DEL DOM UNA SOLA VEZ
 const DOMElements = {
     loginButton: document.getElementById("loginButton"),
     buscarTrenButton: document.getElementById("buscarTrenButton"),
@@ -14,172 +15,147 @@ const DOMElements = {
     btnAnterior: document.getElementById("btnAnterior"),
     btnSiguiente: document.getElementById("btnSiguiente"),
     tabButtons: document.querySelectorAll(".tab-button"),
+    pantallas: document.querySelectorAll(".pantalla"),
     inputEstación: document.getElementById("numeroEst"),
     sugerencias: document.getElementById("sugerencias"),
     buscarEstButton: document.getElementById("buscarEstButton"),
-    cargarMas: document.getElementById("cargarMas"),
-    numeroTrenInput: document.getElementById("numeroTren"),
-
-    // TELEINDICADOR
-    searchButtonTele: document.getElementById('searchButtonTele'),
-    stationInputTele: document.getElementById('stationInputTele'),
-    clearBtnTele: document.getElementById('clearStationInputTele'),
-    sugerenciasTele: document.getElementById('sugerenciasTele'),
-    departureTele: document.getElementById('departureTele'),
-    arrivalTele: document.getElementById('arrivalTele'),
-    telePanel: document.getElementById('teleindicadorPanel'),
-    trainTypeTele: document.getElementById('trainTypeTele')
+    cargarMas: document.getElementById("cargarMas")
 };
 
-// --- EVENTOS ---
 function setupEventListeners() {
-    DOMElements.loginButton?.addEventListener("click", login);
-    DOMElements.buscarTrenButton?.addEventListener("click", buscarTren);
-    DOMElements.clearResultadosButton?.addEventListener("click", clearResultados);
-    DOMElements.cerrarSesionButton?.addEventListener("click", cerrarSesion);
-    DOMElements.toggleThemeBtn?.addEventListener("click", toggleTheme);
-    DOMElements.btnAnterior?.addEventListener("click", mostrarTrenAnterior);
-    DOMElements.btnSiguiente?.addEventListener("click", mostrarTrenSiguiente);
-    DOMElements.inputEstación?.addEventListener("input", autocompletarEstaciones);
-    DOMElements.inputEstación?.addEventListener("focus", autocompletarEstaciones);
-    DOMElements.buscarEstButton?.addEventListener("click", buscarEstacion);
-    DOMElements.cargarMas?.addEventListener("click", cargarMas);
-    DOMElements.numeroTrenInput?.addEventListener('keyup', e => { if (e.key === 'Enter') buscarTren(); });
-    DOMElements.inputEstación?.addEventListener('keyup', e => { if (e.key === 'Enter') buscarEstacion(); });
+    DOMElements.loginButton.addEventListener("click", login);
+    DOMElements.buscarTrenButton.addEventListener("click", buscarTren);
+    DOMElements.clearResultadosButton.addEventListener("click", clearResultados);
+    DOMElements.cerrarSesionButton.addEventListener("click", cerrarSesion);
+    DOMElements.toggleThemeBtn.addEventListener("click", toggleTheme);
+    DOMElements.btnAnterior.addEventListener("click", mostrarTrenAnterior);
+    DOMElements.btnSiguiente.addEventListener("click", mostrarTrenSiguiente);
+    DOMElements.inputEstación.addEventListener("input", autocompletarEstaciones);
+    DOMElements.inputEstación.addEventListener("focus", autocompletarEstaciones);
+    DOMElements.buscarEstButton.addEventListener("click", buscarEstacion);
+    DOMElements.cargarMas.addEventListener("click", cargarMas);
 
-    DOMElements.tabButtons.forEach(button => {
-      button.addEventListener("click", () => {
-        const target = button.getAttribute("data-target");
-
-        // Oculta todas las pantallas
-        document.querySelectorAll(".pantalla").forEach(panel => {
-          panel.style.display = "none";
-        });
-
-        // Elimina clase activa de todos los botones
-        DOMElements.tabButtons.forEach(btn => btn.classList.remove("active"));
-
-        // Muestra la pantalla correspondiente
-        let panelId = target;
-        if (target === "teleindicador") panelId = "teleindicadorTab";
-        document.getElementById(panelId).style.display = "block";
-
-        // Marca el botón actual como activo
-        button.classList.add("active");
-      });
+    // Buscar tren con Enter
+    document.getElementById('numeroTren').addEventListener('keyup', (event) => {
+        if (event.key === 'Enter') buscarTren();
+    });
+    document.getElementById('numeroEst').addEventListener('keyup', (event) => {
+        if (event.key === 'Enter') buscarEstacion();
     });
 
-    // TELEINDICADOR
-    DOMElements.searchButtonTele?.addEventListener("click", searchTeleindicador);
-    DOMElements.stationInputTele?.addEventListener("keydown", function (e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            searchTeleindicador();
-        }
-    });
-    DOMElements.stationInputTele?.addEventListener("input", function () {
-        autocompletarEstacionesTele();
-        if (this.value) {
-            DOMElements.clearBtnTele.style.display = 'flex';
-            this.classList.add('input-con-x');
-        } else {
-            DOMElements.clearBtnTele.style.display = 'none';
-            this.classList.remove('input-con-x');
-        }
-    });
-    DOMElements.clearBtnTele?.addEventListener('click', () => {
-        DOMElements.stationInputTele.value = '';
-        DOMElements.clearBtnTele.style.display = 'none';
-        DOMElements.stationInputTele.classList.remove('input-con-x');
-        DOMElements.stationInputTele.focus();
-        DOMElements.sugerenciasTele.innerHTML = '';
-        DOMElements.sugerenciasTele.classList.remove('visible');
-    });
     document.addEventListener('click', function(event) {
-        if (!DOMElements.sugerenciasTele.contains(event.target) &&
-            !DOMElements.stationInputTele.contains(event.target)) {
-            DOMElements.sugerenciasTele.classList.remove('visible');
+        if (
+            !DOMElements.sugerencias.contains(event.target) &&
+            !DOMElements.inputEstación.contains(event.target) &&
+            event.target !== DOMElements.inputEstación
+        ) {
+            DOMElements.sugerencias.classList.remove('visible');
         }
     });
-    DOMElements.departureTele?.addEventListener('click', function () {
-        this.classList.add('selected');
-        DOMElements.arrivalTele.classList.remove('selected');
-    });
-    DOMElements.arrivalTele?.addEventListener('click', function () {
-        this.classList.add('selected');
-        DOMElements.departureTele.classList.remove('selected');
-    });
-}
 
-// --- BUSQUEDA TELEINDICADOR ---
-function searchTeleindicador() {
-    const input = DOMElements.stationInputTele;
-    const stationCode = input.dataset.codigo;
-    const tipoPanel = DOMElements.departureTele.classList.contains('selected') ? 'salidas' : 'llegadas';
-    const tipoTren = DOMElements.trainTypeTele.value;
+    // Manejar tabs de navegación (marcha <-> estación)
+    DOMElements.tabButtons.forEach(button => {
+        button.addEventListener("click", () => {
+            const destinoID = button.dataset.target;
 
-    if (!stationCode) {
-        DOMElements.telePanel.innerHTML = '<div>Selecciona una estación de la lista</div>';
-        return;
-    }
+            // Cambiar pestaña activa
+            DOMElements.tabButtons.forEach(btn => btn.classList.remove("active"));
+            button.classList.add("active");
 
-    buscarEstacionPorCodigoParaTeleindicador(stationCode, tipoPanel, tipoTren)
-        .then(trenes => {
-            renderTeleindicadorResults(trenes);
-        })
-        .catch(() => {
-            DOMElements.telePanel.innerHTML = '<div>Error al obtener los datos</div>';
+            // Cambiar pantalla visible
+            if (destinoID === "consulta") {
+                document.getElementById("estacion")?.classList.remove("visible");
+                document.getElementById("consulta")?.classList.add("visible");
+            } else if (destinoID === "estacion") {
+                document.getElementById("consulta")?.classList.remove("visible");
+                document.getElementById("estacion")?.classList.add("visible");
+            }
         });
-}
-
-function renderTeleindicadorResults(trenes) {
-    const panel = DOMElements.telePanel;
-    panel.innerHTML = '';
-    if (!trenes || trenes.length === 0) {
-        panel.innerHTML = '<div>No hay trenes para mostrar.</div>';
-        return;
-    }
-
-    panel.innerHTML = `
-      <div class="teleindicador-row teleindicador-header">
-        <div>Hora</div>
-        <div>Línea</div>
-        <div>Destino</div>
-        <div>Recorrido</div>
-        <div>Operador</div>
-        <div>Nº Tren</div>
-        <div>Vía</div>
-      </div>
-    `;
-
-    trenes.forEach(tren => {
-        const linea = tren.commercialPathInfo?.line ?? '';
-        const hora = tren.passThroughStep?.hora_programada ?? '';
-        const destino = tren.commercialPathInfo?.destination ?? '';
-        const recorrido = tren.commercialPathInfo?.route ?? '';
-        const operador = tren.commercialPathInfo?.company ?? '';
-        const numero = tren.commercialPathInfo?.number ?? '';
-        const via = tren.passThroughStep?.platform ?? '';
-
-        panel.innerHTML += `
-          <div class="teleindicador-row">
-            <div>${hora}</div>
-            <div>${linea}</div>
-            <div>${destino}</div>
-            <div>${recorrido}</div>
-            <div>${operador}</div>
-            <div>${numero}</div>
-            <div>${via}</div>
-          </div>
-        `;
     });
 }
 
-// --- INICIALIZACIÓN ---
 async function init() {
     initTheme();
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./service-worker.js')
+        .then(registration => console.log('Service Worker registrado con éxito.'))
+        .catch(error => console.log('Fallo al registrar Service Worker:', error));
+    }
     setupEventListeners();
     await verificarSesionGuardada();
 }
 
 window.addEventListener('load', init);
+
+// Control de select personalizados
+document.querySelectorAll('.custom-select').forEach(function(select) {
+  const selected = select.querySelector('.custom-select-selected');
+  const options = select.querySelector('.custom-select-options');
+  const hiddenInput = select.querySelector('input[type="hidden"]');
+
+  selected.addEventListener('click', function(e) {
+    select.classList.toggle('open');
+    selected.classList.toggle('active');
+  });
+
+  options.querySelectorAll('div').forEach(function(option) {
+    option.addEventListener('click', function(e) {
+      options.querySelectorAll('div').forEach(o => o.classList.remove('selected'));
+      option.classList.add('selected');
+      selected.textContent = option.textContent;
+      hiddenInput.value = option.getAttribute('data-value');
+      select.classList.remove('open');
+      selected.classList.remove('active');
+    });
+  });
+
+  // Cerrar si se hace click fuera
+  document.addEventListener('click', function(e) {
+    if (!select.contains(e.target)) {
+      select.classList.remove('open');
+      selected.classList.remove('active');
+    }
+  });
+});
+
+const numeroEst = document.getElementById('numeroEst');
+const clearBtn = document.getElementById('clearNumeroEst');
+
+numeroEst.addEventListener('input', () => {
+  if (numeroEst.value) {
+    clearBtn.style.display = 'flex';
+    numeroEst.classList.add('input-con-x');
+  } else {
+    clearBtn.style.display = 'none';
+    numeroEst.classList.remove('input-con-x');
+  }
+});
+
+clearBtn.addEventListener('click', () => {
+  numeroEst.value = '';
+  clearBtn.style.display = 'none';
+  numeroEst.classList.remove('input-con-x');
+  numeroEst.focus();
+});
+
+function setupTabs() {
+  document.querySelectorAll('.tab-button').forEach(button => {
+    button.addEventListener('click', () => {
+      const targetId = button.dataset.target;
+
+      // Oculta todas las pantallas principales
+      document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('visible'));
+      // Muestra la pestaña destino
+      const destino = document.getElementById(targetId);
+      if (destino) destino.classList.add('visible');
+
+      // Marca el botón como activo
+      document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+      button.classList.add('active');
+    });
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  setupTabs();
+});
