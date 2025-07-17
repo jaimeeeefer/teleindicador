@@ -1,7 +1,7 @@
 // js/api.js
 
 import { getAuthHeader, procesarCSV, setEstaciones, getEstaciones } from './auth.js';
-import { mostrarPantalla, mostrarTren, mostrarEstacion, finCargarMas, clearLastDate } from './ui.js';
+import { mostrarPantalla, mostrarTren, mostrarEstacion, finCargarMas, clearLastDate, mostrarTeleindicador } from './ui.js';
 
 const API_BASE_URL = "https://adif-api.onrender.com";
 let trenes = [];
