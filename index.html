@@ -194,10 +194,10 @@
   <!-- Div principal para el tab Teleindicador -->
   <div id="teleindicadorTab" class="pantalla">
     <div class="busqueda-teleindicador" style="margin-bottom: 2em;">
-      <div class="input-sugerencias-wrapper">
-        <input type="text" id="stationInputTele" placeholder="Estación" autocomplete="off" style="font-size:1.2em;padding:0.3em;">
+      <div class="input-sugerencias-wrapper" style="margin: 0 auto; display: flex; flex-direction: column; align-items: center; width: 410px;">
+        <input type="text" id="stationInputTele" placeholder="Estación" autocomplete="off" class="input-estacion" />
         <button type="button" id="clearStationInputTele" class="clear-input-btn" style="display:none;" aria-label="Borrar">×</button>
-        <div id="sugerenciasTele"></div>
+        <div id="sugerenciasTele" class="sugerencias"></div>
       </div>
       <button id="searchButtonTele" style="font-size:1.2em;padding:0.3em 1.2em;margin-left:0.5em;">Buscar</button>
       <div class="filtros-tele" style="margin-top:1em;">
