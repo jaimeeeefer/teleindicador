@@ -1,6 +1,6 @@
 // js/ui.js
 
-import { getTrenActual, getTrenes, setTrenActual , getProximosTrenes, getPaginaActual, setPaginaActual, getTipoPanel, mostrarTeleindicador } from './api.js';
+import { getTrenActual, getTrenes, setTrenActual , getProximosTrenes, getPaginaActual, setPaginaActual, getTipoPanel } from './api.js';
 import { getEstaciones, getOperadores } from './auth.js';
 
 let lastDate = null;
