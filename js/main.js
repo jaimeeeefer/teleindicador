@@ -195,15 +195,18 @@ function searchTeleindicador() {
     document.getElementById('teleindicadorPanel').innerHTML = '<div>Selecciona una estación de la lista</div>';
     return;
   }
-  console.log("Código enviado:", stationCode);
+
   buscarEstacion(stationCode, tipo, tipoTren)
     .then(data => {
-      console.log("Datos recibidos:", data);
-      renderTeleindicadorResults(data);
+      // Si data tiene un campo commercialPaths, pásalo directamente
+      if (data && Array.isArray(data.commercialPaths)) {
+        renderTeleindicadorResults(data.commercialPaths);
+      } else if (Array.isArray(data)) {
+        renderTeleindicadorResults(data);
+      } else {
+        renderTeleindicadorResults([]); // Vacío si no hay nada válido
+      }
     })
-    .catch(() => {
-      document.getElementById('teleindicadorPanel').innerHTML = '<div>Error al obtener los datos</div>';
-    });
 }
 
 // Botones de llegadas/salidas
