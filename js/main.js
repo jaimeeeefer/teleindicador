@@ -34,6 +34,8 @@ function setupEventListeners() {
     DOMElements.inputEstación.addEventListener("focus", autocompletarEstaciones);
     DOMElements.buscarEstButton.addEventListener("click", buscarEstacion);
     DOMElements.cargarMas.addEventListener("click", cargarMas);
+    document.getElementById("stationInputTele").addEventListener("input", autocompletarEstacionesTele);
+    document.getElementById("stationInputTele").addEventListener("focus", autocompletarEstacionesTele);
 
     // Buscar tren con Enter
     document.getElementById('numeroTren').addEventListener('keyup', (event) => {
@@ -142,7 +144,7 @@ clearBtn.addEventListener('click', () => {
 });
 
 document.getElementById("buscarTeleButton").addEventListener("click", async () => {
-  const input = document.getElementById("stationInputTele").addEventListener("input", autocompletarEstacionesTele);
+  const input = document.getElementById("stationInputTele");
   const tipoPanel = document.getElementById("tipoPanelTele").value;
   const tipoTren = document.getElementById("tipoTrenTele").value;
   const resultadosDiv = document.getElementById("resultadoTele");
