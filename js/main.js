@@ -58,10 +58,10 @@ function setupEventListeners() {
         button.addEventListener("click", () => {
             const destinoID = button.dataset.target;
 
-            // Ocultar todas las pantallas
+            // Oculta todas las pantallas
             DOMElements.pantallas.forEach(p => p.classList.remove("visible"));
 
-            // Activar solo la correspondiente
+            // Muestra solo la seleccionada
             if (destinoID === "consulta") {
                 document.getElementById("consulta")?.classList.add("visible");
             } else if (destinoID === "estacion") {
@@ -70,7 +70,7 @@ function setupEventListeners() {
                 document.getElementById("teleindicadorTab")?.classList.add("visible");
             }
 
-            // Actualizar botón activo
+            // Actualiza el botón activo
             DOMElements.tabButtons.forEach(btn => btn.classList.remove("active"));
             button.classList.add("active");
         });
