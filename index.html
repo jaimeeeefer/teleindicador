@@ -191,8 +191,21 @@
   </div>
   </div>
 
+
   <div id="teleindicador" class="pantalla">
-    <!-- contenido del teleindicador -->
+    <input type="text" id="numeroTeleEst" placeholder="Introduce estación...">
+    <select id="modoTele">
+      <option value="salidas">Salidas</option>
+      <option value="llegadas">Llegadas</option>
+    </select>
+    <select id="tipoTele">
+      <option value="ALL">Todos</option>
+      <option value="FREIGHT">Mercancías</option>
+      <option value="PASSENGER">Pasajeros</option>
+    </select>
+    <button onclick="buscarTeleindicador()">Buscar</button>
+    <div id="resultadoTele"></div>
+    <div id="panelTeleindicador"></div>
   </div>
 
 
