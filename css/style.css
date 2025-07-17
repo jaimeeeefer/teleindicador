@@ -691,3 +691,22 @@ color: var(--button-hover-color);
 .input-con-x {
   padding-right: 1.3em !important;
 }
+
+.teleindicador {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #1a1a1a;
+  color: #adff2f;
+  font-family: monospace;
+}
+
+.teleindicador th, .teleindicador td {
+  border: 1px solid #444;
+  padding: 10px;
+  text-align: center;
+}
+
+.teleindicador thead {
+  background-color: #222;
+  color: #fff;
+}
