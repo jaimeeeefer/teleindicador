@@ -364,7 +364,7 @@ tbody tr:hover { background-color: var(--table-row-hover-bg); }
 .sugerenciasContainer{
   display: flex; justify-content: center; margin-bottom: 0rem;
 }
-.sugerencias {
+#sugerencias {
   position: absolute;
   left: 0;                /* Alinea con el input */
   width: 100%;            /* Igual ancho que el input */
@@ -383,7 +383,7 @@ tbody tr:hover { background-color: var(--table-row-hover-bg); }
   transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out, visibility 0.2s;
 }
 
-.sugerencias.visible {
+#sugerencias.visible {
 opacity: 1;
 visibility: visible;
 transform: translateY(0);
