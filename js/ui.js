@@ -296,8 +296,12 @@ export function autocompletarEstacionesTele() {
             `;
             item.dataset.codigo = codigo;
             item.addEventListener('click', () => {
-                estacion.value = nombre;
+                estacion.value = nombre;           // Muestra el nombre en el input
+                estacion.dataset.codigo = codigo;  // Guarda el código en un atributo del input
                 sugerencias.classList.remove('visible');
+            });
+            estacion.addEventListener('input', () => {
+                estacion.dataset.codigo = ''; // Borra el código al editar manualmente
             });
             sugerencias.appendChild(item);
         });
