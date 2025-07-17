@@ -51,25 +51,20 @@ function setupEventListeners() {
       button.addEventListener("click", () => {
         const target = button.getAttribute("data-target");
 
-        // Oculta todos los paneles
-        document.querySelectorAll(".tab-content").forEach(panel => {
+        // Oculta todas las pantallas
+        document.querySelectorAll(".pantalla").forEach(panel => {
           panel.style.display = "none";
         });
 
         // Elimina clase activa de todos los botones
         DOMElements.tabButtons.forEach(btn => btn.classList.remove("active"));
 
-        // Muestra el panel objetivo
-        
-    let panelId = target;
-    if (target === "estacion") panelId = "estacion";
-    else if (target === "consulta") panelId = "consulta";
-    else if (target === "teleindicador") panelId = "teleindicadorTab";
-    document.querySelectorAll(".pantalla").forEach(panel => panel.style.display = "none");
-    document.getElementById(panelId).style.display = "block";
-    
+        // Muestra la pantalla correspondiente
+        let panelId = target;
+        if (target === "teleindicador") panelId = "teleindicadorTab";
+        document.getElementById(panelId).style.display = "block";
 
-        // Marca este botón como activo
+        // Marca el botón actual como activo
         button.classList.add("active");
       });
     });
