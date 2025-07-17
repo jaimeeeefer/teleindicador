@@ -47,6 +47,26 @@ function setupEventListeners() {
     DOMElements.numeroTrenInput?.addEventListener('keyup', e => { if (e.key === 'Enter') buscarTren(); });
     DOMElements.inputEstación?.addEventListener('keyup', e => { if (e.key === 'Enter') buscarEstacion(); });
 
+    DOMElements.tabButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        const target = button.getAttribute("data-target");
+
+        // Oculta todos los paneles
+        document.querySelectorAll(".tab-content").forEach(panel => {
+          panel.style.display = "none";
+        });
+
+        // Elimina clase activa de todos los botones
+        DOMElements.tabButtons.forEach(btn => btn.classList.remove("active"));
+
+        // Muestra el panel objetivo
+        document.getElementById(`${target}Panel`).style.display = "block";
+
+        // Marca este botón como activo
+        button.classList.add("active");
+      });
+    });
+
     // TELEINDICADOR
     DOMElements.searchButtonTele?.addEventListener("click", searchTeleindicador);
     DOMElements.stationInputTele?.addEventListener("keydown", function (e) {
