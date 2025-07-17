@@ -58,18 +58,21 @@ function setupEventListeners() {
         button.addEventListener("click", () => {
             const destinoID = button.dataset.target;
 
-            // Cambiar pestaña activa
-            DOMElements.tabButtons.forEach(btn => btn.classList.remove("active"));
-            button.classList.add("active");
+            // Ocultar todas las pantallas
+            DOMElements.pantallas.forEach(p => p.classList.remove("visible"));
 
-            // Cambiar pantalla visible
+            // Activar solo la correspondiente
             if (destinoID === "consulta") {
-                document.getElementById("estacion")?.classList.remove("visible");
                 document.getElementById("consulta")?.classList.add("visible");
             } else if (destinoID === "estacion") {
-                document.getElementById("consulta")?.classList.remove("visible");
                 document.getElementById("estacion")?.classList.add("visible");
+            } else if (destinoID === "teleindicadorTab") {
+                document.getElementById("teleindicadorTab")?.classList.add("visible");
             }
+
+            // Actualizar botón activo
+            DOMElements.tabButtons.forEach(btn => btn.classList.remove("active"));
+            button.classList.add("active");
         });
     });
 }
