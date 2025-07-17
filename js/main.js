@@ -195,9 +195,10 @@ function searchTeleindicador() {
     document.getElementById('teleindicadorPanel').innerHTML = '<div>Selecciona una estación de la lista</div>';
     return;
   }
-
+  console.log("Código enviado:", stationCode);
   buscarEstacion(stationCode, tipo, tipoTren)
     .then(data => {
+      console.log("Datos recibidos:", data);
       renderTeleindicadorResults(data);
     })
     .catch(() => {
