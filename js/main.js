@@ -181,19 +181,22 @@ document.getElementById('searchButtonTele').addEventListener('click', function()
 });
 
 function searchTeleindicador() {
-  const station = document.getElementById('stationInputTele').value.trim();
+  const input = document.getElementById('stationInputTele');
+  const stationName = input.value.trim();
+  const stationCode = input.dataset.codigo;  // <-- ahora usas esto
+
   const tipo = document.getElementById('departureTele').classList.contains('selected') ? 'salidas'
               : document.getElementById('arrivalTele').classList.contains('selected') ? 'llegadas'
               : 'salidas';
   const tipoTren = document.getElementById('trainTypeTele').value;
 
-  if (!station) {
-    document.getElementById('teleindicadorPanel').innerHTML = '<div>Introduce una estación</div>';
+  // Si no hay código, muestra mensaje de aviso:
+  if (!stationCode) {
+    document.getElementById('teleindicadorPanel').innerHTML = '<div>Selecciona una estación de la lista</div>';
     return;
   }
 
-  // Reutilizamos tu función de api (ajústala si el nombre es distinto)
-  buscarEstacion(station, tipo, tipoTren)
+  buscarEstacion(stationCode, tipo, tipoTren)
     .then(data => {
       renderTeleindicadorResults(data);
     })
