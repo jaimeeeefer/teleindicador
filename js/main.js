@@ -1,7 +1,7 @@
 // --- IMPORTACIONES ---
 import { initTheme, toggleTheme } from './theme.js';
 import { login, cerrarSesion, verificarSesionGuardada } from './auth.js';
-import { buscarTren, clearResultados, buscarEstacion, cargarMas } from './api.js';
+import { buscarTren, clearResultados, buscarEstacion, cargarMas, buscarEstacionPorCodigoParaTeleindicador } from './api.js';
 import { mostrarTrenAnterior, mostrarTrenSiguiente, autocompletarEstaciones, autocompletarEstacionesTele } from './ui.js';
 
 // --- REFERENCIAS DOM ---
@@ -93,7 +93,7 @@ function setupEventListeners() {
 function searchTeleindicador() {
     const input = DOMElements.stationInputTele;
     const stationCode = input.dataset.codigo;
-    const tipo = DOMElements.departureTele.classList.contains('selected') ? 'salidas' : 'llegadas';
+    const tipoPanel = DOMElements.departureTele.classList.contains('selected') ? 'salidas' : 'llegadas';
     const tipoTren = DOMElements.trainTypeTele.value;
 
     if (!stationCode) {
@@ -101,15 +101,9 @@ function searchTeleindicador() {
         return;
     }
 
-    buscarEstacion(stationCode, tipo, tipoTren)
-        .then(data => {
-            if (data && Array.isArray(data.commercialPaths)) {
-                renderTeleindicadorResults(data.commercialPaths);
-            } else if (Array.isArray(data)) {
-                renderTeleindicadorResults(data);
-            } else {
-                renderTeleindicadorResults([]);
-            }
+    buscarEstacionPorCodigoParaTeleindicador(stationCode, tipoPanel, tipoTren)
+        .then(trenes => {
+            renderTeleindicadorResults(trenes);
         })
         .catch(() => {
             DOMElements.telePanel.innerHTML = '<div>Error al obtener los datos</div>';
