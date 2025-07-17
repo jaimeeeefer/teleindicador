@@ -519,4 +519,17 @@ function traducirParada(parada) {
 function traducirOperador(operador) {
     const operadores = getOperadores();
     return operadores[operador] || '';
+
+
+  if (modo === "teleindicador") {
+    const contenedor = document.getElementById("resultadosTeleindicador");
+    contenedor.innerHTML = "";
+    trenes.forEach(tren => {
+      const fila = document.createElement("div");
+      fila.className = "fila-teleindicador";
+      fila.textContent = `${tren.hora || ""} - ${tren.destino || ""} - ${tren.tipo || ""}`;
+      contenedor.appendChild(fila);
+    });
+    return;
+  }
 }
