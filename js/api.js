@@ -86,6 +86,69 @@ export async function buscarEstacion(){
     }
 }
 
+export async function buscarTeleindicador(){
+    clearTeleindicador(); // deberás crear esta función si quieres limpiar antes
+    try{
+        const estacionesArray = Object.entries(getEstaciones());
+        const estacion = document.getElementById("numeroTeleEst");
+        const estacionInput = estacion.value.toLowerCase().trim();
+        if (estacionInput.match(/^\d+$/)){
+            getSalidasTeleindicador(estacionInput.padStart(5, '0'));
+        } else {
+            const coincidencia = estacionesArray.find(([codigo, nombre]) =>
+                nombre.toLowerCase() === estacionInput
+            );
+            if (coincidencia) {
+                getSalidasTeleindicador(coincidencia[0]);
+            } else {
+                throw new Error("No se encontró ninguna estación con ese nombre exacto.");
+            }
+        }
+    } catch (error) {
+        document.getElementById("resultadoTele").textContent = "Error: " + error.message;
+    }
+}
+
+async function getSalidasTeleindicador(numero){
+    const tipo = document.getElementById('tipoTele').value;
+    const tipoPanelSeleccionado = document.getElementById('modoTele').value;
+    const estaciones = getEstaciones();
+    const pagina = 0;
+    const viajeros = "BOTH";
+    const parada = "BOTH";
+    const resultadoTele = document.getElementById("resultadoTele");
+    const contenedor = document.getElementById("resultadoTele");
+    numero = numero.padStart(5, '0');
+
+    try{
+        resultadoTele.textContent = "Consultando...";
+
+        const response = await fetch(`${API_BASE_URL}/${tipoPanelSeleccionado}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": getAuthHeader()
+            },
+            body: JSON.stringify({ numero, pagina, viajeros, parada, tipo })
+        });
+
+        if (!response.ok) throw new Error("Error en la consulta. Revisa el número o la sesión.");
+
+        const data = await response.json();
+        const trenes = data.commercialPaths || [];
+
+        if (trenes.length === 0) throw new Error(`No hay ${tipoPanelSeleccionado} para la estación seleccionada.`);
+
+        // Pintar en estilo teleindicador
+        mostrarTeleindicador(trenes);
+
+        resultadoTele.innerHTML = `Se han encontrado <strong>${trenes.length}</strong> tren(es) en <strong>${numero.trim()+" - "+estaciones[numero.replace(/^0+/, '')] || numero}</strong>.`;
+
+    } catch (error) {
+        resultadoTele.textContent = "Error: " + error.message;
+    }
+}
+
 async function getSalidas(numero){
     clearEstacion();
     const tablaPanelBody = document.getElementById("tablaPanel").querySelector("tbody");
