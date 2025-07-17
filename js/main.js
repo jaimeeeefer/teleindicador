@@ -3,7 +3,7 @@
 import { initTheme, toggleTheme } from './theme.js';
 import { login, cerrarSesion, verificarSesionGuardada, } from './auth.js';
 import { buscarTren, clearResultados, buscarEstacion, cargarMas } from './api.js';
-import { mostrarTrenAnterior, mostrarTrenSiguiente, autocompletarEstaciones } from './ui.js';
+import { mostrarTrenAnterior, mostrarTrenSiguiente, autocompletarEstaciones, autocompletarEstacionesTele } from './ui.js';
 
 // ALMACENAR ELEMENTOS DEL DOM UNA SOLA VEZ
 const DOMElements = {
@@ -122,6 +122,39 @@ document.querySelectorAll('.custom-select').forEach(function(select) {
 
 const numeroEst = document.getElementById('numeroEst');
 const clearBtn = document.getElementById('clearNumeroEst');
+const stationInputTele = document.getElementById('stationInputTele');
+const clearBtnTele = document.getElementById('clearStationInputTele');
+const sugerenciasTele = document.getElementById('sugerenciasTele');
+
+stationInputTele.addEventListener('input', function() {
+  autocompletarEstacionesTele();
+  if (stationInputTele.value) {
+    clearBtnTele.style.display = 'flex';
+    stationInputTele.classList.add('input-con-x');
+  } else {
+    clearBtnTele.style.display = 'none';
+    stationInputTele.classList.remove('input-con-x');
+  }
+});
+stationInputTele.addEventListener('focus', autocompletarEstacionesTele);
+
+clearBtnTele.addEventListener('click', () => {
+  stationInputTele.value = '';
+  clearBtnTele.style.display = 'none';
+  stationInputTele.classList.remove('input-con-x');
+  stationInputTele.focus();
+  sugerenciasTele.innerHTML = '';
+  sugerenciasTele.classList.remove('visible');
+});
+
+document.addEventListener('click', function(event) {
+  if (!sugerenciasTele.contains(event.target) &&
+      !stationInputTele.contains(event.target) &&
+      event.target !== stationInputTele) {
+    sugerenciasTele.classList.remove('visible');
+  }
+});
+
 
 numeroEst.addEventListener('input', () => {
   if (numeroEst.value) {
