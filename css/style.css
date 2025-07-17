@@ -421,10 +421,6 @@ tbody tr:hover { background-color: var(--table-row-hover-bg); }
 
 
 /* --- Estilo al pasar el ratón por encima (Hover) --- */
-#sugerencias div:hover {
-background-color: var(--button-hover-bg);
-color: var(--button-hover-color);
-}
 
 /* TABLA DE SALIDAS */
 .salidas-container {
