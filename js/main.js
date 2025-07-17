@@ -137,3 +137,23 @@ clearBtn.addEventListener('click', () => {
   numeroEst.classList.remove('input-con-x');
   numeroEst.focus();
 });
+
+
+document.querySelectorAll(".tab-button").forEach(button => {
+  button.addEventListener("click", () => {
+    const targetId = button.getAttribute("data-target");
+
+    // Ocultar todas las pantallas
+    document.querySelectorAll(".pantalla").forEach(p => p.classList.remove("visible"));
+
+    // Mostrar la pantalla seleccionada
+    const target = document.getElementById(targetId);
+    if (target) {
+      target.classList.add("visible");
+    }
+
+    // Actualizar estilos activos en los botones
+    document.querySelectorAll(".tab-button").forEach(b => b.classList.remove("active"));
+    button.classList.add("active");
+  });
+});
