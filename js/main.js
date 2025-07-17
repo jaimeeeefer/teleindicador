@@ -60,7 +60,14 @@ function setupEventListeners() {
         DOMElements.tabButtons.forEach(btn => btn.classList.remove("active"));
 
         // Muestra el panel objetivo
-        document.getElementById(`${target}Panel`).style.display = "block";
+        
+    let panelId = target;
+    if (target === "estacion") panelId = "estacion";
+    else if (target === "consulta") panelId = "consulta";
+    else if (target === "teleindicador") panelId = "teleindicadorTab";
+    document.querySelectorAll(".pantalla").forEach(panel => panel.style.display = "none");
+    document.getElementById(panelId).style.display = "block";
+    
 
         // Marca este botón como activo
         button.classList.add("active");
