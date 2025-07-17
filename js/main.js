@@ -62,13 +62,15 @@ function setupEventListeners() {
             DOMElements.tabButtons.forEach(btn => btn.classList.remove("active"));
             button.classList.add("active");
 
-            // Cambiar pantalla visible
+            // Oculta todos los tabs
+            document.querySelectorAll('.pantalla, .tab-content').forEach(tab => tab.classList.remove("visible"));
+            // Muestra solo el tab correspondiente
             if (destinoID === "consulta") {
-                document.getElementById("estacion")?.classList.remove("visible");
                 document.getElementById("consulta")?.classList.add("visible");
             } else if (destinoID === "estacion") {
-                document.getElementById("consulta")?.classList.remove("visible");
                 document.getElementById("estacion")?.classList.add("visible");
+            } else if (destinoID === "teleindicador") {
+                document.getElementById("teleindicadorTab")?.classList.add("visible");
             }
         });
     });
