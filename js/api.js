@@ -214,6 +214,33 @@ export function clearResultados(){
     clearEstacion();
 }
 
+export async function buscarEstacionPorCodigoParaTeleindicador(codigo, tipoPanelSeleccionado, tipoTren) {
+    const numero = codigo.padStart(5, '0');
+    const pagina = 0;
+    const viajeros = "BOTH";
+    const parada = "BOTH";
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/${tipoPanelSeleccionado}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": getAuthHeader()
+            },
+            body: JSON.stringify({ numero, pagina, viajeros, parada, tipo: tipoTren })
+        });
+
+        if (!response.ok) throw new Error("Error en la consulta");
+
+        const data = await response.json();
+        if (data.error) throw new Error(data.error);
+        return data.commercialPaths || [];
+    } catch (error) {
+        console.error("Error en buscarEstacionParaTeleindicador:", error);
+        return [];
+    }
+}
+
 
 // --- CARGA DE DATOS INICIALES ---
 
