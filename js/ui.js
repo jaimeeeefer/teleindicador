@@ -289,9 +289,10 @@ export function autocompletarEstacionesTele() {
     if (coincidencias.length > 0) {
         coincidencias.forEach(([codigo, nombre]) => {
             const item = document.createElement('div');
+            item.className = "sugerencia"; // usa misma clase que en estaciones
             item.innerHTML = `
-            <span>${nombre}</span>
-            <span class="codigo-estacion">${codigo.padStart(5, '0')}</span>
+                <span>${nombre}</span>
+                <span class="codigo-estacion">${codigo.padStart(5, '0')}</span>
             `;
             item.dataset.codigo = codigo;
             item.addEventListener('click', () => {
