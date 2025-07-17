@@ -244,13 +244,13 @@ function renderTeleindicadorResults(trenes) {
   `;
 
   trenes.forEach(tren => {
-    const linea = tren.linea || '';
-    const hora = tren.hora || tren.hora_salida || '';
-    const destino = tren.destino || '';
-    const recorrido = tren.ruta_corta || tren.ruta || '';
-    const operador = tren.operador || '';
-    const numero = tren.numero || tren.num_tren || '';
-    const via = tren.via || '';
+    const linea = tren.commercialPathInfo?.line ?? '';
+    const hora = tren.passThroughStep?.hora_programada ?? '';
+    const destino = tren.commercialPathInfo?.destination ?? '';
+    const recorrido = tren.commercialPathInfo?.route ?? '';
+    const operador = tren.commercialPathInfo?.company ?? '';
+    const numero = tren.commercialPathInfo?.number ?? '';
+    const via = tren.passThroughStep?.platform ?? '';
 
     panel.innerHTML += `
       <div class="teleindicador-row">
