@@ -519,17 +519,38 @@ function traducirParada(parada) {
 function traducirOperador(operador) {
     const operadores = getOperadores();
     return operadores[operador] || '';
+}
 
+export function renderizarPanelTeleindicador(commercialPaths) {
+    const estaciones = getEstaciones();
+    const tbody = document.getElementById("tablaTeleindicadorBody");
+    tbody.innerHTML = "";
 
-  if (modo === "teleindicador") {
-    const contenedor = document.getElementById("resultadosTeleindicador");
-    contenedor.innerHTML = "";
-    trenes.forEach(tren => {
-      const fila = document.createElement("div");
-      fila.className = "fila-teleindicador";
-      fila.textContent = `${tren.hora || ""} - ${tren.destino || ""} - ${tren.tipo || ""}`;
-      contenedor.appendChild(fila);
+    commercialPaths.forEach(obj => {
+        const info = obj.commercialPathInfo;
+        const paso = obj.passthroughStep.departurePassthroughStepSides || obj.passthroughStep.arrivalPassthroughStepSides;
+        if (!info || !paso) return;
+
+        // Formateos y extracciones
+        const hora = formatearTimestampHora(paso.plannedTime);
+        const linea = info.line || "";
+        const destino = estaciones[info.commercialDestinationStationCode.replace(/^0+/, "")] || info.commercialDestinationStationCode;
+        const numero = info.commercialPathKey.commercialCirculationKey.commercialNumber;
+        const via = paso.plannedPlatform || paso.ctcPlatform || "";
+        const operador = traducirOperador(info.opeProComPro?.operator);
+        const tipo = info.trafficType || "";
+        
+        // Ejemplo: cada tren es una fila como en el panel Adif
+        const fila = document.createElement("tr");
+        fila.innerHTML = `
+            <td>${hora}</td>
+            <td>${linea ? `<span class="panel-linea">${linea}</span>` : ""}</td>
+            <td>${destino}</td>
+            <td>${operador}</td>
+            <td>${numero}</td>
+            <td>${via}</td>
+            <td>${tipo}</td>
+        `;
+        tbody.appendChild(fila);
     });
-    return;
-  }
 }
