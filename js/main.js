@@ -175,8 +175,16 @@ document.getElementById("buscarTeleButton").addEventListener("click", async () =
     } else {
       resultadosDiv.textContent = "No se encontraron trenes.";
     }
+    if (trenes && trenes.length > 0) {
+      renderizarPanelTeleindicador(trenes);
+    } else {
+      // Si quieres, puedes vaciar la tabla y mostrar mensaje
+      document.getElementById("tablaTeleindicadorBody").innerHTML = "";
+      resultadosDiv.textContent = "No se encontraron trenes.";
+    }
   } catch (err) {
     resultadosDiv.textContent = "Error al consultar el servidor.";
     console.error(err);
+    
   }
 });
