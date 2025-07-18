@@ -3,7 +3,7 @@
 import { initTheme, toggleTheme } from './theme.js';
 import { login, cerrarSesion, verificarSesionGuardada, } from './auth.js';
 import { buscarTren, clearResultados, buscarEstacion, cargarMas, buscarEstacionPorCodigoParaTeleindicador } from './api.js';
-import { mostrarTrenAnterior, mostrarTrenSiguiente, autocompletarEstaciones, autocompletarEstacionesTele } from './ui.js';
+import { mostrarTrenAnterior, mostrarTrenSiguiente, autocompletarEstaciones, autocompletarEstacionesTele, renderizarPanelTeleindicador } from './ui.js';
 
 // ALMACENAR ELEMENTOS DEL DOM UNA SOLA VEZ
 const DOMElements = {
