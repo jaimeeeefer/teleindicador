@@ -146,10 +146,17 @@ clearBtn.addEventListener('click', () => {
 document.getElementById("buscarTeleButton").addEventListener("click", async () => {
   const input = document.getElementById("stationInputTele");
   const codigo = input?.dataset?.codigo || "";
-  const tipoPanel =
-    (document.getElementById("departureTele")?.classList.contains("selected") ? "salidas" : "llegadas");
+  const tipoPanel = document.getElementById("tipoPanelTele").value;
   const tipoTren = document.getElementById("trainTypeTele").value;
   const resultadosDiv = document.getElementById("teleindicadorPanel");
+
+  let tipoTrenApi = tipoTren;
+    if (tipoTren === "Todos") tipoTrenApi = "ALL";
+    if (tipoTren === "Mercancías") tipoTrenApi = "GOODS";
+    if (tipoTren === "AVLDMD") tipoTrenApi = "AVLDMD";
+    if (tipoTren === "Cercanías") tipoTrenApi = "CERCANIAS";
+    if (tipoTren === "Viajeros") tipoTrenApi = "TRAVELERS";
+    if (tipoTren === "Otros") tipoTrenApi = "OTHERS";
 
   if (!codigo || !/^\d+$/.test(codigo)) {
     resultadosDiv.textContent = "Selecciona una estación válida.";
@@ -160,7 +167,7 @@ document.getElementById("buscarTeleButton").addEventListener("click", async () =
 
   try {
     // Llama aquí a tu función que consulta la API de Render, por ejemplo:
-    const trenes = await buscarEstacionPorCodigoParaTeleindicador(codigo, tipoPanel, tipoTren);
+    const trenes = await buscarEstacionPorCodigoParaTeleindicador(codigo, tipoPanel, tipoTrenApi);
     if (trenes && trenes.length > 0) {
       resultadosDiv.innerHTML = trenes.map(t =>
         `<div>${t.hora || ''} - ${t.destino || ''} - ${t.numero || ''}</div>`
