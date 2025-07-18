@@ -2,7 +2,7 @@
 
 import { initTheme, toggleTheme } from './theme.js';
 import { login, cerrarSesion, verificarSesionGuardada, } from './auth.js';
-import { buscarTren, clearResultados, buscarEstacion, cargarMas } from './api.js';
+import { buscarTren, clearResultados, buscarEstacion, cargarMas, buscarEstacionPorCodigoParaTeleindicador } from './api.js';
 import { mostrarTrenAnterior, mostrarTrenSiguiente, autocompletarEstaciones, autocompletarEstacionesTele } from './ui.js';
 
 // ALMACENAR ELEMENTOS DEL DOM UNA SOLA VEZ
@@ -145,28 +145,31 @@ clearBtn.addEventListener('click', () => {
 
 document.getElementById("buscarTeleButton").addEventListener("click", async () => {
   const input = document.getElementById("stationInputTele");
-  const tipoPanel = document.getElementById("tipoPanelTele").value;
-  const tipoTren = document.getElementById("tipoTrenTele").value;
-  const resultadosDiv = document.getElementById("resultadoTele");
   const codigo = input?.dataset?.codigo || "";
+  const tipoPanel =
+    (document.getElementById("departureTele")?.classList.contains("selected") ? "salidas" : "llegadas");
+  const tipoTren = document.getElementById("trainTypeTele").value;
+  const resultadosDiv = document.getElementById("teleindicadorPanel");
 
   if (!codigo || !/^\d+$/.test(codigo)) {
-    resultadosDiv.textContent = "Introduce una estación válida.";
+    resultadosDiv.textContent = "Selecciona una estación válida.";
     return;
   }
 
   resultadosDiv.textContent = "Cargando...";
 
   try {
+    // Llama aquí a tu función que consulta la API de Render, por ejemplo:
     const trenes = await buscarEstacionPorCodigoParaTeleindicador(codigo, tipoPanel, tipoTren);
     if (trenes && trenes.length > 0) {
-      resultadosDiv.textContent = `Trenes encontrados para ${codigo} - ${getEstaciones()[codigo.replace(/^0+/, "")] || "Estación desconocida"}`;
-      renderizarHorarios(trenes, "teleindicador");
+      resultadosDiv.innerHTML = trenes.map(t =>
+        `<div>${t.hora || ''} - ${t.destino || ''} - ${t.numero || ''}</div>`
+      ).join('');
     } else {
       resultadosDiv.textContent = "No se encontraron trenes.";
     }
-  } catch (error) {
-    resultadosDiv.textContent = "Error al obtener datos del servidor.";
-    console.error(error);
+  } catch (err) {
+    resultadosDiv.textContent = "Error al consultar el servidor.";
+    console.error(err);
   }
 });
