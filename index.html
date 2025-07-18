@@ -201,14 +201,18 @@
       </div>
       <button id="buscarTeleButton">Buscar</button>
       <div class="filtros-tele">
-        <button class="selected" id="departureTele" type="button" style="font-size:1em;margin-right:0.5em;">Salidas</button>
-        <button id="arrivalTele" type="button" style="font-size:1em;margin-right:1em;">Llegadas</button>
+        <select id="tipoPanelTele">
+          <option value="salidas">Salidas</option>
+          <option value="llegadas">Llegadas</option>
+        </select>
         <label style="margin-right:0.5em;">Tipo:</label>
-        <select id="trainTypeTele" style="font-size:1em;">
-          <option value="todos">Todos</option>
-          <option value="larga_distancia">Larga distancia</option>
-          <option value="media_distancia">Media distancia</option>
-          <option value="cercanias">Cercanías</option>
+        <select id="trainTypeTele" class="tipo-tren-select">
+          <option value="Todos">Todos</option>
+          <option value="Mercancías">Mercancías</option>
+          <option value="AVLDMD">AVLDMD</option>
+          <option value="Cercanías">Cercanías</option>
+          <option value="Viajeros">Viajeros</option>
+          <option value="Otros">Otros</option>
         </select>
       </div>
     </div>
