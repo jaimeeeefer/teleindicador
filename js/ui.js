@@ -532,32 +532,27 @@ export function renderizarPanelTeleindicador(datos) {
         console.error("No se encontró el tbody de la tabla del teleindicador");
         return;
     }
+
     tbody.innerHTML = "";
+
     if (!datos || !Array.isArray(datos) || datos.length === 0) {
         tbody.innerHTML = "<tr><td colspan='7'>No se encontraron trenes.</td></tr>";
         return;
     }
 
-    datos.forEach(item => {
-        // Aquí adaptas según la estructura de cada tren
-        const info = item.commercialPathInfo;
-        const paso = item.passthroughStep?.departurePassthroughStepSides;
-        let hora = paso ? new Date(paso.plannedTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '-';
-        let linea = info.line || '';
-        let destino = info.commercialDestinationStationCode || '';
-        let operador = info.opeProComPro?.operator || '';
-        let numTren = info.commercialPathKey?.commercialCirculationKey?.commercialNumber || '';
-        let via = paso?.plannedPlatform || '-';
-        let tipo = info.trafficType || '';
+    datos.forEach((tren) => {
+        const fila = document.createElement("tr");
 
-        tbody.innerHTML += `<tr>
-            <td>${hora}</td>
-            <td>${linea}</td>
-            <td>${destino}</td>
-            <td>${operador}</td>
-            <td>${numTren}</td>
-            <td>${via}</td>
-            <td>${tipo}</td>
-        </tr>`;
+        fila.innerHTML = `
+            <td>${tren.hora || "-"}</td>
+            <td>${tren.linea || "-"}</td>
+            <td>${tren.destino || "-"}</td>
+            <td>${tren.operador || "-"}</td>
+            <td>${tren.numeroTren || "-"}</td>
+            <td>${tren.via || "-"}</td>
+            <td>${tren.tipo || "-"}</td>
+        `;
+
+        tbody.appendChild(fila);
     });
 }
