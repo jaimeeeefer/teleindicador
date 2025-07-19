@@ -521,36 +521,58 @@ function traducirOperador(operador) {
     return operadores[operador] || '';
 }
 
-export function renderizarPanelTeleindicador(commercialPaths) {
-    const estaciones = getEstaciones();
+export function renderizarPanelTeleindicador(datos) {
+    // Si datos viene como { commercialPaths: [...] }
+    const paths = datos.commercialPaths || [];
     const tbody = document.getElementById("tablaTeleindicadorBody");
     tbody.innerHTML = "";
 
-    commercialPaths.forEach(obj => {
-        const info = obj.commercialPathInfo;
-        const paso = obj.passthroughStep.departurePassthroughStepSides || obj.passthroughStep.arrivalPassthroughStepSides;
-        if (!info || !paso) return;
+    if (!paths.length) {
+        tbody.innerHTML = "<tr><td colspan='7'>No se encontraron trenes.</td></tr>";
+        return;
+    }
 
-        // Formateos y extracciones
-        const hora = formatearTimestampHora(paso.plannedTime);
-        const linea = info.line || "";
-        const destino = estaciones[info.commercialDestinationStationCode.replace(/^0+/, "")] || info.commercialDestinationStationCode;
-        const numero = info.commercialPathKey.commercialCirculationKey.commercialNumber;
-        const via = paso.plannedPlatform || paso.ctcPlatform || "";
-        const operador = traducirOperador(info.opeProComPro?.operator);
-        const tipo = info.trafficType || "";
-        
-        // Ejemplo: cada tren es una fila como en el panel Adif
-        const fila = document.createElement("tr");
-        fila.innerHTML = `
-            <td>${hora}</td>
-            <td>${linea ? `<span class="panel-linea">${linea}</span>` : ""}</td>
-            <td>${destino}</td>
-            <td>${operador}</td>
-            <td>${numero}</td>
-            <td>${via}</td>
-            <td>${tipo}</td>
+    for (const path of paths) {
+        // Extrae los datos que necesitas mostrar
+        const info = path.commercialPathInfo;
+        const step = path.passthroughStep;
+        const salida = step?.departurePassthroughStepSides;
+        if (!info || !salida) continue;
+
+        // Hora en formato HH:mm
+        const hora = salida.plannedTime ? formatearHora(new Date(salida.plannedTime)) : "-";
+        // Línea
+        const linea = info.line || "-";
+        // Destino
+        const destino = info.commercialDestinationStationCode || "-";
+        // Operador
+        const operador = info.opeProComPro?.operator || "-";
+        // Nº Tren
+        const numero = info.commercialPathKey?.commercialCirculationKey?.commercialNumber || "-";
+        // Vía
+        const via = salida.plannedPlatform || salida.ctcPlatform || "-";
+        // Tipo
+        const tipo = info.opeProComPro?.commercialProduct || "-";
+
+        tbody.innerHTML += `
+            <tr>
+                <td>${hora}</td>
+                <td>${linea}</td>
+                <td>${destino}</td>
+                <td>${operador}</td>
+                <td>${numero}</td>
+                <td>${via}</td>
+                <td>${tipo}</td>
+            </tr>
         `;
-        tbody.appendChild(fila);
-    });
+    }
 }
+
+// Formatea una fecha en milisegundos a HH:mm
+function formatearHora(date) {
+    if (!date) return "-";
+    let h = date.getHours();
+    let m = date.getMinutes();
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+}
+
