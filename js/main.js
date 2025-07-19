@@ -79,6 +79,11 @@ function setupEventListeners() {
     });
 }
 
+function mostrarTab(tabId) {
+  document.querySelectorAll('.pantalla').forEach(div => div.classList.remove('visible'));
+  document.getElementById(tabId).classList.add('visible');
+}
+
 async function init() {
     initTheme();
     if ('serviceWorker' in navigator) {
