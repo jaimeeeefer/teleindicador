@@ -730,3 +730,76 @@ tbody tr:hover { background-color: var(--table-row-hover-bg); }
 .teleindicador-row:nth-child(odd):not(.teleindicador-header) {
   background: #254e7a;
 }
+
+.busqueda-teleindicador {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.2em;
+  margin-bottom: 2em;
+}
+
+.filtros-tele {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1em;
+  width: 100%;
+}
+
+.tren-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #132039;
+  color: white;
+  padding: 0.8em 1em;
+  margin-bottom: 0.5em;
+  border-radius: 6px;
+  font-size: 1.1em;
+  font-family: 'Fira Sans', sans-serif;
+}
+
+.tren-hora {
+  font-weight: bold;
+  width: 70px;
+}
+
+.tren-linea-destino {
+  flex: 1;
+  margin-left: 1em;
+}
+
+.linea {
+  font-weight: bold;
+  background-color: #3498db;
+  border-radius: 4px;
+  padding: 0.2em 0.6em;
+  margin-right: 0.5em;
+  color: #fff;
+}
+
+.destino {
+  font-weight: bold;
+}
+
+.tren-operador {
+  font-size: 0.9em;
+  color: #dcdcdc;
+  margin-right: 1em;
+  width: 120px;
+  text-align: right;
+}
+
+.tren-num {
+  font-weight: bold;
+  width: 80px;
+  text-align: right;
+}
+
+.tren-via {
+  font-weight: bold;
+  width: 60px;
+  text-align: right;
+}
