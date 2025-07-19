@@ -144,6 +144,9 @@ clearBtn.addEventListener('click', () => {
 });
 
 document.getElementById("buscarTeleButton").addEventListener("click", async () => {
+  // Asegúrate de que la pestaña teleindicador está activa
+  mostrarTab('teleindicadorTab'); // (pon la función mostrarTab si no la tienes)
+  
   const input = document.getElementById("stationInputTele");
   const codigo = input?.dataset?.codigo || "";
   const tipoPanel = document.getElementById("tipoPanelTele").value;
@@ -166,11 +169,10 @@ document.getElementById("buscarTeleButton").addEventListener("click", async () =
   resultadosDiv.textContent = "Cargando...";
 
   try {
-    // Llama aquí a tu función que consulta la API de Render, por ejemplo:
     const trenes = await buscarEstacionPorCodigoParaTeleindicador(codigo, tipoPanel, tipoTrenApi);
     if (trenes && trenes.length > 0) {
-      renderizarPanelTeleindicador(trenes);  // Muestra la tabla
-      resultadosDiv.textContent = ""; // Limpia el mensaje
+      renderizarPanelTeleindicador(trenes);
+      resultadosDiv.textContent = "";
     } else {
       document.getElementById("tablaTeleindicadorBody").innerHTML = "";
       resultadosDiv.textContent = "No se encontraron trenes.";
