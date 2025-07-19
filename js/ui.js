@@ -534,26 +534,28 @@ export function renderizarPanelTeleindicador(datos) {
   }
 
   console.log("Datos recibidos para renderizar:", datos);
-  tbody.innerHTML = ""; // Limpia la tabla
+  tbody.innerHTML = "";
 
   if (!Array.isArray(datos) || datos.length === 0) {
-    console.warn("No hay datos para mostrar en el teleindicador.");
     const row = document.createElement("tr");
     row.innerHTML = `<td colspan="7" style="text-align:center;">No hay trenes disponibles.</td>`;
     tbody.appendChild(row);
     return;
   }
 
-  datos.forEach(dato => {
+  datos.forEach((dato) => {
+    const info = dato.commercialPathInfo || {};
+    const paso = dato.passthroughStep || {};
+
     const row = document.createElement("tr");
     row.innerHTML = `
-      <td>${dato.hora || "-"}</td>
-      <td>${dato.linea || "-"}</td>
-      <td>${dato.destino || "-"}</td>
-      <td>${dato.operador || "-"}</td>
-      <td>${dato.numero || "-"}</td>
-      <td>${dato.via || "-"}</td>
-      <td>${dato.tipo || "-"}</td>
+      <td>${new Date(info.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) || "-"}</td>
+      <td>${info.line || "-"}</td>
+      <td>${info.commercialDestinationStationName || "-"}</td>
+      <td>${info.operatorName || "-"}</td>
+      <td>${info.trainIdentifier || "-"}</td>
+      <td>${paso.platform || "-"}</td>
+      <td>${info.trafficType || "-"}</td>
     `;
     tbody.appendChild(row);
   });
