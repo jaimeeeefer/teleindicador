@@ -521,58 +521,42 @@ function traducirOperador(operador) {
     return operadores[operador] || '';
 }
 
-export function renderizarPanelTeleindicador(datos) {
-    // Si datos viene como { commercialPaths: [...] }
-    const paths = datos.commercialPaths || [];
-    const tbody = document.getElementById("tablaTeleindicadorBody");
-    tbody.innerHTML = "";
+export function renderizarPanelTeleindicador(data) {
+  const tablaBody = document.getElementById("tablaTeleindicadorBody");
+  if (!tablaBody) {
+    console.error("No se encontró el tbody de la tabla del teleindicador");
+    return;
+  }
+  if (!data || !data.commercialPaths || data.commercialPaths.length === 0) {
+    tablaBody.innerHTML = '<tr><td colspan="7">No hay trenes para mostrar.</td></tr>';
+    return;
+  }
 
-    if (!paths.length) {
-        tbody.innerHTML = "<tr><td colspan='7'>No se encontraron trenes.</td></tr>";
-        return;
-    }
+  let filas = "";
+  data.commercialPaths.forEach(item => {
+    const info = item.commercialPathInfo;
+    const paso = item.passthroughStep?.departurePassthroughStepSides || {};
 
-    for (const path of paths) {
-        // Extrae los datos que necesitas mostrar
-        const info = path.commercialPathInfo;
-        const step = path.passthroughStep;
-        const salida = step?.departurePassthroughStepSides;
-        if (!info || !salida) continue;
+    const hora = paso.plannedTime ? new Date(paso.plannedTime).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }) : "-";
+    const linea = info.line || "-";
+    const destino = obtenerNombreEstacion(info.commercialDestinationStationCode) || "-"; // Función que busque el nombre según el código
+    const operador = info.opeProComPro?.operator || "-";
+    const numero = info.commercialPathKey?.commercialCirculationKey?.commercialNumber || "-";
+    const via = paso.plannedPlatform || "-";
+    const tipo = info.trafficType || "-";
 
-        // Hora en formato HH:mm
-        const hora = salida.plannedTime ? formatearHora(new Date(salida.plannedTime)) : "-";
-        // Línea
-        const linea = info.line || "-";
-        // Destino
-        const destino = info.commercialDestinationStationCode || "-";
-        // Operador
-        const operador = info.opeProComPro?.operator || "-";
-        // Nº Tren
-        const numero = info.commercialPathKey?.commercialCirculationKey?.commercialNumber || "-";
-        // Vía
-        const via = salida.plannedPlatform || salida.ctcPlatform || "-";
-        // Tipo
-        const tipo = info.opeProComPro?.commercialProduct || "-";
+    filas += `
+      <tr>
+        <td>${hora}</td>
+        <td>${linea}</td>
+        <td>${destino}</td>
+        <td>${operador}</td>
+        <td>${numero}</td>
+        <td>${via}</td>
+        <td>${tipo}</td>
+      </tr>
+    `;
+  });
 
-        tbody.innerHTML += `
-            <tr>
-                <td>${hora}</td>
-                <td>${linea}</td>
-                <td>${destino}</td>
-                <td>${operador}</td>
-                <td>${numero}</td>
-                <td>${via}</td>
-                <td>${tipo}</td>
-            </tr>
-        `;
-    }
+  tablaBody.innerHTML = filas;
 }
-
-// Formatea una fecha en milisegundos a HH:mm
-function formatearHora(date) {
-    if (!date) return "-";
-    let h = date.getHours();
-    let m = date.getMinutes();
-    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-}
-
