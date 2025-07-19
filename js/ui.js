@@ -521,6 +521,11 @@ function traducirOperador(operador) {
     return operadores[operador] || '';
 }
 
+function mostrarTab(tabId) {
+    document.querySelectorAll('.pantalla').forEach(div => div.style.display = 'none');
+    document.getElementById(tabId).style.display = 'block';
+}
+
 export function renderizarPanelTeleindicador(datos) {
     const tbody = document.getElementById("tablaTeleindicadorBody");
     if (!tbody) {
