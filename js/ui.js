@@ -534,10 +534,12 @@ export function renderizarPanelTeleindicador(datos) {
   }
 
   // Limpia el contenido anterior
-  contenedor.innerHTML = "";
+  tbody.innerHTML = ""; // Vacía la tabla sin borrar la estructura
 
   if (!datos || datos.length === 0) {
-    contenedor.innerHTML = "<p style='padding:1em;'>No hay datos disponibles.</p>";
+    const fila = document.createElement("tr");
+    fila.innerHTML = `<td colspan="7" style="text-align:center;">No hay datos disponibles</td>`;
+    tbody.appendChild(fila);
     return;
   }
 
