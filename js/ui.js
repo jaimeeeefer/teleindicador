@@ -527,32 +527,34 @@ function mostrarTab(tabId) {
 }
 
 export function renderizarPanelTeleindicador(datos) {
-    const tbody = document.getElementById("tablaTeleindicadorBody");
-    if (!tbody) {
-        console.error("No se encontró el tbody de la tabla del teleindicador");
-        return;
-    }
+  const tbody = document.getElementById("tablaTeleindicadorBody");
+  if (!tbody) {
+    console.error("No se encontró el tbody de la tabla del teleindicador");
+    return;
+  }
 
-    tbody.innerHTML = "";
+  console.log("Datos recibidos para renderizar:", datos);
+  tbody.innerHTML = ""; // Limpia la tabla
 
-    if (!datos || !Array.isArray(datos) || datos.length === 0) {
-        tbody.innerHTML = "<tr><td colspan='7'>No se encontraron trenes.</td></tr>";
-        return;
-    }
+  if (!Array.isArray(datos) || datos.length === 0) {
+    console.warn("No hay datos para mostrar en el teleindicador.");
+    const row = document.createElement("tr");
+    row.innerHTML = `<td colspan="7" style="text-align:center;">No hay trenes disponibles.</td>`;
+    tbody.appendChild(row);
+    return;
+  }
 
-    datos.forEach((tren) => {
-        const fila = document.createElement("tr");
-
-        fila.innerHTML = `
-            <td>${tren.hora || "-"}</td>
-            <td>${tren.linea || "-"}</td>
-            <td>${tren.destino || "-"}</td>
-            <td>${tren.operador || "-"}</td>
-            <td>${tren.numeroTren || "-"}</td>
-            <td>${tren.via || "-"}</td>
-            <td>${tren.tipo || "-"}</td>
-        `;
-
-        tbody.appendChild(fila);
-    });
+  datos.forEach(dato => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${dato.hora || "-"}</td>
+      <td>${dato.linea || "-"}</td>
+      <td>${dato.destino || "-"}</td>
+      <td>${dato.operador || "-"}</td>
+      <td>${dato.numero || "-"}</td>
+      <td>${dato.via || "-"}</td>
+      <td>${dato.tipo || "-"}</td>
+    `;
+    tbody.appendChild(row);
+  });
 }
