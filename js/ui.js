@@ -535,7 +535,7 @@ export function renderizarPanelTeleindicador(datos) {
   }
 
   // Limpia el contenido anterior
-  tbody.innerHTML = ""; // Vacía la tabla sin borrar la estructura
+  //tbody.innerHTML = ""; // Vacía la tabla sin borrar la estructura
 
   if (!datos || datos.length === 0) {
     const fila = document.createElement("tr");
