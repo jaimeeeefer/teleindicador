@@ -527,19 +527,17 @@ function mostrarTab(tabId) {
 }
 
 export function renderizarPanelTeleindicador(datos) {
-  const tbody = document.getElementById("tablaTeleindicadorBody");
-  if (!tbody) {
-    console.error("No se encontró el tbody de la tabla del teleindicador");
+  const contenedor = document.getElementById("teleindicadorPanel");
+  if (!contenedor) {
+    console.error("No se encontró el contenedor del teleindicador");
     return;
   }
 
-  console.log("Datos recibidos para renderizar:", datos);
-  tbody.innerHTML = "";
+  // Limpia el contenido anterior
+  contenedor.innerHTML = "";
 
-  if (!Array.isArray(datos) || datos.length === 0) {
-    const row = document.createElement("tr");
-    row.innerHTML = `<td colspan="7" style="text-align:center;">No hay trenes disponibles.</td>`;
-    tbody.appendChild(row);
+  if (!datos || datos.length === 0) {
+    contenedor.innerHTML = "<p style='padding:1em;'>No hay datos disponibles.</p>";
     return;
   }
 
@@ -547,16 +545,29 @@ export function renderizarPanelTeleindicador(datos) {
     const info = dato.commercialPathInfo || {};
     const paso = dato.passthroughStep || {};
 
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${new Date(info.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) || "-"}</td>
-      <td>${info.line || "-"}</td>
-      <td>${info.commercialDestinationStationName || "-"}</td>
-      <td>${info.operatorName || "-"}</td>
-      <td>${info.trainIdentifier || "-"}</td>
-      <td>${paso.platform || "-"}</td>
-      <td>${info.trafficType || "-"}</td>
+    const hora = new Date(info.timestamp).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+
+    const linea = info.line || "-";
+    const destino = info.commercialDestinationStationName || "-";
+    const operador = info.operatorName || "-";
+    const numTren = info.trainIdentifier || "-";
+    const via = paso.platform || "-";
+
+    const div = document.createElement("div");
+    div.className = "tren-item";
+    div.innerHTML = `
+      <div class="tren-hora">${hora}</div>
+      <div class="tren-linea-destino">
+        <span class="linea">${linea}</span>
+        <span class="destino">${destino}</span>
+      </div>
+      <div class="tren-operador">${operador}</div>
+      <div class="tren-num">${numTren}</div>
+      <div class="tren-via">Vía ${via}</div>
     `;
-    tbody.appendChild(row);
+    contenedor.appendChild(div);
   });
 }
