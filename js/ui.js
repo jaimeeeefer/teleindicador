@@ -528,6 +528,7 @@ function mostrarTab(tabId) {
 
 export function renderizarPanelTeleindicador(datos) {
   const contenedor = document.getElementById("teleindicadorPanel");
+  const tbody = document.getElementById("tablaTeleindicadorBody");
   if (!contenedor) {
     console.error("No se encontró el contenedor del teleindicador");
     return;
