@@ -521,42 +521,38 @@ function traducirOperador(operador) {
     return operadores[operador] || '';
 }
 
-export function renderizarPanelTeleindicador(data) {
-  const tablaBody = document.getElementById("tablaTeleindicadorBody");
-  if (!tablaBody) {
-    console.error("No se encontró el tbody de la tabla del teleindicador");
-    return;
-  }
-  if (!data || !data.commercialPaths || data.commercialPaths.length === 0) {
-    tablaBody.innerHTML = '<tr><td colspan="7">No hay trenes para mostrar.</td></tr>';
-    return;
-  }
+export function renderizarPanelTeleindicador(datos) {
+    const tbody = document.getElementById("tablaTeleindicadorBody");
+    if (!tbody) {
+        console.error("No se encontró el tbody de la tabla del teleindicador");
+        return;
+    }
+    tbody.innerHTML = "";
+    if (!datos || !Array.isArray(datos) || datos.length === 0) {
+        tbody.innerHTML = "<tr><td colspan='7'>No se encontraron trenes.</td></tr>";
+        return;
+    }
 
-  let filas = "";
-  data.commercialPaths.forEach(item => {
-    const info = item.commercialPathInfo;
-    const paso = item.passthroughStep?.departurePassthroughStepSides || {};
+    datos.forEach(item => {
+        // Aquí adaptas según la estructura de cada tren
+        const info = item.commercialPathInfo;
+        const paso = item.passthroughStep?.departurePassthroughStepSides;
+        let hora = paso ? new Date(paso.plannedTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '-';
+        let linea = info.line || '';
+        let destino = info.commercialDestinationStationCode || '';
+        let operador = info.opeProComPro?.operator || '';
+        let numTren = info.commercialPathKey?.commercialCirculationKey?.commercialNumber || '';
+        let via = paso?.plannedPlatform || '-';
+        let tipo = info.trafficType || '';
 
-    const hora = paso.plannedTime ? new Date(paso.plannedTime).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }) : "-";
-    const linea = info.line || "-";
-    const destino = obtenerNombreEstacion(info.commercialDestinationStationCode) || "-"; // Función que busque el nombre según el código
-    const operador = info.opeProComPro?.operator || "-";
-    const numero = info.commercialPathKey?.commercialCirculationKey?.commercialNumber || "-";
-    const via = paso.plannedPlatform || "-";
-    const tipo = info.trafficType || "-";
-
-    filas += `
-      <tr>
-        <td>${hora}</td>
-        <td>${linea}</td>
-        <td>${destino}</td>
-        <td>${operador}</td>
-        <td>${numero}</td>
-        <td>${via}</td>
-        <td>${tipo}</td>
-      </tr>
-    `;
-  });
-
-  tablaBody.innerHTML = filas;
+        tbody.innerHTML += `<tr>
+            <td>${hora}</td>
+            <td>${linea}</td>
+            <td>${destino}</td>
+            <td>${operador}</td>
+            <td>${numTren}</td>
+            <td>${via}</td>
+            <td>${tipo}</td>
+        </tr>`;
+    });
 }
