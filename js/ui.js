@@ -587,7 +587,7 @@ export function renderizarPanelTeleindicador(datos) {
             <td class="linea">${linea}</td>
             <td class="destino">${destino}</td>
             <td class="operador">${operador}</td>
-            <td class="num-tren">${numTren}</td>
+            <td class="num-tren">${numeroTren}</td>
             <td class="via">${via}</td>
             <td class="tipo">${tipoTren}</td>
         `;
