@@ -540,6 +540,11 @@ export function renderizarPanelTeleindicador(datos) {
     // Limpia el contenido anterior
     tablaTeleindicadorBody; // Vacía la tabla sin borrar la estructura
 
+    console.log("Datos recibidos para el teleindicador:");
+    console.log(datos);
+    console.log("Tipo de datos:", typeof datos);
+    console.log("¿Es array?:", Array.isArray(datos));
+
     if (!datos || datos.length === 0) {
         const fila = document.createElement("tr");
         fila.innerHTML = `<td colspan="7" style="text-align:center;">No hay datos disponibles</td>`;
