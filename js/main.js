@@ -185,7 +185,7 @@ document.getElementById("buscarTeleButton").addEventListener("click", async () =
 
   document.getElementById("tablaTeleindicadorBody").innerHTML = "";
   document.getElementById("tablaTeleindicadorBody").innerHTML = "<tr><td colspan='7'>Cargando...</td></tr>";
-  mostrarTab("teleindicadorTab");
+  mostrarPantalla("teleindicadorTab");
   try {
     const trenes = await buscarEstacionPorCodigoParaTeleindicador(codigo, tipoPanel, tipoTrenApi);
     if (trenes && trenes.length > 0) {
