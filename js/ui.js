@@ -550,7 +550,7 @@ export function renderizarPanelTeleindicador(datos) {
         // Accede al primer elemento del array passthroughSteps[0]
         const paso = tren.passthroughSteps ? tren.passthroughSteps[0] : {};
         const info = tren.commercialPathInfo || {};
-        const infoextra = tren.passthroughSteps.departurePassthroughStepSides
+        const infoextra = tren.passthroughStep.departurePassthroughStepSides
 
         // Extrae los datos usando los nombres correctos y con valores por defecto
         const hora = formatearTimestampHora(infoextra.plannedTime)
