@@ -585,7 +585,7 @@ export function renderizarPanelTeleindicador(datos) {
         const fila = document.createElement("tr");
         fila.innerHTML = `
             <td class="hora">${horaMostrada}</td>
-            <td">${linea}</td>
+            <td>${linea}</td>
             <td class="destino">${destino}</td>
             <td class="operador">${operador}</td>
             <td class="num-tren">${numeroTren}</td>
