@@ -527,9 +527,9 @@ function mostrarTab(tabId) {
 }
 
 export function renderizarPanelTeleindicador(datos) {
+    const tbody = document.getElementById("tablaTeleindicadorBody");
     console.log("Contenido tbody después de renderizar:", tbody.innerHTML);
     console.trace("¿Quién está tocando el tbody?");
-    const tbody = document.getElementById("tablaTeleindicadorBody");
     console.log("Renderizando teleindicador...");
     const estaciones = getEstaciones();
     console.log("tbody encontrado: ", tbody);
