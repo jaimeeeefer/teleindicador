@@ -535,35 +535,41 @@ export function renderizarPanelTeleindicador(datos) {
         return;
     }
 
-    // 1. Limpiar siempre la tabla antes de hacer nada.
-    tbody.innerHTML = ""; 
+    // 1. Limpiar la tabla (quita el "Cargando...")
+    tbody.innerHTML = "";
 
-    // 2. Comprobar si hay datos para mostrar.
     if (!Array.isArray(datos) || datos.length === 0) {
-        const fila = document.createElement("tr");
-        fila.innerHTML = `<td colspan="7" style="text-align:center;">No hay trenes para mostrar.</td>`;
-        tbody.appendChild(fila);
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">No hay datos disponibles</td></tr>`;
         return;
     }
 
-    // 3. Renderizar las filas con los datos.
+    // 2. Recorrer los datos recibidos
     datos.forEach((tren) => {
-        const horaTimestamp = tren.commercialPathInfo?.timestamp;
-        const hora = horaTimestamp
-            ? new Date(horaTimestamp * 1000).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })
+        // --- CORRECCIONES CLAVE AQUÍ ---
+
+        // Accede al primer elemento del array passthroughSteps[0]
+        const paso = tren.passthroughSteps ? tren.passthroughSteps[0] : {};
+        const info = tren.commercialPathInfo || {};
+
+        // Extrae los datos usando los nombres correctos y con valores por defecto
+        const hora = info.timestamp
+            ? new Date(info.timestamp * 1000).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })
             : "-";
-
-        const linea = tren.commercialPathInfo?.line ?? "-";
-        const destinoCodigo = tren.commercialPathInfo?.commercialDestinationStationCode ?? "-";
+        
+        const linea = info.line ?? "-";
+        const destinoCodigo = info.commercialDestinationStationCode ?? "-";
         const destino = estaciones[destinoCodigo.replace(/^0+/, '')] ?? destinoCodigo;
-        const operador = tren.commercialPathInfo?.operatorName ?? "Renfe";
-        const numeroTren = tren.commercialPathInfo?.trainNumber ?? "-";
-        const via = tren.passthroughStep?.platform ?? "-";
-        const tipo = tren.commercialPathInfo?.trainType ?? "-";
+        const operador = info.operatorName ?? "Renfe"; // Asumimos que 'operatorName' es correcto, si no, ajústalo.
+        const numeroTren = info.trainNumber ?? "-";
+        const via = paso.platform ?? "-"; // Lee la vía desde el objeto "paso" corregido
+        const tipo = info.trainType ?? "-";
 
-        // Evitar filas vacías si faltan datos clave
-        if (hora === "-" && destino === "-" && numeroTren === "-") return;
+        // Evita renderizar filas completamente vacías
+        if (hora === "-" && destino === "-" && numeroTren === "-") {
+            return; // Salta a la siguiente iteración del bucle
+        }
 
+        // 3. Crea y añade la fila a la tabla
         const fila = document.createElement("tr");
         fila.innerHTML = `
             <td>${hora}</td>
