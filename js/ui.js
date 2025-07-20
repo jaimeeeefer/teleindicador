@@ -584,6 +584,6 @@ export function renderizarPanelTeleindicador(datos) {
         tbody.appendChild(fila);
         totalFilas++;
     });
-    document.getElementById("resultadoEstacion").classList.remove("hidden");
+    document.getElementById("tablaTeleindicadorBody").classList.remove("hidden");
     console.log("Total filas generadas:", totalFilas);
 }
