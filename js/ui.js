@@ -527,7 +527,7 @@ function mostrarTab(tabId) {
 }
 
 export function renderizarPanelTeleindicador(datos) {
-    const tbody = document.getElementById("tablaTeleindicador");
+    const tbody = document.getElementById("tablaTeleindicadorBody");
     console.log("⏩ renderizarPanelTeleindicador llamada con", datos);
     console.log("Contenido tbody después de renderizar:", tbody.innerHTML);
     console.trace("¿Quién está tocando el tbody?");
@@ -584,6 +584,6 @@ export function renderizarPanelTeleindicador(datos) {
         tbody.appendChild(fila);
         totalFilas++;
     });
-
+    document.getElementById("resultadoEstacion").classList.remove("hidden");
     console.log("Total filas generadas:", totalFilas);
 }
