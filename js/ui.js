@@ -551,6 +551,7 @@ export function renderizarPanelTeleindicador(datos) {
         const paso = tren.passthroughSteps ? tren.passthroughSteps[0] : {};
         const info = tren.commercialPathInfo || {};
         const infoextra = tren.passthroughStep.departurePassthroughStepSides;
+        const estadoTraducido = traducirEstado(paso.circulationState);
 
         // Extrae los datos usando los nombres correctos y con valores por defecto
         let horaTeorica = infoextra?.plannedTime ? formatearTimestampHora(infoextra.plannedTime) : "-";
@@ -584,7 +585,7 @@ export function renderizarPanelTeleindicador(datos) {
         const fila = document.createElement("tr");
         fila.innerHTML = `
             <td class="hora">${horaMostrada}</td>
-            <td class="linea">${linea}</td>
+            <td">${linea}</td>
             <td class="destino">${destino}</td>
             <td class="operador">${operador}</td>
             <td class="num-tren">${numeroTren}</td>
