@@ -549,7 +549,7 @@ export function renderizarPanelTeleindicador(datos) {
 
         // Accede al primer elemento del array passthroughSteps[0]
         const paso = tren.passthroughSteps?.[0] || {}; // primer paso completo
-        const pasoTiempo = tren.passthroughStep?.departurePassthroughStepSides || tren.passthroughStep?.arrivalPassthroughStepSides || {};
+        const pasoTiempo = tren.passthroughStep?.departurePassthroughStepSides;
         const info = tren.commercialPathInfo || {};
         const infoextra = tren.passthroughStep.departurePassthroughStepSides;
         const estadoTraducido = traducirEstado(paso.circulationState);
