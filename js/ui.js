@@ -550,10 +550,11 @@ export function renderizarPanelTeleindicador(datos) {
         // Accede al primer elemento del array passthroughSteps[0]
         const paso = tren.passthroughSteps ? tren.passthroughSteps[0] : {};
         const info = tren.commercialPathInfo || {};
+        const infoextra = tren.passthroughStep.departurePassthroughStepSides
 
         // Extrae los datos usando los nombres correctos y con valores por defecto
         const hora = info.timestamp
-            ? new Date(info.timestamp * 1000).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })
+            ? new Date(infoextra.plannedTime * 1000).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })
             : "-";
         
         const linea = info.line ?? "-";
