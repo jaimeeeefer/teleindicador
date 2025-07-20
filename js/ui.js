@@ -527,6 +527,8 @@ function mostrarTab(tabId) {
 }
 
 export function renderizarPanelTeleindicador(datos) {
+    console.log("Contenido tbody después de renderizar:", tbody.innerHTML);
+    console.trace("¿Quién está tocando el tbody?");
     const tbody = document.getElementById("tablaTeleindicadorBody");
     console.log("Renderizando teleindicador...");
     const estaciones = getEstaciones();
@@ -537,6 +539,8 @@ export function renderizarPanelTeleindicador(datos) {
     }
 
     tbody.innerHTML = ""; // limpiar
+    console.warn("¡ALGUIEN ESTÁ VACIANDO EL TBODY!");
+    console.trace();
 
     if (!Array.isArray(datos) || datos.length === 0) {
         const fila = document.createElement("tr");
