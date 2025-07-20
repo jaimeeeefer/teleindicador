@@ -79,6 +79,18 @@ function setupEventListeners() {
     });
 }
 
+function mostrarPantalla(idPantalla) {
+  const pantallas = document.querySelectorAll(".pantalla");
+  pantallas.forEach((pantalla) => {
+    pantalla.style.display = "none";
+  });
+
+  const pantallaActiva = document.getElementById(idPantalla);
+  if (pantallaActiva) {
+    pantallaActiva.style.display = "block";
+  }
+}
+
 function mostrarTab(tabId) {
   document.querySelectorAll('.pantalla').forEach(div => div.classList.remove('visible'));
   document.getElementById(tabId).classList.add('visible');
