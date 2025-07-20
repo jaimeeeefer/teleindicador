@@ -527,7 +527,7 @@ function mostrarTab(tabId) {
 }
 
 export function renderizarPanelTeleindicador(datos) {
-    const tbody = document.getElementById("tablaTeleindicadorBody");
+    const tbody = document.getElementById("tablaTeleindicador");
     console.log("⏩ renderizarPanelTeleindicador llamada con", datos);
     console.log("Contenido tbody después de renderizar:", tbody.innerHTML);
     console.trace("¿Quién está tocando el tbody?");
