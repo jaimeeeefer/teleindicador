@@ -556,8 +556,8 @@ export function renderizarPanelTeleindicador(datos) {
         // Extrae los datos usando los nombres correctos y con valores por defecto
         let horaTeorica = infoextra?.plannedTime ? formatearTimestampHora(infoextra.plannedTime) : "-";
         let horaEstimada = infoextra?.forecastedTime ? formatearTimestampHora(infoextra.forecastedTime) : null;
-        let tacharHora = paso.forecastedOrAuditedDelay !== null && (paso.forecastedOrAuditedDelay >= 180 || paso.forecastedOrAuditedDelay < 0) && estadoTraducido !== 'PENDIENTE DE CIRCULAR';
-        const delay = paso.forecastedOrAuditedDelay;
+        let tacharHora = paso.forecastedOrAuditedDelay !== null && (infoextra.forecastedOrAuditedDelay >= 180 || infoextra.forecastedOrAuditedDelay < 0) && estadoTraducido !== 'PENDIENTE DE CIRCULAR';
+        const delay = infoextra.forecastedOrAuditedDelay;
         const linea = info.line ?? "-";
         const destinoCodigo = info.commercialDestinationStationCode ?? "-";
         const destino = estaciones[destinoCodigo.replace(/^0+/, '')] ?? destinoCodigo;
