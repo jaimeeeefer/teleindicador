@@ -527,16 +527,18 @@ function mostrarTab(tabId) {
 }
 
 export function renderizarPanelTeleindicador(datos) {
-    document.getElementById("teleindicadorTab").classList.add("visible");
     const contenedor = document.getElementById("teleindicadorPanel");
     const tbody = document.getElementById("tablaTeleindicadorBody");
+    console.log("Renderizando teleindicador...");
+    console.log("tbody encontrado:", tbody);
+    console.log("Datos:", datos);
     if (!contenedor) {
         console.error("No se encontró el contenedor del teleindicador");
         return;
     }
-
+    
     // Limpia el contenido anterior
-    tbody.innerHTML = ""; // Vacía la tabla sin borrar la estructura
+    tablaTeleindicadorBody; // Vacía la tabla sin borrar la estructura
 
     if (!datos || datos.length === 0) {
         const fila = document.createElement("tr");
