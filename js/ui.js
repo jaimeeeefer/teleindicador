@@ -548,16 +548,26 @@ export function renderizarPanelTeleindicador(datos) {
         // --- CORRECCIONES CLAVE AQUÍ ---
 
         // Accede al primer elemento del array passthroughSteps[0]
-        const paso = tren.passthroughSteps ? tren.passthroughSteps[0] : {};
+        const paso = tren.passthroughSteps?.[0] || {}; // primer paso completo
+        const pasoTiempo = tren.passthroughStep?.departurePassthroughStepSides || tren.passthroughStep?.arrivalPassthroughStepSides || {};
         const info = tren.commercialPathInfo || {};
         const infoextra = tren.passthroughStep.departurePassthroughStepSides;
         const estadoTraducido = traducirEstado(paso.circulationState);
 
+        // Horas y retraso
+        const horaTeorica = pasoTiempo?.plannedTime ? formatearTimestampHora(pasoTiempo.plannedTime) : "-";
+        const horaEstimada = pasoTiempo?.forecastedTime ? formatearTimestampHora(pasoTiempo.forecastedTime) : null;
+        const delay = pasoTiempo?.forecastedOrAuditedDelay ?? null;
+        const tacharHora = delay !== null && (delay >= 180 || delay < 0) && estadoTraducido !== 'PENDIENTE DE CIRCULAR';
+
+        let horaMostrada = "";
+        if (tacharHora && horaEstimada) {
+            horaMostrada = `<span style="text-decoration:line-through;color:gray;">${horaTeorica}</span><br><span>${horaEstimada}</span>`;
+        } else {
+            horaMostrada = horaTeorica;
+        }
+
         // Extrae los datos usando los nombres correctos y con valores por defecto
-        let horaTeorica = infoextra?.plannedTime ? formatearTimestampHora(infoextra.plannedTime) : "-";
-        let horaEstimada = infoextra?.forecastedTime ? formatearTimestampHora(infoextra.forecastedTime) : null;
-        let tacharHora = infoextra.forecastedOrAuditedDelay !== null && (infoextra.forecastedOrAuditedDelay >= 180 || infoextra.forecastedOrAuditedDelay < 0) && estadoTraducido !== 'PENDIENTE DE CIRCULAR';
-        const delay = infoextra.forecastedOrAuditedDelay;
         const linea = info.line ?? "-";
         const destinoCodigo = info.commercialDestinationStationCode ?? "-";
         const destino = estaciones[destinoCodigo.replace(/^0+/, '')] ?? destinoCodigo;
@@ -565,16 +575,6 @@ export function renderizarPanelTeleindicador(datos) {
         const numeroTren = info.commercialPathKey.commercialCirculationKey.commercialNumber ?? "-";
         const via = infoextra.plannedPlatform ?? "-"; // Lee la vía desde el objeto "paso" corregido
         const tipo = info.trainType ?? "-";
-
-        const horaPlanificada = formatearTimestampHora(infoextra.plannedTime);
-            let horaMostrada = "";
-
-            if (tacharHora) {
-            const horaEstim = formatearTimestampHora(infoextra.forecastedTime);
-            horaMostrada = `<span style="text-decoration:line-through;color:gray;">${horaPlanificada}</span><br><span>${horaEstim}</span>`;
-            } else {
-            horaMostrada = horaPlanificada;
-            }
 
         // Evita renderizar filas completamente vacías
         if (horaMostrada === "-" && destino === "-" && numeroTren === "-") {
@@ -584,13 +584,13 @@ export function renderizarPanelTeleindicador(datos) {
         // 3. Crea y añade la fila a la tabla
         const fila = document.createElement("tr");
         fila.innerHTML = `
-            <td class="hora">${horaMostrada}</td>
+            <td>${horaMostrada}</td>
             <td>${linea}</td>
-            <td class="destino">${destino}</td>
-            <td class="operador">${operador}</td>
-            <td class="num-tren">${numeroTren}</td>
-            <td class="via">${via}</td>
-            <td class="tipo">${tipo}</td>
+            <td>${destino}</td>
+            <td>${operador}</td>
+            <td>${numeroTren}</td>
+            <td>${via}</td>
+            <td>${tipo}</td>
         `;
         tbody.appendChild(fila);
     });
