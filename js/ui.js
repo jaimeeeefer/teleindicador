@@ -576,7 +576,7 @@ export function renderizarPanelTeleindicador(datos) {
             }
 
         // Evita renderizar filas completamente vacías
-        if (hora === "-" && destino === "-" && numeroTren === "-") {
+        if (horaMostrada === "-" && destino === "-" && numeroTren === "-") {
             return; // Salta a la siguiente iteración del bucle
         }
 
