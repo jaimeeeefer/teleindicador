@@ -557,7 +557,7 @@ export function renderizarPanelTeleindicador(datos) {
         const linea = info.line ?? "-";
         const destinoCodigo = info.commercialDestinationStationCode ?? "-";
         const destino = estaciones[destinoCodigo.replace(/^0+/, '')] ?? destinoCodigo;
-        const operador = info.opeProComPro.operator; // Asumimos que 'operatorName' es correcto, si no, ajústalo.
+        const operador = traducirOperador(info.opeProComPro.operator); // Asumimos que 'operatorName' es correcto, si no, ajústalo.
         const numeroTren = info.commercialPathKey.commercialCirculationKey.commercialNumber ?? "-";
         const via = infoextra.plannedPlatform ?? "-"; // Lee la vía desde el objeto "paso" corregido
         const tipo = info.trainType ?? "-";
