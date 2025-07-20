@@ -559,7 +559,7 @@ export function renderizarPanelTeleindicador(datos) {
         const destino = estaciones[destinoCodigo.replace(/^0+/, '')] ?? destinoCodigo;
         const operador = info.operatorName ?? "Renfe"; // Asumimos que 'operatorName' es correcto, si no, ajústalo.
         const numeroTren = info.commercialPathKey.commercialCirculationKey.commercialNumber ?? "-";
-        const via = infoextra.departurePassthroughStepSides.ctcPlatform ?? "-"; // Lee la vía desde el objeto "paso" corregido
+        const via = infoextra.departurePassthroughStepSides.plannedPlatform ?? "-"; // Lee la vía desde el objeto "paso" corregido
         const tipo = info.trainType ?? "-";
 
         // Evita renderizar filas completamente vacías
