@@ -550,10 +550,13 @@ export function renderizarPanelTeleindicador(datos) {
         // Accede al primer elemento del array passthroughSteps[0]
         const paso = tren.passthroughSteps ? tren.passthroughSteps[0] : {};
         const info = tren.commercialPathInfo || {};
-        const infoextra = tren.passthroughStep.departurePassthroughStepSides
+        const infoextra = tren.passthroughStep.departurePassthroughStepSides;
 
         // Extrae los datos usando los nombres correctos y con valores por defecto
-        const hora = formatearTimestampHora(infoextra.plannedTime)
+        let horaTeorica = infoextra?.plannedTime ? formatearTimestampHora(infoextra.plannedTime) : "-";
+        let horaEstimada = infoextra?.forecastedTime ? formatearTimestampHora(infoextra.forecastedTime) : null;
+        let tacharHora = paso.forecastedOrAuditedDelay !== null && (paso.forecastedOrAuditedDelay >= 180 || paso.forecastedOrAuditedDelay < 0) && estadoTraducido !== 'PENDIENTE DE CIRCULAR';
+        const delay = paso.forecastedOrAuditedDelay;
         const linea = info.line ?? "-";
         const destinoCodigo = info.commercialDestinationStationCode ?? "-";
         const destino = estaciones[destinoCodigo.replace(/^0+/, '')] ?? destinoCodigo;
@@ -561,6 +564,16 @@ export function renderizarPanelTeleindicador(datos) {
         const numeroTren = info.commercialPathKey.commercialCirculationKey.commercialNumber ?? "-";
         const via = infoextra.plannedPlatform ?? "-"; // Lee la vía desde el objeto "paso" corregido
         const tipo = info.trainType ?? "-";
+
+        const horaPlanificada = formatearTimestampHora(infoextra.plannedTime);
+            let horaMostrada = "";
+
+            if (tacharHora) {
+            const horaEstim = formatearTimestampHora(infoextra.forecastedTime);
+            horaMostrada = `<span style="text-decoration:line-through;color:gray;">${horaPlanificada}</span><br><span>${horaEstim}</span>`;
+            } else {
+            horaMostrada = horaPlanificada;
+            }
 
         // Evita renderizar filas completamente vacías
         if (hora === "-" && destino === "-" && numeroTren === "-") {
@@ -570,13 +583,13 @@ export function renderizarPanelTeleindicador(datos) {
         // 3. Crea y añade la fila a la tabla
         const fila = document.createElement("tr");
         fila.innerHTML = `
-            <td>${hora}</td>
-            <td>${linea}</td>
-            <td>${destino}</td>
-            <td>${operador}</td>
-            <td>${numeroTren}</td>
-            <td>${via}</td>
-            <td>${tipo}</td>
+            <td class="hora">${horaMostrada}</td>
+            <td class="linea">${linea}</td>
+            <td class="destino">${destino}</td>
+            <td class="operador">${operador}</td>
+            <td class="num-tren">${numTren}</td>
+            <td class="via">${via}</td>
+            <td class="tipo">${tipoTren}</td>
         `;
         tbody.appendChild(fila);
     });
