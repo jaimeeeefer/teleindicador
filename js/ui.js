@@ -527,50 +527,51 @@ function mostrarTab(tabId) {
 }
 
 export function renderizarPanelTeleindicador(datos) {
-  const contenedor = document.getElementById("teleindicadorPanel");
-  const tbody = document.getElementById("tablaTeleindicadorBody");
-  if (!contenedor) {
-    console.error("No se encontró el contenedor del teleindicador");
-    return;
-  }
+    document.getElementById("teleindicadorTab").classList.add("visible");
+    const contenedor = document.getElementById("teleindicadorPanel");
+    const tbody = document.getElementById("tablaTeleindicadorBody");
+    if (!contenedor) {
+        console.error("No se encontró el contenedor del teleindicador");
+        return;
+    }
 
-  // Limpia el contenido anterior
-  //tbody.innerHTML = ""; // Vacía la tabla sin borrar la estructura
+    // Limpia el contenido anterior
+    tbody.innerHTML = ""; // Vacía la tabla sin borrar la estructura
 
-  if (!datos || datos.length === 0) {
-    const fila = document.createElement("tr");
-    fila.innerHTML = `<td colspan="7" style="text-align:center;">No hay datos disponibles</td>`;
-    tbody.appendChild(fila);
-    return;
-  }
+    if (!datos || datos.length === 0) {
+        const fila = document.createElement("tr");
+        fila.innerHTML = `<td colspan="7" style="text-align:center;">No hay datos disponibles</td>`;
+        tbody.appendChild(fila);
+        return;
+    }
 
-  datos.forEach((dato) => {
-    const info = dato.commercialPathInfo || {};
-    const paso = dato.passthroughStep || {};
+    datos.forEach((dato) => {
+        const info = dato.commercialPathInfo || {};
+        const paso = dato.passthroughStep || {};
 
-    const hora = new Date(info.timestamp).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit"
+        const hora = new Date(info.timestamp).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit"
+        });
+
+        const linea = info.line || "-";
+        const destino = info.commercialDestinationStationName || "-";
+        const operador = info.operatorName || "-";
+        const numTren = info.trainIdentifier || "-";
+        const via = paso.platform || "-";
+
+        const div = document.createElement("div");
+        div.className = "tren-item";
+        div.innerHTML = `
+        <div class="tren-hora">${hora}</div>
+        <div class="tren-linea-destino">
+            <span class="linea">${linea}</span>
+            <span class="destino">${destino}</span>
+        </div>
+        <div class="tren-operador">${operador}</div>
+        <div class="tren-num">${numTren}</div>
+        <div class="tren-via">Vía ${via}</div>
+        `;
+        contenedor.appendChild(div);
     });
-
-    const linea = info.line || "-";
-    const destino = info.commercialDestinationStationName || "-";
-    const operador = info.operatorName || "-";
-    const numTren = info.trainIdentifier || "-";
-    const via = paso.platform || "-";
-
-    const div = document.createElement("div");
-    div.className = "tren-item";
-    div.innerHTML = `
-      <div class="tren-hora">${hora}</div>
-      <div class="tren-linea-destino">
-        <span class="linea">${linea}</span>
-        <span class="destino">${destino}</span>
-      </div>
-      <div class="tren-operador">${operador}</div>
-      <div class="tren-num">${numTren}</div>
-      <div class="tren-via">Vía ${via}</div>
-    `;
-    contenedor.appendChild(div);
-  });
 }
