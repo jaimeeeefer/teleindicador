@@ -149,41 +149,51 @@ clearBtn.addEventListener('click', () => {
 });
 
 document.getElementById("buscarTeleButton").addEventListener("click", async () => {
-  // Asegúrate de que la pestaña teleindicador está activa
-  mostrarTab('teleindicadorTab'); // (pon la función mostrarTab si no la tienes)
-  
   const input = document.getElementById("stationInputTele");
   const codigo = input?.dataset?.codigo || "";
   const tipoPanel = document.getElementById("tipoPanelTele").value;
   const tipoTren = document.getElementById("trainTypeTele").value;
   const resultadosDiv = document.getElementById("teleindicadorPanel");
+  const tbody = document.getElementById("tablaTeleindicadorBody");
 
-  let tipoTrenApi = tipoTren;
-  if (tipoTren === "Todos") tipoTrenApi = "ALL";
-  if (tipoTren === "Mercancías") tipoTrenApi = "GOODS";
-  if (tipoTren === "AVLDMD") tipoTrenApi = "AVLDMD";
-  if (tipoTren === "Cercanías") tipoTrenApi = "CERCANIAS";
-  if (tipoTren === "Viajeros") tipoTrenApi = "TRAVELERS";
-  if (tipoTren === "Otros") tipoTrenApi = "OTHERS";
+  // Oculta el mensaje de error/info previo
+  resultadosDiv.textContent = "";
 
   if (!codigo || !/^\d+$/.test(codigo)) {
     resultadosDiv.textContent = "Selecciona una estación válida.";
     return;
   }
 
-  document.getElementById("tablaTeleindicadorBody").innerHTML = "";
-  document.getElementById("tablaTeleindicadorBody").innerHTML = "<tr><td colspan='7'>Cargando...</td></tr>";
+  // Muestra el estado de carga directamente en la tabla
+  tbody.innerHTML = "<tr><td colspan='7' style='text-align:center;'>Cargando...</td></tr>";
   mostrarTab("teleindicadorTab");
+
   try {
-    const trenes = await buscarEstacionPorCodigoParaTeleindicador(codigo, tipoPanel, tipoTrenApi);
-    if (trenes && trenes.length > 0) {
-      renderizarPanelTeleindicador(trenes);
-      resultadosDiv.textContent = "";
-    } else {
-      document.getElementById("tablaTeleindicadorBody").innerHTML = "";
-      resultadosDiv.textContent = "No se encontraron trenes.";
+    let tipoTrenApi = "ALL"; // Valor por defecto
+    const tipoTrenMapping = {
+        "Mercancías": "GOODS",
+        "AVLDMD": "AVLDMD",
+        "Cercanías": "CERCANIAS",
+        "Viajeros": "TRAVELERS",
+        "Otros": "OTHERS"
+    };
+    if (tipoTrenMapping[tipoTren]) {
+        tipoTrenApi = tipoTrenMapping[tipoTren];
     }
+    
+    const trenes = await buscarEstacionPorCodigoParaTeleindicador(codigo, tipoPanel, tipoTrenApi);
+    
+    // La función renderizarPanelTeleindicador se encargará de limpiar y rellenar
+    renderizarPanelTeleindicador(trenes); 
+
+    if (!trenes || trenes.length === 0) {
+      // Si no hay trenes, renderizarPanelTeleindicador mostrará el mensaje adecuado.
+      // Puedes añadir un mensaje adicional en resultadosDiv si lo deseas.
+      resultadosDiv.textContent = "No se encontraron trenes para la estación seleccionada.";
+    }
+
   } catch (err) {
+    tbody.innerHTML = ""; // Limpiar el "Cargando..." en caso de error
     resultadosDiv.textContent = "Error al consultar el servidor.";
     console.error(err);
   }
