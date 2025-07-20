@@ -527,63 +527,57 @@ function mostrarTab(tabId) {
 }
 
 export function renderizarPanelTeleindicador(datos) {
-    const contenedor = document.getElementById("teleindicadorPanel");
     const tbody = document.getElementById("tablaTeleindicadorBody");
     console.log("Renderizando teleindicador...");
-    console.log("tbody encontrado:", tbody);
-    console.log("Datos:", datos);
-    if (!contenedor) {
-        console.error("No se encontró el contenedor del teleindicador");
+    console.log("tbody encontrado: ", tbody);
+    if (!tbody) {
+        console.error("No se encontró el tbody de la tabla del teleindicador");
         return;
     }
-    
-    // Limpia el contenido anterior
-    tablaTeleindicadorBody; // Vacía la tabla sin borrar la estructura
 
-    console.log("Datos recibidos para el teleindicador:");
-    console.log(datos);
-    console.log("Tipo de datos:", typeof datos);
-    console.log("¿Es array?:", Array.isArray(datos));
+    tbody.innerHTML = ""; // limpiar
 
-    if (!datos || datos.length === 0) {
+    if (!Array.isArray(datos) || datos.length === 0) {
         const fila = document.createElement("tr");
         fila.innerHTML = `<td colspan="7" style="text-align:center;">No hay datos disponibles</td>`;
         tbody.appendChild(fila);
         return;
     }
+
+    let totalFilas = 0;
+
     datos.forEach((tren, i) => {
         console.log(`Tren ${i}:`, tren);
-        // tu código aquí
-    });
 
-    datos.forEach((dato) => {
-        console.log("Total filas generadas:", tbody.children.length);
-        const info = dato.commercialPathInfo || {};
-        const paso = dato.passthroughStep || {};
+        const horaTimestamp = tren.commercialPathInfo?.timestamp;
+        const hora = horaTimestamp
+            ? new Date(horaTimestamp * 1000).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })
+            : "-";
 
-        const hora = new Date(info.timestamp).toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit"
-        });
+        const linea = tren.commercialPathInfo?.line ?? "-";
+        const destinoCodigo = tren.commercialPathInfo?.commercialDestinationStationCode ?? "-";
+        const destino = estaciones[destinoCodigo] ?? destinoCodigo;
+        const operador = tren.commercialPathInfo?.operatorName ?? "Renfe";
+        const numeroTren = tren.commercialPathInfo?.trainNumber ?? "-";
+        const via = tren.passthroughStep?.platform ?? "-";
+        const tipo = tren.commercialPathInfo?.trainType ?? "-";
 
-        const linea = info.line || "-";
-        const destino = info.commercialDestinationStationName || "-";
-        const operador = info.operatorName || "-";
-        const numTren = info.trainIdentifier || "-";
-        const via = paso.platform || "-";
+        // Filtrado defensivo
+        if (hora === "-" && destino === "-" && numeroTren === "-") return;
 
-        const div = document.createElement("div");
-        div.className = "tren-item";
-        div.innerHTML = `
-        <div class="tren-hora">${hora}</div>
-        <div class="tren-linea-destino">
-            <span class="linea">${linea}</span>
-            <span class="destino">${destino}</span>
-        </div>
-        <div class="tren-operador">${operador}</div>
-        <div class="tren-num">${numTren}</div>
-        <div class="tren-via">Vía ${via}</div>
+        const fila = document.createElement("tr");
+        fila.innerHTML = `
+            <td>${hora}</td>
+            <td>${linea}</td>
+            <td>${destino}</td>
+            <td>${operador}</td>
+            <td>${numeroTren}</td>
+            <td>${via}</td>
+            <td>${tipo}</td>
         `;
-        contenedor.appendChild(div);
+        tbody.appendChild(fila);
+        totalFilas++;
     });
+
+    console.log("Total filas generadas:", totalFilas);
 }
