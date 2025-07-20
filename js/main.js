@@ -153,23 +153,21 @@ document.getElementById("buscarTeleButton").addEventListener("click", async () =
   const codigo = input?.dataset?.codigo || "";
   const tipoPanel = document.getElementById("tipoPanelTele").value;
   const tipoTren = document.getElementById("trainTypeTele").value;
-  const resultadosDiv = document.getElementById("teleindicadorPanel");
   const tbody = document.getElementById("tablaTeleindicadorBody");
 
-  // Oculta el mensaje de error/info previo
-  resultadosDiv.textContent = "";
-
+  // Valida que se haya seleccionado una estación
   if (!codigo || !/^\d+$/.test(codigo)) {
-    resultadosDiv.textContent = "Selecciona una estación válida.";
+    tbody.innerHTML = "<tr><td colspan='7' style='text-align:center;'>Por favor, selecciona una estación válida de la lista.</td></tr>";
     return;
   }
 
-  // Muestra el estado de carga directamente en la tabla
+  // 1. Muestra el estado de "Cargando..." dentro de la tabla
   tbody.innerHTML = "<tr><td colspan='7' style='text-align:center;'>Cargando...</td></tr>";
-  mostrarTab("teleindicadorTab");
+  mostrarTab("teleindicadorTab"); // Asegura que la pestaña sea visible
 
   try {
-    let tipoTrenApi = "ALL"; // Valor por defecto
+    // 2. Convierte la selección del usuario al formato que espera la API
+    let tipoTrenApi = "ALL";
     const tipoTrenMapping = {
         "Mercancías": "GOODS",
         "AVLDMD": "AVLDMD",
@@ -181,20 +179,15 @@ document.getElementById("buscarTeleButton").addEventListener("click", async () =
         tipoTrenApi = tipoTrenMapping[tipoTren];
     }
     
+    // 3. Llama a la API y espera los resultados
     const trenes = await buscarEstacionPorCodigoParaTeleindicador(codigo, tipoPanel, tipoTrenApi);
     
-    // La función renderizarPanelTeleindicador se encargará de limpiar y rellenar
+    // 4. Pasa los datos (o un array vacío) a la función de renderizado
     renderizarPanelTeleindicador(trenes); 
 
-    if (!trenes || trenes.length === 0) {
-      // Si no hay trenes, renderizarPanelTeleindicador mostrará el mensaje adecuado.
-      // Puedes añadir un mensaje adicional en resultadosDiv si lo deseas.
-      resultadosDiv.textContent = "No se encontraron trenes para la estación seleccionada.";
-    }
-
   } catch (err) {
-    tbody.innerHTML = ""; // Limpiar el "Cargando..." en caso de error
-    resultadosDiv.textContent = "Error al consultar el servidor.";
+    // 5. Si hay un error en la llamada, muéstralo también dentro de la tabla
+    tbody.innerHTML = "<tr><td colspan='7' style='text-align:center;'>Error al consultar el servidor. Inténtalo de nuevo.</td></tr>";
     console.error(err);
   }
 });
