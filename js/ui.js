@@ -589,7 +589,7 @@ export function renderizarPanelTeleindicador(datos) {
             <td class="operador">${operador}</td>
             <td class="num-tren">${numeroTren}</td>
             <td class="via">${via}</td>
-            <td class="tipo">${tipoTren}</td>
+            <td class="tipo">${tipo}</td>
         `;
         tbody.appendChild(fila);
     });
