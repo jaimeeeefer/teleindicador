@@ -528,33 +528,26 @@ function mostrarTab(tabId) {
 
 export function renderizarPanelTeleindicador(datos) {
     const tbody = document.getElementById("tablaTeleindicadorBody");
-    console.log("⏩ renderizarPanelTeleindicador llamada con", datos);
-    console.log("Contenido tbody después de renderizar:", tbody.innerHTML);
-    console.trace("¿Quién está tocando el tbody?");
-    console.log("Renderizando teleindicador...");
     const estaciones = getEstaciones();
-    console.log("tbody encontrado: ", tbody);
+
     if (!tbody) {
         console.error("No se encontró el tbody de la tabla del teleindicador");
         return;
     }
 
-    tbody.innerHTML = ""; // limpiar
-    console.warn("¡ALGUIEN ESTÁ VACIANDO EL TBODY!");
-    console.trace();
+    // 1. Limpiar siempre la tabla antes de hacer nada.
+    tbody.innerHTML = ""; 
 
+    // 2. Comprobar si hay datos para mostrar.
     if (!Array.isArray(datos) || datos.length === 0) {
         const fila = document.createElement("tr");
-        fila.innerHTML = `<td colspan="7" style="text-align:center;">No hay datos disponibles</td>`;
+        fila.innerHTML = `<td colspan="7" style="text-align:center;">No hay trenes para mostrar.</td>`;
         tbody.appendChild(fila);
         return;
     }
 
-    let totalFilas = 0;
-
-    datos.forEach((tren, i) => {
-        console.log(`Tren ${i}:`, tren);
-
+    // 3. Renderizar las filas con los datos.
+    datos.forEach((tren) => {
         const horaTimestamp = tren.commercialPathInfo?.timestamp;
         const hora = horaTimestamp
             ? new Date(horaTimestamp * 1000).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })
@@ -562,13 +555,13 @@ export function renderizarPanelTeleindicador(datos) {
 
         const linea = tren.commercialPathInfo?.line ?? "-";
         const destinoCodigo = tren.commercialPathInfo?.commercialDestinationStationCode ?? "-";
-        const destino = estaciones[destinoCodigo] ?? destinoCodigo;
+        const destino = estaciones[destinoCodigo.replace(/^0+/, '')] ?? destinoCodigo;
         const operador = tren.commercialPathInfo?.operatorName ?? "Renfe";
         const numeroTren = tren.commercialPathInfo?.trainNumber ?? "-";
         const via = tren.passthroughStep?.platform ?? "-";
         const tipo = tren.commercialPathInfo?.trainType ?? "-";
 
-        // Filtrado defensivo
+        // Evitar filas vacías si faltan datos clave
         if (hora === "-" && destino === "-" && numeroTren === "-") return;
 
         const fila = document.createElement("tr");
@@ -582,8 +575,5 @@ export function renderizarPanelTeleindicador(datos) {
             <td>${tipo}</td>
         `;
         tbody.appendChild(fila);
-        totalFilas++;
     });
-    document.getElementById("tablaTeleindicadorBody").classList.remove("hidden");
-    console.log("Total filas generadas:", totalFilas);
 }
