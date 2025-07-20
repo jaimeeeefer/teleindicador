@@ -553,10 +553,7 @@ export function renderizarPanelTeleindicador(datos) {
         const infoextra = tren.passthroughStep.departurePassthroughStepSides
 
         // Extrae los datos usando los nombres correctos y con valores por defecto
-        const hora = info.timestamp
-            ? new Date(infoextra.plannedTime * 1000).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })
-            : "-";
-        
+        const hora = formatearTimestampHora(infoextra.plannedTime)
         const linea = info.line ?? "-";
         const destinoCodigo = info.commercialDestinationStationCode ?? "-";
         const destino = estaciones[destinoCodigo.replace(/^0+/, '')] ?? destinoCodigo;
