@@ -551,8 +551,13 @@ export function renderizarPanelTeleindicador(datos) {
         tbody.appendChild(fila);
         return;
     }
+    datos.forEach((tren, i) => {
+        console.log(`Tren ${i}:`, tren);
+        // tu código aquí
+    });
 
     datos.forEach((dato) => {
+        console.log("Total filas generadas:", tbody.children.length);
         const info = dato.commercialPathInfo || {};
         const paso = dato.passthroughStep || {};
 
