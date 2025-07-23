@@ -600,7 +600,7 @@ function obtenerRutaPictograma(linea) {
         'C10': 'Cercanías_C10.svg'
     };
     if (!linea) return null;
-    return nombresArchivos[linea] ? `img/${nombresArchivos[linea]}` : `img/${linea}.png`;
+    return nombresArchivos[linea] ? `img/${nombresArchivos[linea]}` : null;
 }
 
 export function renderizarPanelTeleindicador(datos) {
