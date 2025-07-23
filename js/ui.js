@@ -248,26 +248,74 @@ export function autocompletarEstaciones() {
     const sugerencias = document.getElementById("sugerencias");
     sugerencias.innerHTML = '';
 
-    if (estacionInput.length < 2) return;
+    // Limpia el atributo data-codigo si el usuario edita el input
+    estacion.removeAttribute('data-codigo');
+
+    if (estacionInput.length < 2) {
+        // Mostrar favoritos
+        const favs = getFavoritosEstaciones();
+        if (favs.length > 0) {
+            const estaciones = getEstaciones();
+            const titulo = document.createElement('div');
+            titulo.textContent = "Favoritos";
+            titulo.classList.add("sugerencias-titulo");
+            sugerencias.appendChild(titulo);
+
+            favs.forEach(codigo => {
+                const nombre = estaciones[codigo];
+                if (!nombre) return;
+                const item = document.createElement('div');
+                item.innerHTML = `
+                    <span class="nombre-estacion-wrap">${nombre}</span>
+                    <span class="codigo-estacion">${codigo.padStart(5, '0')}</span>
+                `;
+                item.dataset.codigo = codigo;
+                item.addEventListener('click', () => {
+                    estacion.value = nombre;
+                    estacion.setAttribute('data-codigo', codigo);
+                    sugerencias.classList.remove('visible');
+                    mostrarFavoritoEstrella();
+                    document.getElementById('clearNumeroEst').classList.add('visible');
+                    document.getElementById('estrellaFavoritoEst').classList.add('visible');
+                    estacion.classList.add('input-con-x');
+                });
+                sugerencias.appendChild(item);
+            });
+            sugerencias.classList.add('visible');
+        } else sugerencias.classList.remove('visible');
+        return;
+    }
 
     // Dividir en palabras (divisor: espacio o guión)
     const palabras = estacionInput.split(/[\s-]+/).filter(p => p.length > 0);
 
+    // Si el input es numérico, buscar también por código
+    const esNumerico = /^\d+$/.test(estacionInput);
+
     const coincidencias = estacionesArray.filter(([codigo, nombre]) => {
-        const nombreLower = nombre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); //minúsculas, separar tildes de letras y eliminar tildes
-        return palabras.every(palabra => nombreLower.includes(palabra));
+        const nombreLower = nombre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const coincideNombre = palabras.every(palabra => nombreLower.includes(palabra));
+        const coincideCodigo = esNumerico && codigo.padStart(5, '0').includes(estacionInput);
+        return coincideNombre || coincideCodigo;
     });
+
+    // Añadir título de sugerencias
+    const titulo = document.createElement('div');
+    titulo.textContent = "Sugerencias";
+    titulo.classList.add("sugerencias-titulo");
+    sugerencias.appendChild(titulo);
 
     if (coincidencias.length > 0) {
         coincidencias.forEach(([codigo, nombre]) => {
             const item = document.createElement('div');
             item.innerHTML = `
-            <span>${nombre}</span>
+            <span class="nombre-estacion-wrap">${nombre}</span>
             <span class="codigo-estacion">${codigo.padStart(5, '0')}</span>
             `;
             item.dataset.codigo = codigo;
             item.addEventListener('click', () => {
                 estacion.value = nombre;
+                estacion.setAttribute('data-codigo', codigo);
                 sugerencias.classList.remove('visible');
             });
             sugerencias.appendChild(item);
