@@ -803,3 +803,20 @@ tbody tr:hover { background-color: var(--table-row-hover-bg); }
   width: 60px;
   text-align: right;
 }
+
+
+
+
+.pastilla-linea {
+    height: 1.3em;
+    margin-right: 0.5em;
+    vertical-align: middle;
+}
+
+.destino-con-pastilla {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    font-weight: bold;
+    font-size: 1.1em;
+}
