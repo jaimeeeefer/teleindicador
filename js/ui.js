@@ -526,6 +526,23 @@ function mostrarTab(tabId) {
     document.getElementById(tabId).style.display = 'block';
 }
 
+function obtenerRutaPictograma(linea) {
+    const nombresArchivos = {
+        'C1': 'Cercanías_C1_(Rojo).svg',
+        'C2': 'Cercanías_C2.svg',
+        'C3': 'Cercanías_C3_(Azul).svg',
+        'C4': 'Cercanías_C4_(MoradoAM).svg',
+        'C5': 'Cercanías_C5.svg',
+        'C6': 'Cercanías_C6_(AzulAM).svg',
+        'C7': 'Cercanías_C7_(NaranjaAM).svg',
+        'C8': 'Cercanías_C8.svg',
+        'C9': 'Cercanías_C9.svg',
+        'C10': 'Cercanías_C10.svg'
+    };
+    if (!linea) return null;
+    return nombresArchivos[linea] ? `img/${nombresArchivos[linea]}` : `img/${linea}.png`;
+}
+
 export function renderizarPanelTeleindicador(datos) {
     const tbody = document.getElementById("tablaTeleindicadorBody");
     const estaciones = getEstaciones();
@@ -535,7 +552,6 @@ export function renderizarPanelTeleindicador(datos) {
         return;
     }
 
-    // 1. Limpiar la tabla (quita el "Cargando...")
     tbody.innerHTML = "";
 
     if (!Array.isArray(datos) || datos.length === 0) {
@@ -543,54 +559,91 @@ export function renderizarPanelTeleindicador(datos) {
         return;
     }
 
-    // 2. Recorrer los datos recibidos
     datos.forEach((tren) => {
-        // --- CORRECCIONES CLAVE AQUÍ ---
-
-        // Accede al primer elemento del array passthroughSteps[0]
-        const paso = tren.passthroughSteps ? tren.passthroughSteps[0] : {};
+        // Extraer info
         const info = tren.commercialPathInfo || {};
-        const infoextra = tren.passthroughStep.departurePassthroughStepSides;
-        const estadoTraducido = traducirEstado(paso.circulationState);
+        const infoextra = tren.passthroughStep?.departurePassthroughStepSides || {};
+        const estadoTraducido = traducirEstado(infoextra.circulationState || "");
 
-        // Extrae los datos usando los nombres correctos y con valores por defecto
-        let tacharHora = infoextra.forecastedOrAuditedDelay !== null && (infoextra.forecastedOrAuditedDelay >= 180 || infoextra.forecastedOrAuditedDelay < 0) && estadoTraducido !== 'PENDIENTE DE CIRCULAR';
-        let horaTeorica = infoextra?.plannedTime ? formatearTimestampHora(infoextra.plannedTime) : "-";
-        const delay = infoextra.forecastedOrAuditedDelay;
+        let tacharHora = infoextra.forecastedOrAuditedDelay !== null
+            && (infoextra.forecastedOrAuditedDelay >= 180 || infoextra.forecastedOrAuditedDelay < 0)
+            && estadoTraducido !== 'PENDIENTE DE CIRCULAR';
+
+        let horaPlanificada = infoextra?.plannedTime ? formatearTimestampHora(infoextra.plannedTime) : "-";
+        let horaMostrada = horaPlanificada;
+
+        if (tacharHora) {
+            const horaEstim = calcularHoraReal(horaPlanificada, infoextra.forecastedOrAuditedDelay);
+            horaMostrada = `<span style="text-decoration:line-through;color:gray;">${horaPlanificada}</span><br><span class="${getColorClass(infoextra.forecastedOrAuditedDelay)}">${horaEstim}</span>`;
+        }
+
         const linea = info.line ?? "-";
         const destinoCodigo = info.commercialDestinationStationCode ?? "-";
         const destino = estaciones[destinoCodigo.replace(/^0+/, '')] ?? destinoCodigo;
-        const operador = traducirOperador(info.opeProComPro?.operator); // Asumimos que 'operatorName' es correcto, si no, ajústalo.
-        const numeroTren = info.commercialPathKey.commercialCirculationKey.commercialNumber ?? "-";
-        const via = infoextra.plannedPlatform ?? "-"; // Lee la vía desde el objeto "paso" corregido
+        const operador = traducirOperador(info.opeProComPro?.operator);
+        const numeroTren = info.commercialPathKey?.commercialCirculationKey?.commercialNumber ?? "-";
+        const via = infoextra.plannedPlatform ?? "-";
         const tipo = info.trainType ?? "-";
 
-        const horaPlanificada = formatearTimestampHora(infoextra.plannedTime);
-            let horaMostrada = "";
+        // Saltar filas vacías
+        if (horaMostrada === "-" && destino === "-" && numeroTren === "-") return;
 
-            if (tacharHora) {
-                const horaEstim = calcularHoraReal(horaPlanificada, infoextra.forecastedOrAuditedDelay);
-                horaMostrada = `<span style="text-decoration:line-through;color:gray;">${horaPlanificada}</span><br><span class="${getColorClass(infoextra.forecastedOrAuditedDelay)}">${horaEstim}</span>`;
-            } else {
-                horaMostrada = horaPlanificada;
-            }
+        // -- Crear la fila y las celdas:
+        const fila = document.createElement("tr");
 
-        // Evita renderizar filas completamente vacías
-        if (horaMostrada === "-" && destino === "-" && numeroTren === "-") {
-            return; // Salta a la siguiente iteración del bucle
+        // Hora
+        const celdaHora = document.createElement("td");
+        celdaHora.innerHTML = horaMostrada;
+        fila.appendChild(celdaHora);
+
+        // Línea (texto o pictograma extra)
+        const celdaLinea = document.createElement("td");
+        celdaLinea.textContent = linea;
+        fila.appendChild(celdaLinea);
+
+        // Destino (con pastilla)
+        const pictograma = obtenerRutaPictograma(linea);
+        const celdaDestino = document.createElement("td");
+        celdaDestino.className = "destino-con-pastilla";
+        celdaDestino.style.display = "flex";
+        celdaDestino.style.alignItems = "center";
+        celdaDestino.style.gap = "0.5em";
+
+        if (pictograma) {
+            const img = document.createElement("img");
+            img.src = pictograma;
+            img.alt = linea;
+            img.className = "pastilla-linea";
+            img.style.height = "1.5em";
+            celdaDestino.appendChild(img);
         }
 
-        // 3. Crea y añade la fila a la tabla
-        const fila = document.createElement("tr");
-        fila.innerHTML = `
-            <td>${horaMostrada}</td>
-            <td>${linea}</td>
-            <td>${destino}</td>
-            <td>${operador}</td>
-            <td>${numeroTren}</td>
-            <td>${via}</td>
-            <td>${tipo}</td>
-        `;
+        const spanDestino = document.createElement("span");
+        spanDestino.textContent = destino ?? "-";
+        celdaDestino.appendChild(spanDestino);
+        fila.appendChild(celdaDestino);
+
+        // Operador
+        const celdaOperador = document.createElement("td");
+        celdaOperador.textContent = operador;
+        fila.appendChild(celdaOperador);
+
+        // Nº tren
+        const celdaNumTren = document.createElement("td");
+        celdaNumTren.textContent = numeroTren;
+        fila.appendChild(celdaNumTren);
+
+        // Vía
+        const celdaVia = document.createElement("td");
+        celdaVia.textContent = via;
+        fila.appendChild(celdaVia);
+
+        // Tipo
+        const celdaTipo = document.createElement("td");
+        celdaTipo.textContent = tipo;
+        fila.appendChild(celdaTipo);
+
+        // Añadir la fila completa
         tbody.appendChild(fila);
     });
 }
