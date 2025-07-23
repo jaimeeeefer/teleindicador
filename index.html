@@ -216,10 +216,21 @@
         </select>
       </div>
     </div>
-
+    
     <div id="teleindicadorPanel" class="teleindicador-panel">
       <table id="tablaTeleindicador" class="panel-tele">
-        <thead>
+        <thead id="cabeceraTeleindicador">
+          <tr>
+            <th colspan="7">
+              <div id="header-teleindicador" style="display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 1em;">
+                  <img src="img/adifsumma.svg" alt="ADIF" style="height: 2.2em;">
+                  <span id="titulo-cabecera-tele" style="font-size: 1.4em; font-weight: bold;">SALIDAS</span>
+                </div>
+                <span id="hora-cabecera-tele" style="font-size: 1.3em; font-family: monospace;"></span>
+              </div>
+            </th>
+          </tr>
           <tr>
             <th>Hora</th>
             <th>Línea</th>
