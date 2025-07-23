@@ -544,52 +544,123 @@ function obtenerRutaPictograma(linea) {
 }
 
 export function renderizarPanelTeleindicador(datos) {
-  const tbody = document.getElementById("tablaTeleindicadorBody");
-  const estaciones = getEstaciones();
-  tbody.innerHTML = "";
+    const tbody = document.getElementById("tablaTeleindicadorBody");
+    const estaciones = getEstaciones();
+    const tipoPanelSelect = document.getElementById("tipoPanelTele");
+    if (tipoPanelSelect) {
+        const titulo = document.getElementById("titulo-cabecera-tele");
+        if (titulo) {
+            titulo.textContent = tipoPanelSelect.value.toUpperCase();
+        }
+    }
 
-  if (!Array.isArray(datos) || datos.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">No hay datos disponibles</td></tr>`;
-    return;
-  }
+    if (!tbody) {
+        console.error("No se encontró el tbody de la tabla del teleindicador");
+        return;
+    }
 
-  datos.forEach(tren => {
-    const info = tren.commercialPathInfo || {};
-    // 1) Tomamos el primer paso (llegada o salida)
-    const pasoRaw = tren.passthroughSteps?.[0];
-    if (!pasoRaw) return;
-    const paso = pasoRaw.departurePassthroughStepSides || pasoRaw.arrivalPassthroughStepSides;
-    if (!paso) return;
+    tbody.innerHTML = "";
 
-    // 2) Formateamos hora teórica y real
-    const planMs = paso.plannedTime;
-    const retraso = paso.forecastedOrAuditedDelay ?? 0; // segundos
-    const horaTeorica = formatearTimestampHora(planMs);
-    // Convertir retraso a milisegundos
-    const horaReal = formatearTimestampHora(planMs + retraso * 1000);
+    if (!Array.isArray(datos) || datos.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">No hay datos disponibles</td></tr>`;
+        return;
+    }
 
-    // 3) Datos del tren
-    const linea      = info.line                       || "-";
-    const destCode   = info.commercialDestinationStationCode?.replace(/^0+/, "") || "-";
-    const destino    = estaciones[destCode]            || destCode;
-    const operador   = traducirOperador(info.opeProComPro?.operator) || "-";
-    const numTren    = info.commercialPathKey?.commercialCirculationKey?.commercialNumber || "-";
-    const via        = paso.plannedPlatform            || "-";
-    const tipo       = info.trainType                  || "-";
+    datos.forEach((tren) => {
+        // Extraer info
+        const info = tren.commercialPathInfo || {};
+        const infoextra = tren.passthroughStep?.departurePassthroughStepSides || {};
+        const estadoTraducido = traducirEstado(infoextra.circulationState || "");
 
-    // 4) Construimos la fila
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${retraso !== 0
-         ? `<span style="text-decoration:line-through;color:gray">${horaTeorica}</span><br>${horaReal}`
-         : horaTeorica}</td>
-      <td>${linea}</td>
-      <td>${destino}</td>
-      <td>${operador}</td>
-      <td>${numTren}</td>
-      <td>${via}</td>
-      <td>${tipo}</td>
-    `;
-    tbody.appendChild(tr);
-  });
+        let tacharHora = infoextra.forecastedOrAuditedDelay !== null
+            && (infoextra.forecastedOrAuditedDelay >= 180 || infoextra.forecastedOrAuditedDelay < 0)
+            && estadoTraducido !== 'PENDIENTE DE CIRCULAR';
+
+        let horaPlanificada = infoextra?.plannedTime ? formatearTimestampHora(infoextra.plannedTime) : "-";
+        let horaMostrada = horaPlanificada;
+
+        if (tacharHora) {
+            const horaEstim = calcularHoraReal(horaPlanificada, infoextra.forecastedOrAuditedDelay);
+            horaMostrada = `<span style="text-decoration:line-through;color:gray;">${horaPlanificada}</span><br><span class="${getColorClass(infoextra.forecastedOrAuditedDelay)}">${horaEstim}</span>`;
+        }
+
+        const linea = info.line ?? "-";
+        const destinoCodigo = info.commercialDestinationStationCode ?? "-";
+        const destino = estaciones[destinoCodigo.replace(/^0+/, '')] ?? destinoCodigo;
+        const operador = traducirOperador(info.opeProComPro?.operator);
+        const numeroTren = info.commercialPathKey?.commercialCirculationKey?.commercialNumber ?? "-";
+        const via = infoextra.plannedPlatform ?? "-";
+        const tipo = info.trainType ?? "-";
+
+        // Saltar filas vacías
+        if (horaMostrada === "-" && destino === "-" && numeroTren === "-") return;
+
+        // -- Crear la fila y las celdas:
+        const fila = document.createElement("tr");
+
+        // Hora
+        const celdaHora = document.createElement("td");
+        celdaHora.innerHTML = horaMostrada;
+        fila.appendChild(celdaHora);
+
+        // Línea (texto o pictograma extra)
+        const celdaLinea = document.createElement("td");
+        celdaLinea.textContent = linea;
+        fila.appendChild(celdaLinea);
+
+        // Destino (con pastilla)
+        const pictograma = obtenerRutaPictograma(linea);
+        const celdaDestino = document.createElement("td");
+        celdaDestino.className = "destino-con-pastilla";
+        celdaDestino.style.display = "flex";
+        celdaDestino.style.alignItems = "center";
+        celdaDestino.style.gap = "0.5em";
+
+        if (pictograma) {
+            const img = document.createElement("img");
+            img.src = pictograma;
+            img.alt = linea;
+            img.className = "pastilla-linea";
+            img.style.height = "1.5em";
+            celdaDestino.appendChild(img);
+        }
+
+        const spanDestino = document.createElement("span");
+        spanDestino.textContent = destino ?? "-";
+        celdaDestino.appendChild(spanDestino);
+        fila.appendChild(celdaDestino);
+
+        // Operador
+        const celdaOperador = document.createElement("td");
+        celdaOperador.textContent = operador;
+        fila.appendChild(celdaOperador);
+
+        // Nº tren
+        const celdaNumTren = document.createElement("td");
+        celdaNumTren.textContent = numeroTren;
+        fila.appendChild(celdaNumTren);
+
+        // Vía
+        const celdaVia = document.createElement("td");
+        celdaVia.textContent = via;
+        fila.appendChild(celdaVia);
+
+        // Tipo
+        const celdaTipo = document.createElement("td");
+        celdaTipo.textContent = tipo;
+        fila.appendChild(celdaTipo);
+
+        // Añadir la fila completa
+        tbody.appendChild(fila);
+    });
 }
+
+function actualizarHoraCabeceraTele() {
+    const el = document.getElementById("hora-cabecera-tele");
+    if (el) {
+        const ahora = new Date();
+        el.textContent = ahora.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
+}
+setInterval(actualizarHoraCabeceraTele, 1000);
+actualizarHoraCabeceraTele();
