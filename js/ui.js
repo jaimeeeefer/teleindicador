@@ -97,12 +97,19 @@ function renderizarInfoTren(path) {
           <div class= "infoTablaColumna">
               <div><strong class="blanco">Número:</strong><br>${info.commercialPathKey.commercialCirculationKey.commercialNumber}</div>
               <div><strong class="blanco">Fecha:</strong><br>${formatearTimestampFecha(info.commercialPathKey.commercialCirculationKey.launchingDate)}</div>
-              <div><strong class="blanco">Origen:</strong><br>${estaciones[info.commercialOriginStationCode.replace(/^0+/, '')] || info.commercialOriginStationCode}</div>
-              <div><strong class="blanco">Destino:</strong><br>${estaciones[info.commercialDestinationStationCode.replace(/^0+/, '')] || info.commercialDestinationStationCode}</div>
+              <div><strong class="blanco">Origen:</strong><br>${estaciones[info.commercialPathKey.originStationCode.replace(/^0+/, '')] || info.commercialPathKey.commercialCirculationKey.originStationCode}</div>
+              <div><strong class="blanco">Destino:</strong><br>${estaciones[info.commercialPathKey.destinationStationCode.replace(/^0+/, '')] || info.commercialPathKey.commercialCirculationKey.destinationStationCode}</div>
           </div>
           <div class= "infoTablaColumna">
               <div><strong class="blanco">Tipo:</strong><br>${info.trafficType}</div>
-              <div><strong class="blanco">Operador:</strong><br>${info.opeProComPro?.operator} - ${traducirOperador(info.opeProComPro?.operator)}</div>
+              <div><strong class="blanco">Operador:</strong><br>
+                    ${info.opeProComPro?.operator || ''}
+                    ${
+                        traducirOperador(info.opeProComPro?.operator)
+                            ? ' - ' + traducirOperador(info.opeProComPro?.operator)
+                            : ''
+                    }
+                </div>
               <div><strong class="blanco">Producto:</strong><br>${info.opeProComPro?.product || ''}${info.opeProComPro?.commercialProduct?.trim() ? ' - ' : ''}${info.opeProComPro?.commercialProduct?.trim() || ''}</div>
               ${info?.line ? `<div><strong class="blanco">Línea/Núcleo:</strong><br>${info.line} - ${info.core}</div>` : ''}
           </div>
@@ -111,6 +118,11 @@ function renderizarInfoTren(path) {
               ${ultimaEstacion ? `<div><strong class="blanco">Última situación:</strong><br>${ultimaEstacion}${esUltimaEstacion ? ` (${esUltimaEstacion})` : ''}</div>` : ''}
               ${ultimaEstacion ? `<div><strong class="blanco">Retraso:</strong><br><span class="${getColorClass(retUltimaEstacion)}">${formatoRetraso(retUltimaEstacion)}</span></div>` : ''}
           </div>
+        </div>
+        <div class="infoTablaGlobal">
+            <div class= "infoTablaColumna">
+                ${info?.observation ? `<div><strong class="blanco">Observaciones:</strong><br>${info.observation}</div>` : ''}
+            </div>
         </div>
     `;
 }
