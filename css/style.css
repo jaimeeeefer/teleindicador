@@ -703,14 +703,15 @@ tbody tr:hover { background-color: var(--table-row-hover-bg); }
 
 .teleindicador-panel {
   background: #E3F8E1;
-  border-radius: 10px;
-  margin-top: 1.5em;
+  border-radius: 18px;
+  margin: 1em auto 2em auto;
   padding: 0.5em 0;
   font-size: 1.5em;
   color: #182946;
-  max-width: 1100px;
-  margin-left: auto;
-  margin-right: auto;
+  max-width: 1500px;   /* Aumenta el máximo de ancho */
+  width: 98vw;         /* Usa el 98% del ancho de la ventana */
+  min-width: 0;
+  box-shadow: 0 2px 24px 4px #b1e0b4d9;
 }
 .teleindicador-row {
   display: grid;
@@ -804,9 +805,6 @@ tbody tr:hover { background-color: var(--table-row-hover-bg); }
   text-align: right;
 }
 
-
-
-
 .pastilla-linea {
     height: 1.3em;
     margin-right: 0.5em;
@@ -819,4 +817,43 @@ tbody tr:hover { background-color: var(--table-row-hover-bg); }
     gap: 0.5em;
     font-weight: bold;
     font-size: 1.1em;
+}
+
+.cabecera-tele {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #1b5c28;
+  color: white;
+  font-family: 'AdifHaussM', Arial, sans-serif;
+  border-radius: 12px 12px 0 0;
+  padding: 0.5em 2em 0.5em 1em;
+  margin-bottom: 0.5em;
+  min-height: 74px;
+  box-shadow: 0 3px 10px #b1e0b4b8;
+}
+
+.logo-adif-tele {
+  height: 2.8em;
+  margin-right: 1.1em;
+  filter: drop-shadow(0 1px 3px #234);
+  background: transparent;
+  border-radius: 7px;
+}
+
+.titulo-tele {
+  font-size: 2.2em;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+  text-align: center;
+  flex-grow: 1;
+}
+
+.hora-tele {
+  font-size: 2.2em;
+  font-family: 'Fira Mono', 'Consolas', monospace;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  min-width: 120px;
+  text-align: right;
 }
