@@ -191,8 +191,8 @@
   </div>
   </div>
 
-  <!-- Div principal para el tab Teleindicador -->
   <div id="teleindicadorTab" class="pantalla">
+  <div class="consulta-container">
     <div class="form-row">
       <div class="input-sugerencias-wrapper">
         <input type="text" id="stationInputTele" placeholder="Estación" autocomplete="off" class="input-estacion" />
@@ -200,49 +200,55 @@
         <div id="sugerenciasTele" class="sugerencias"></div>
       </div>
       <button id="buscarTeleButton">Buscar</button>
-      <div class="filtros-tele">
-        <select id="tipoPanelTele">
-          <option value="salidas">Salidas</option>
-          <option value="llegadas">Llegadas</option>
-        </select>
-        <label style="margin-right:0.5em;">Tipo:</label>
-        <select id="trainTypeTele" class="tipo-tren-select">
-          <option value="Todos">Todos</option>
-          <option value="Mercancías">Mercancías</option>
-          <option value="AVLDMD">AVLDMD</option>
-          <option value="Cercanías">Cercanías</option>
-          <option value="Viajeros">Viajeros</option>
-          <option value="Otros">Otros</option>
-        </select>
+    </div>
+
+    <div id="parametrosEstacion" style="margin-top: 1.5rem;">
+      <div class="form-row">
+        <span style="font-family: 'AdifHaussM';">Mostrar:</span>
+        <div class="custom-select" id="customTipoPanelTele">
+          <div class="custom-select-selected">Salidas</div>
+          <div class="custom-select-options">
+            <div data-value="salidas">Salidas</div>
+            <div data-value="llegadas">Llegadas</div>
+          </div>
+          <input type="hidden" name="tipoPanel" id="tipoPanelTele" value="salidas">
+        </div>
+      </div>
+      <div class="form-row">
+        <span style="font-family: 'AdifHaussM';">Tipo:</span>
+        <div class="custom-select" id="customTipoTrenTele">
+          <div class="custom-select-selected">Todos</div>
+          <div class="custom-select-options">
+            <div data-value="ALL">Todos</div>
+            <div data-value="GOODS">Mercancías</div>
+            <div data-value="AVLDMD">AVLDMD</div>
+            <div data-value="CERCANIAS">Cercanías</div>
+            <div data-value="TRAVELERS">Viajeros</div>
+            <div data-value="OTROS">Otros</div>
+          </div>
+          <input type="hidden" name="tipoTren" id="tipoTrenTele" value="ALL">
+        </div>
       </div>
     </div>
 
-    <table id="tablaTeleindicador" class="panel-tele">
-      <thead id="cabeceraTeleindicador">
-        <tr>
-          <th colspan="7">
-            <div id="header-teleindicador" style="display: flex; align-items: center; justify-content: space-between;">
-              <div style="display: flex; align-items: center; gap: 1em;">
-                 <img src="img/adifsumma.svg" alt="ADIF" style="height: 2.2em;">
-                <span id="titulo-cabecera-tele" style="font-size: 1.4em; font-weight: bold;">SALIDAS</span>
-              </div>
-               <span id="hora-cabecera-tele" style="font-size: 1.3em; font-family: monospace;"></span>
-            </div>
-          </th>
-        </tr>
-        <tr>
-          <th>Hora</th>
-          <th>Línea</th>
-          <th>Destino</th>
-          <th>Operador</th>
-          <th>Nº Tren</th>
-          <th>Vía</th>
-          <th>Tipo</th>
-        </tr>
-      </thead>
-      <tbody id="tablaTeleindicadorBody"></tbody>
-    </table>
-  </div> <!-- CIERRE FINAL QUE FALTABA -->
+    <div class="resultado-header">Resultado:</div>
+    <pre id="resultadoTele">Esperando consulta...</pre>
+  </div>
+
+  <div id="resultadoTeleindicador" class="hidden">
+    <h2 class="table-title">Teleindicador</h2>
+    <div class="table-wrapper">
+      <div id="tablaTeleindicador" class="teleindicador-panel">
+        <!-- Las filas de trenes se añadirán dinámicamente -->
+      </div>
+    </div>
+    <div class="botones-centro">
+      <div class="botonesCentro2">
+        <button id="cargarMasTele">Cargar más</button>
+      </div>
+    </div>
+  </div>
+</div>
 
   <div id="botonesCentro" class="botones-centro pantalla">
     <div class="botonesCentro2">
