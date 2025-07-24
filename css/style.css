@@ -732,15 +732,6 @@ tbody tr:hover { background-color: var(--table-row-hover-bg); }
   background: #254e7a;
 }
 
-.busqueda-teleindicador {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1.2em;
-  margin-bottom: 2em;
-}
-
 .filtros-tele {
   display: flex;
   justify-content: center;
