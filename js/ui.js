@@ -337,31 +337,44 @@ export function autocompletarEstacionesTele() {
     const sugerencias = document.getElementById("sugerenciasTele");
     sugerencias.innerHTML = '';
 
-    if (estacionInput.length < 2) return;
+    // Limpia el atributo data-codigo si el usuario edita el input
+    estacion.removeAttribute('data-codigo');
+
+    if (estacionInput.length < 2) {
+        sugerencias.classList.remove('visible');
+        return;
+    }
 
     const palabras = estacionInput.split(/[\s-]+/).filter(p => p.length > 0);
+    const esNumerico = /^\d+$/.test(estacionInput);
 
     const coincidencias = estacionesArray.filter(([codigo, nombre]) => {
         const nombreLower = nombre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        return palabras.every(palabra => nombreLower.includes(palabra));
+        const coincideNombre = palabras.every(palabra => nombreLower.includes(palabra));
+        const coincideCodigo = esNumerico && codigo.padStart(5, '0').includes(estacionInput);
+        return coincideNombre || coincideCodigo;
     });
+
+    const titulo = document.createElement('div');
+    titulo.textContent = "Sugerencias";
+    titulo.classList.add("sugerencias-titulo");
+    sugerencias.appendChild(titulo);
 
     if (coincidencias.length > 0) {
         coincidencias.forEach(([codigo, nombre]) => {
             const item = document.createElement('div');
-            item.className = "sugerencia"; // usa misma clase que en estaciones
+            item.className = "sugerencia";
             item.innerHTML = `
-                <span>${nombre}</span>
+                <span class="nombre-estacion-wrap">${nombre}</span>
                 <span class="codigo-estacion">${codigo.padStart(5, '0')}</span>
             `;
             item.dataset.codigo = codigo;
             item.addEventListener('click', () => {
-                estacion.value = nombre;           // Muestra el nombre en el input
-                estacion.dataset.codigo = codigo;  // Guarda el código en un atributo del input
+                estacion.value = nombre;
+                estacion.setAttribute('data-codigo', codigo);
                 sugerencias.classList.remove('visible');
-            });
-            estacion.addEventListener('input', () => {
-                estacion.dataset.codigo = ''; // Borra el código al editar manualmente
+                document.getElementById('clearStationInputTele').classList.add('visible');
+                estacion.classList.add('input-con-x');
             });
             sugerencias.appendChild(item);
         });
@@ -371,9 +384,10 @@ export function autocompletarEstacionesTele() {
         sinCoincidencias.textContent = "(sin coincidencias)";
         sinCoincidencias.classList.add("sugerencia", "no-click");
         sugerencias.appendChild(sinCoincidencias);
-        return;
+        sugerencias.classList.add('visible');
     }
 }
+
 
 
 export function mostrarEstacion() {
