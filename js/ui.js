@@ -717,6 +717,7 @@ function traducirOperador(operador) {
     return operadores[operador] || '';
 }
 
+
 function obtenerRutaPictograma(linea) {
     const nombresArchivos = {
         'C1': 'Cercanías_C1_(Rojo).svg',
@@ -845,3 +846,61 @@ function actualizarHoraCabeceraTele() {
 }
 setInterval(actualizarHoraCabeceraTele, 1000);
 actualizarHoraCabeceraTele();
+
+export function autocompletarEstacionesTele() {
+    const estacionesArray = Object.entries(getEstaciones());
+    const estacion = document.getElementById("stationInputTele");
+    const estacionInput = estacion.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+    const sugerencias = document.getElementById("sugerenciasTele");
+    sugerencias.innerHTML = '';
+
+    // Limpia el atributo data-codigo si el usuario edita el input
+    estacion.removeAttribute('data-codigo');
+
+    if (estacionInput.length < 2) {
+        sugerencias.classList.remove('visible');
+        return;
+    }
+
+    const palabras = estacionInput.split(/[\s-]+/).filter(p => p.length > 0);
+    const esNumerico = /^\d+$/.test(estacionInput);
+
+    const coincidencias = estacionesArray.filter(([codigo, nombre]) => {
+        const nombreLower = nombre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const coincideNombre = palabras.every(palabra => nombreLower.includes(palabra));
+        const coincideCodigo = esNumerico && codigo.padStart(5, '0').includes(estacionInput);
+        return coincideNombre || coincideCodigo;
+    });
+
+    const titulo = document.createElement('div');
+    titulo.textContent = "Sugerencias";
+    titulo.classList.add("sugerencias-titulo");
+    sugerencias.appendChild(titulo);
+
+    if (coincidencias.length > 0) {
+        coincidencias.forEach(([codigo, nombre]) => {
+            const item = document.createElement('div');
+            item.className = "sugerencia";
+            item.innerHTML = `
+                <span class="nombre-estacion-wrap">${nombre}</span>
+                <span class="codigo-estacion">${codigo.padStart(5, '0')}</span>
+            `;
+            item.dataset.codigo = codigo;
+            item.addEventListener('click', () => {
+                estacion.value = nombre;
+                estacion.setAttribute('data-codigo', codigo);
+                sugerencias.classList.remove('visible');
+                document.getElementById('clearStationInputTele').classList.add('visible');
+                estacion.classList.add('input-con-x');
+            });
+            sugerencias.appendChild(item);
+        });
+        sugerencias.classList.add('visible');
+    } else {
+        const sinCoincidencias = document.createElement("div");
+        sinCoincidencias.textContent = "(sin coincidencias)";
+        sinCoincidencias.classList.add("sugerencia", "no-click");
+        sugerencias.appendChild(sinCoincidencias);
+        sugerencias.classList.add('visible');
+    }
+}
