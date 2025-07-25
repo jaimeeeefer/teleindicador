@@ -122,13 +122,14 @@
 
   <div id="estacion" class="pantalla">
     <div class="consulta-container">
-      <div class="form-row">
+      <div class="form-row barraBusqueda">
+        <button type="button" id="estrellaFavoritoEst" class="estrella-favorito" title="Añadir/Quitar favorito" tabindex="-1">★</button>
         <div class="input-sugerencias-wrapper">
           <input type="text" id="numeroEst" placeholder="Estación" autocomplete="off"/>
-          <button type="button" id="clearNumeroEst" class="clear-input-btn" style="display:none;" aria-label="Borrar">×</button>
-          <div id="sugerencias" class="sugerencias"></div>
+          <button type="button" id="clearNumeroEst" class="clear-input-btn" aria-label="Borrar">×</button>
+          <div id="sugerencias"></div>
         </div>
-        <button id="buscarEstButton">Buscar</button>
+        <button id="buscarEstButton" style="margin-right: 0.5em;">Buscar</button>
       </div>
       <div class="sugerenciasContainer">
         <div id="sugerencias"></div>
@@ -166,29 +167,31 @@
     </div>
 
     <div id="resultadoEstacion" class="hidden">
-    <h2 id="salidasLlegadasHeader" class="table-title">Salidas</h2>
-    <div class="table-wrapper">
-      <table id="tablaPanel">
-        <thead>
-          <tr>
-            <th>Hora</th>
-            <th>Retraso</th>
-            <th>Destino/Origen</th>
-            <th>Número</th>
-            <th>Operador</th>
-            <th>Vía</th>
-            <th>Estado</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-    <div class="botones-centro">
-      <div class="botonesCentro2">
-        <button id="cargarMas">Cargar más</button>
+      <div class="header-tabla" id="infoEstacion"></div>
+      <h2 id="salidasLlegadasHeader" class="table-title">Salidas</h2>
+      <div class="table-wrapper">
+        <table id="tablaPanel">
+          <thead>
+            <tr>
+              <th>Hora</th>
+              <th>Retraso</th>
+              <th>Destino/Origen</th>
+              <th>Número</th>
+              <th>Operador</th>
+              <th>Vía</th>
+              <th>Estado</th>
+              <th>Parada</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="botones-centro">
+        <div class="botonesCentro2">
+          <button id="cargarMas">Cargar más</button>
+        </div>
       </div>
     </div>
-  </div>
   </div>
 
   <div id="teleindicadorTab" class="pantalla">
