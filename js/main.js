@@ -152,7 +152,7 @@ document.getElementById("buscarTeleButton").addEventListener("click", async () =
   const input = document.getElementById("stationInputTele");
   const codigo = input?.dataset?.codigo || "";
   const tipoPanel = document.getElementById("tipoPanelTele").value;
-  const tipoTren = document.getElementById("trainTypeTele").value;
+  const tipoTren = document.getElementById("custom-select-selected").value;
   const tbody = document.getElementById("tablaTeleindicadorBody");
 
   // Valida que se haya seleccionado una estación
