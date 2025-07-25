@@ -370,14 +370,16 @@ tbody tr:hover { background-color: var(--table-row-hover-bg); }
   display: flex; justify-content: center; margin-bottom: 0rem;
 }
 
-#sugerencias #sugerenciasTele .visible {
+#sugerencias .visible,
+#sugerenciasTele .visible {
 opacity: 1;
 visibility: visible;
 transform: translateY(0);
 }
 
 
-#sugerencias #sugerenciasTele div {
+#sugerencias div,
+#sugerenciasTele div {
 padding: 0.75rem 1rem;
 cursor: pointer;
 color: var(--text-color);
@@ -387,18 +389,21 @@ transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
 border-bottom: 1px solid var(--bg-color);
 }
 
-#sugerencias #sugerenciasTele div:last-child {
+#sugerencias div:last-child,
+#sugerenciasTele div:last-child {
 border-bottom: none;
 }
 
 
 /* --- Estilo al pasar el ratón por encima (Hover) --- */
-#sugerencias #sugerenciasTele div:hover {
+#sugerencias div:hover,
+#sugerenciasTele div:hover {
 background-color: var(--button-hover-bg);
 color: var(--button-hover-color);
 }
 
-#sugerencias #sugerenciasTele,
+#sugerencias,
+#sugerenciasTele,
 #favoritos {
   position: absolute;
   left: 0;
@@ -418,15 +423,17 @@ color: var(--button-hover-color);
   transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out, visibility 0.2s;
 }
 
-#sugerencias #sugerenciasTele .visible,
-#favoritos.visible {
+#sugerencias .visible,
+#sugerenciasTele .visible,
+#favoritos .visible {
   opacity: 1;
   visibility: visible;
   transform: translateY(0);
   display: block;
 }
 
-#sugerencias #sugerenciasTele div,
+#sugerencias div,
+#sugerenciasTele div,
 #favoritos .sugerencia {
   padding: 0.75rem 1rem;
   cursor: pointer;
@@ -438,12 +445,14 @@ color: var(--button-hover-color);
   border-bottom: 1px solid var(--bg-color);
 }
 
-#sugerencias #sugerenciasTele div:last-child,
+#sugerencias div:last-child,
+#sugerenciasTele div:last-child,
 #favoritos .sugerencia:last-child {
   border-bottom: none;
 }
 
-#sugerencias #sugerenciasTele div:hover,
+#sugerencias div:hover,
+#sugerenciasTele div:hover,
 #favoritos .sugerencia:hover {
   background-color: var(--button-hover-bg);
   color: var(--button-hover-color);
@@ -456,7 +465,8 @@ color: var(--button-hover-color);
 }
 
 #favoritos .sugerencias-titulo,
-#sugerencias #sugerenciasTele .sugerencias-titulo {
+#sugerencias .sugerencias-titulo,
+#sugerenciasTele .sugerencias-titulo {
   padding: 0.3em 0.8em 0.2em 0.8em !important;
   font-size: 0.68em !important;
   cursor: default !important;
@@ -868,7 +878,8 @@ color: var(--button-hover-color);
   margin-bottom: 0.1em;
 }
 
-#sugerencias #sugerenciasTele .sugerencias-titulo {
+#sugerencias .sugerencias-titulo,
+#sugerenciasTele .sugerencias-titulo {
   padding: 0.3em 0.8em 0.2em 0.8em !important;
   font-size: 0.68em !important;
   cursor: default !important;
@@ -882,7 +893,8 @@ color: var(--button-hover-color);
   transition: none !important;
 }
 
-#sugerencias #sugerenciasTele .sugerencias-titulo:hover {
+#sugerencias .sugerencias-titulo:hover,
+#sugerenciasTele .sugerencias-titulo:hover {
   background: transparent !important;
   color: var(--input-placeholder) !important;
 }
