@@ -200,64 +200,64 @@
   </div>
 
   <div id="teleindicadorTab" class="pantalla">
-  <div class="consulta-container">
-    <div class="form-row">
-      <div class="input-sugerencias-wrapper">
-        <input type="text" id="stationInputTele" placeholder="Estación" autocomplete="off" class="input-estacion" />
-        <button type="button" id="clearStationInputTele" class="clear-input-btn" style="display:none;" aria-label="Borrar">×</button>
-        <div id="sugerenciasTele" class="sugerencias"></div>
+    <div class="consulta-container">
+      <div class="form-row">
+        <div class="input-sugerencias-wrapper">
+          <input type="text" id="stationInputTele" placeholder="Estación" autocomplete="off" class="input-estacion" />
+          <button type="button" id="clearStationInputTele" class="clear-input-btn" style="display:none;" aria-label="Borrar">×</button>
+          <div id="sugerenciasTele" class="sugerencias"></div>
+        </div>
+        <button id="buscarTeleButton">Buscar</button>
       </div>
-      <button id="buscarTeleButton">Buscar</button>
+
+      <div id="parametrosTeleindicador" style="margin-top: 1.5em;">
+        <div class="form-row">
+          <span style="font-family: 'AdifHaussM';">Mostrar:</span>
+          <select id="tipoPanelTele" class="tipo-panel-select">
+            <option value="salidas">Salidas</option>
+            <option value="llegadas">Llegadas</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <span style="font-family: 'AdifHaussM';">Tipo:</span>
+          <select id="trainTypeTele" class="tipo-tren-select">
+            <option value="Todos">Todos</option>
+            <option value="Mercancías">Mercancías</option>
+            <option value="AVLDMD">AVLDMD</option>
+            <option value="Cercanías">Cercanías</option>
+            <option value="Viajeros">Viajeros</option>
+            <option value="Otros">Otros</option>
+          </select>
+        </div>
+      </div>
     </div>
 
-    <div id="parametrosTeleindicador" style="margin-top: 1.5em;">
-      <div class="form-row">
-        <span style="font-family: 'AdifHaussM';">Mostrar:</span>
-        <select id="tipoPanelTele" class="tipo-panel-select">
-          <option value="salidas">Salidas</option>
-          <option value="llegadas">Llegadas</option>
-        </select>
-      </div>
-
-      <div class="form-row">
-        <span style="font-family: 'AdifHaussM';">Tipo:</span>
-        <select id="trainTypeTele" class="tipo-tren-select">
-          <option value="Todos">Todos</option>
-          <option value="Mercancías">Mercancías</option>
-          <option value="AVLDMD">AVLDMD</option>
-          <option value="Cercanías">Cercanías</option>
-          <option value="Viajeros">Viajeros</option>
-          <option value="Otros">Otros</option>
-        </select>
-      </div>
-    </div>
-  </div>
-
-  <!-- SE MANTIENE TU TABLA TAL CUAL -->
-  <table id="tablaTeleindicador" class="panel-tele">
-    <thead id="cabeceraTeleindicador">
-      <tr>
-        <th colspan="7">
-          <div id="header-teleindicador" style="display: flex; align-items: center; justify-content: space-between;">
-            <div style="display: flex; align-items: center; gap: 1em;">
-              <img src="img/adifsumma.svg" alt="ADIF" style="height: 2.2em;">
-              <span id="titulo-cabecera-tele" style="font-size: 1.4em; font-weight: bold;">SALIDAS</span>
+    <!-- SE MANTIENE TU TABLA TAL CUAL -->
+    <table id="tablaTeleindicador" class="panel-tele">
+      <thead id="cabeceraTeleindicador">
+        <tr>
+          <th colspan="7">
+            <div id="header-teleindicador" style="display: flex; align-items: center; justify-content: space-between;">
+              <div style="display: flex; align-items: center; gap: 1em;">
+                <img src="img/adifsumma.svg" alt="ADIF" style="height: 2.2em;">
+                <span id="titulo-cabecera-tele" style="font-size: 1.4em; font-weight: bold;">SALIDAS</span>
+              </div>
+              <span id="hora-cabecera-tele" style="font-size: 1.3em; font-family: monospace;"></span>
             </div>
-            <span id="hora-cabecera-tele" style="font-size: 1.3em; font-family: monospace;"></span>
-          </div>
-        </th>
-      </tr>
-      <tr>
-        <th>Hora</th>
-        <th>Destino</th>
-        <th>Operador</th>
-        <th>Nº Tren</th>
-        <th>Vía</th>
-      </tr>
-    </thead>
-    <tbody id="tablaTeleindicadorBody"></tbody>
-  </table>
-</div>
+          </th>
+        </tr>
+        <tr>
+          <th>Hora</th>
+          <th>Destino</th>
+          <th>Operador</th>
+          <th>Nº Tren</th>
+          <th>Vía</th>
+        </tr>
+      </thead>
+      <tbody id="tablaTeleindicadorBody"></tbody>
+    </table>
+  </div>
 
 
   <div id="botonesCentro" class="botones-centro pantalla">
