@@ -674,6 +674,8 @@ tbody tr:hover { background-color: var(--table-row-hover-bg); }
   }
 
   .teleindicador-row > * {
+    display: flex;
+    align-items: center;
     text-align: left;
     padding: 0;
   }
@@ -685,7 +687,7 @@ tbody tr:hover { background-color: var(--table-row-hover-bg); }
   .destino-con-pastilla {
     font-size: 1em;
     align-items: center;
-    gap: 0.3em;
+    gap: 0.5em;
   }
 }
 
@@ -794,7 +796,7 @@ tbody tr:hover { background-color: var(--table-row-hover-bg); }
   display: grid;
   grid-template-columns: 1fr 0.9fr 2fr 1.6fr 1fr 1fr 0.5fr;
   align-items: center;
-  padding: 0.3em 0.5em;
+  padding: 0.1em 0.5em;
   border-bottom: 1px solid #bee6be;
   background: #21486b;
   color: #fff;
