@@ -658,10 +658,9 @@ tbody tr:hover { background-color: var(--table-row-hover-bg); }
     border-collapse: collapse;
   }
 
-  .panel-tele th,
-  .panel-tele td {
-    padding: 0.03em 0.05em;
-    font-size: 0.75rem;
+  .panel-tele td, .panel-tele th {
+    padding-left: 0.3em;
+    padding-right: 0.3em;
   }
 
   .teleindicador-row {
