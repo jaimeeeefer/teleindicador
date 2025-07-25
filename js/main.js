@@ -1,12 +1,27 @@
 // js/main.js
 
+// ------------------------
+// --- IMPORTS
+// ------------------------
 import { initTheme, toggleTheme } from './theme.js';
-import { login, cerrarSesion, verificarSesionGuardada, } from './auth.js';
-import { buscarTren, clearResultados, buscarEstacion, cargarMas, buscarEstacionPorCodigoParaTeleindicador } from './api.js';
-import { mostrarTrenAnterior, mostrarTrenSiguiente, autocompletarEstaciones, autocompletarEstacionesTele, renderizarPanelTeleindicador } from './ui.js';
+import { login, cerrarSesion, verificarSesionGuardada, getEstaciones } from './auth.js';
+import { buscarTren, clearResultados, buscarEstacion, cargarMas } from './api.js';
+import {
+    mostrarTrenAnterior,
+    mostrarTrenSiguiente,
+    autocompletarEstaciones,
+    toggleFavoritoEstacion,
+    mostrarFavoritoEstrella,
+    toggleFavoritoTren,
+    mostrarFavoritoEstrellaTren,
+    mostrarFavoritosTren
+} from './ui.js';
 
-// ALMACENAR ELEMENTOS DEL DOM UNA SOLA VEZ
+// ---------------------------------
+// --- ALMACÉN DE ELEMENTOS DEL DOM
+// ---------------------------------
 const DOMElements = {
+    // Botones principales
     loginButton: document.getElementById("loginButton"),
     buscarTrenButton: document.getElementById("buscarTrenButton"),
     clearResultadosButton: document.getElementById("clearResultadosButton"),
@@ -14,15 +29,54 @@ const DOMElements = {
     toggleThemeBtn: document.getElementById("toggleThemeBtn"),
     btnAnterior: document.getElementById("btnAnterior"),
     btnSiguiente: document.getElementById("btnSiguiente"),
+    buscarEstButton: document.getElementById("buscarEstButton"),
+    cargarMas: document.getElementById("cargarMas"),
+
+    // Navegación por pestañas
     tabButtons: document.querySelectorAll(".tab-button"),
     pantallas: document.querySelectorAll(".pantalla"),
-    inputEstación: document.getElementById("numeroEst"),
-    sugerencias: document.getElementById("sugerencias"),
-    buscarEstButton: document.getElementById("buscarEstButton"),
-    cargarMas: document.getElementById("cargarMas")
+    consultaTab: document.getElementById("consulta"),
+    estacionTab: document.getElementById("estacion"),
+
+    // Búsqueda de Tren
+    trenInput: document.getElementById('numeroTren'),
+    clearTrenBtn: document.getElementById('clearNumeroTren'),
+    estrellaTrenBtn: document.getElementById('estrellaFavoritoNumero'),
+    trenFavoritosDiv: document.getElementById('favoritos'),
+
+    // Búsqueda de Estación
+    estacionInput: document.getElementById("numeroEst"),
+    sugerenciasDiv: document.getElementById("sugerencias"),
+    clearEstBtn: document.getElementById('clearNumeroEst'),
+    estrellaEstBtn: document.getElementById('estrellaFavoritoEst'),
+
+    // Selectores personalizados
+    customSelects: document.querySelectorAll('.custom-select')
 };
 
+// ---------------------------------
+// --- FUNCIONES DE AYUDA (UI)
+// ---------------------------------
+
+/**
+ * Muestra u oculta los botones de limpiar y favorito de un input.
+ * @param {HTMLInputElement} input El elemento del input.
+ * @param {HTMLElement} clearBtn El botón para limpiar el input.
+ * @param {HTMLElement} favBtn El botón para marcar como favorito.
+ */
+function actualizarControlesInput(input, clearBtn, favBtn) {
+    const hayValor = !!input.value;
+    clearBtn.classList.toggle('visible', hayValor);
+    favBtn.classList.toggle('visible', hayValor);
+    input.classList.toggle('input-con-x', hayValor);
+}
+
+// ---------------------------------
+// --- CONFIGURACIÓN DE EVENTOS
+// ---------------------------------
 function setupEventListeners() {
+
+    // --- Botones Generales ---
     DOMElements.loginButton.addEventListener("click", login);
     DOMElements.buscarTrenButton.addEventListener("click", buscarTren);
     DOMElements.clearResultadosButton.addEventListener("click", clearResultados);
@@ -30,123 +84,145 @@ function setupEventListeners() {
     DOMElements.toggleThemeBtn.addEventListener("click", toggleTheme);
     DOMElements.btnAnterior.addEventListener("click", mostrarTrenAnterior);
     DOMElements.btnSiguiente.addEventListener("click", mostrarTrenSiguiente);
-    DOMElements.inputEstación.addEventListener("input", autocompletarEstaciones);
-    DOMElements.inputEstación.addEventListener("focus", autocompletarEstaciones);
     DOMElements.buscarEstButton.addEventListener("click", buscarEstacion);
     DOMElements.cargarMas.addEventListener("click", cargarMas);
-    document.getElementById("stationInputTele").addEventListener("input", autocompletarEstacionesTele);
-    document.getElementById("stationInputTele").addEventListener("focus", autocompletarEstacionesTele);
 
-    // Buscar tren con Enter
-    document.getElementById('numeroTren').addEventListener('keyup', (event) => {
+    // --- Búsqueda de Tren ---
+    DOMElements.trenInput.addEventListener('input', () => {
+        actualizarControlesInput(DOMElements.trenInput, DOMElements.clearTrenBtn, DOMElements.estrellaTrenBtn);
+        mostrarFavoritosTren();
+        mostrarFavoritoEstrellaTren();
+    });
+    DOMElements.trenInput.addEventListener('focus', () => {
+        mostrarFavoritosTren();
+        mostrarFavoritoEstrellaTren();
+    });
+    DOMElements.trenInput.addEventListener('keyup', event => {
         if (event.key === 'Enter') buscarTren();
     });
-    document.getElementById('numeroEst').addEventListener('keyup', (event) => {
-        if (event.key === 'Enter') buscarEstacion();
+    DOMElements.clearTrenBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        DOMElements.trenInput.value = '';
+        actualizarControlesInput(DOMElements.trenInput, DOMElements.clearTrenBtn, DOMElements.estrellaTrenBtn);
+        DOMElements.trenInput.focus();
+        mostrarFavoritosTren();
+        mostrarFavoritoEstrellaTren();
+    });
+    DOMElements.estrellaTrenBtn.addEventListener('click', () => {
+        const numero = DOMElements.trenInput.value.trim();
+        if (numero) toggleFavoritoTren(numero);
     });
 
-    document.addEventListener('click', function(event) {
-        if (
-            !DOMElements.sugerencias.contains(event.target) &&
-            !DOMElements.inputEstación.contains(event.target) &&
-            event.target !== DOMElements.inputEstación
-        ) {
-            DOMElements.sugerencias.classList.remove('visible');
+    // --- Búsqueda de Estación ---
+    DOMElements.estacionInput.addEventListener('input', () => {
+        actualizarControlesInput(DOMElements.estacionInput, DOMElements.clearEstBtn, DOMElements.estrellaEstBtn);
+        autocompletarEstaciones();
+        mostrarFavoritoEstrella();
+    });
+    DOMElements.estacionInput.addEventListener('focus', () => {
+        actualizarControlesInput(DOMElements.estacionInput, DOMElements.clearEstBtn, DOMElements.estrellaEstBtn);
+        autocompletarEstaciones();
+        mostrarFavoritoEstrella();
+    });
+    DOMElements.estacionInput.addEventListener('keyup', event => {
+        if (event.key === 'Enter') buscarEstacion();
+    });
+    DOMElements.estacionInput.addEventListener('change', mostrarFavoritoEstrella);
+    DOMElements.clearEstBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        DOMElements.estacionInput.value = '';
+        actualizarControlesInput(DOMElements.estacionInput, DOMElements.clearEstBtn, DOMElements.estrellaEstBtn);
+        DOMElements.estacionInput.focus();
+        autocompletarEstaciones();
+        mostrarFavoritoEstrella();
+    });
+    DOMElements.estrellaEstBtn.addEventListener('click', () => {
+        const estaciones = getEstaciones();
+        const nombreEstacion = DOMElements.estacionInput.value.trim();
+        const codigo = Object.keys(estaciones).find(cod => (estaciones[cod].toLowerCase() === nombreEstacion.toLowerCase() || cod === nombreEstacion));
+        if (codigo) {
+            toggleFavoritoEstacion(codigo);
+            mostrarFavoritoEstrella();
         }
     });
 
-    // Manejar tabs de navegación (marcha <-> estación)
+    // --- Navegación por Pestañas (marcha <-> estación) ---
     DOMElements.tabButtons.forEach(button => {
         button.addEventListener("click", () => {
             const destinoID = button.dataset.target;
-
-            // Oculta todas las pantallas
-            DOMElements.pantallas.forEach(p => p.classList.remove("visible"));
-
-            // Muestra solo la seleccionada
-            if (destinoID === "consulta") {
-                document.getElementById("consulta")?.classList.add("visible");
-            } else if (destinoID === "estacion") {
-                document.getElementById("estacion")?.classList.add("visible");
-            } else if (destinoID === "teleindicadorTab") {
-                document.getElementById("teleindicadorTab")?.classList.add("visible");
-            }
-
-            // Actualiza el botón activo
             DOMElements.tabButtons.forEach(btn => btn.classList.remove("active"));
             button.classList.add("active");
+            DOMElements.consultaTab?.classList.toggle("visible", destinoID === "consulta");
+            DOMElements.estacionTab?.classList.toggle("visible", destinoID === "estacion");
+        });
+    });
+
+    // --- Selectores Personalizados ---
+    DOMElements.customSelects.forEach(select => {
+        const selected = select.querySelector('.custom-select-selected');
+        const options = select.querySelector('.custom-select-options');
+        const hiddenInput = select.querySelector('input[type="hidden"]');
+
+        selected.addEventListener('click', () => {
+            select.classList.toggle('open');
+            selected.classList.toggle('active');
+        });
+
+        options.querySelectorAll('div').forEach(option => {
+            option.addEventListener('click', () => {
+                options.querySelectorAll('div').forEach(o => o.classList.remove('selected'));
+                option.classList.add('selected');
+                selected.textContent = option.textContent;
+                hiddenInput.value = option.getAttribute('data-value');
+                select.classList.remove('open');
+                selected.classList.remove('active');
+            });
+        });
+    });
+
+    // --- Cierre de Popups/Sugerencias al hacer click fuera ---
+    document.addEventListener('click', event => {
+        // Cerrar sugerencias de estación
+        if (!DOMElements.sugerenciasDiv.contains(event.target) && !DOMElements.estacionInput.contains(event.target)) {
+            DOMElements.sugerenciasDiv.classList.remove('visible');
+        }
+        // Cerrar favoritos de tren
+        if (DOMElements.trenFavoritosDiv && !DOMElements.trenFavoritosDiv.contains(event.target) && event.target !== DOMElements.trenInput) {
+            DOMElements.trenFavoritosDiv.classList.remove('visible');
+        }
+        // Cerrar selectores personalizados
+        DOMElements.customSelects.forEach(select => {
+            if (!select.contains(event.target)) {
+                select.classList.remove('open');
+                select.querySelector('.custom-select-selected').classList.remove('active');
+            }
         });
     });
 }
 
-function mostrarTab(tabId) {
-  document.querySelectorAll('.pantalla').forEach(div => div.classList.remove('visible'));
-  document.getElementById(tabId).classList.add('visible');
-}
-
+// ------------------------
+// --- INICIALIZACIÓN
+// ------------------------
 async function init() {
     initTheme();
+
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./service-worker.js')
-        .then(registration => console.log('Service Worker registrado con éxito.'))
-        .catch(error => console.log('Fallo al registrar Service Worker:', error));
+        navigator.serviceWorker.register('./service-worker.js')
+            .then(() => console.log('Service Worker registrado con éxito.'))
+            .catch(error => console.log('Fallo al registrar Service Worker:', error));
     }
+
     setupEventListeners();
     await verificarSesionGuardada();
+
+    // Establecer estado inicial de los controles de los inputs
+    actualizarControlesInput(DOMElements.trenInput, DOMElements.clearTrenBtn, DOMElements.estrellaTrenBtn);
+    actualizarControlesInput(DOMElements.estacionInput, DOMElements.clearEstBtn, DOMElements.estrellaEstBtn);
 }
 
+// Iniciar la aplicación cuando la ventana se haya cargado
 window.addEventListener('load', init);
 
-// Control de select personalizados
-document.querySelectorAll('.custom-select').forEach(function(select) {
-  const selected = select.querySelector('.custom-select-selected');
-  const options = select.querySelector('.custom-select-options');
-  const hiddenInput = select.querySelector('input[type="hidden"]');
-
-  selected.addEventListener('click', function(e) {
-    select.classList.toggle('open');
-    selected.classList.toggle('active');
-  });
-
-  options.querySelectorAll('div').forEach(function(option) {
-    option.addEventListener('click', function(e) {
-      options.querySelectorAll('div').forEach(o => o.classList.remove('selected'));
-      option.classList.add('selected');
-      selected.textContent = option.textContent;
-      hiddenInput.value = option.getAttribute('data-value');
-      select.classList.remove('open');
-      selected.classList.remove('active');
-    });
-  });
-
-  // Cerrar si se hace click fuera
-  document.addEventListener('click', function(e) {
-    if (!select.contains(e.target)) {
-      select.classList.remove('open');
-      selected.classList.remove('active');
-    }
-  });
-});
-
-const numeroEst = document.getElementById('numeroEst');
-const clearBtn = document.getElementById('clearNumeroEst');
-
-numeroEst.addEventListener('input', () => {
-  if (numeroEst.value) {
-    clearBtn.style.display = 'flex';
-    numeroEst.classList.add('input-con-x');
-  } else {
-    clearBtn.style.display = 'none';
-    numeroEst.classList.remove('input-con-x');
-  }
-});
-
-clearBtn.addEventListener('click', () => {
-  numeroEst.value = '';
-  clearBtn.style.display = 'none';
-  numeroEst.classList.remove('input-con-x');
-  numeroEst.focus();
-});
 
 document.getElementById("buscarTeleButton").addEventListener("click", async () => {
   const input = document.getElementById("stationInputTele");
