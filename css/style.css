@@ -708,11 +708,33 @@ tbody tr:hover { background-color: var(--table-row-hover-bg); }
   padding: 0.5em 0;
   font-size: 1.5em;
   color: #182946;
-  max-width: 1500px;   /* Aumenta el máximo de ancho */
-  width: 98vw;         /* Usa el 98% del ancho de la ventana */
+  max-width: 1500px;
+  width: 98vw;
   min-width: 0;
   box-shadow: 0 2px 24px 4px #b1e0b4d9;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
+
+@media (max-width: 600px) {
+  .teleindicador-panel {
+    font-size: 1.1em;
+    padding: 0.3em 0.5em;
+  }
+
+  .teleindicador-row {
+    font-size: 0.85em;
+    padding: 0.3em 0.4em;
+    gap: 0.2em;
+  }
+
+  .destino-con-pastilla {
+    font-size: 1em;
+  }
+}
+
 .teleindicador-row {
   display: grid;
   grid-template-columns: 1fr 0.9fr 2fr 1.6fr 1fr 1fr 0.5fr;
