@@ -144,6 +144,8 @@ function renderizarTablaPasos(path) {
         
         if (estadoPaso.clase) fila.classList.add(estadoPaso.clase);
 
+        const viaInfo = obtenerVia(salida, llegada);
+
         fila.innerHTML = `
           <td>${estaciones[paso.stationCode.replace(/^0+/, '')] || paso.stationCode}</td>
           <td>${traducirParada(paso.stopType)}</td>
@@ -153,17 +155,47 @@ function renderizarTablaPasos(path) {
           <td>${salida ? formatearTimestampHora(salida.plannedTime) : ''}</td>
           <td>${salida ? `<span class="${getColorClass(salida.forecastedOrAuditedDelay)}">${calcularHoraReal(formatearTimestampHora(salida.plannedTime), salida.forecastedOrAuditedDelay)}</span>` : ''}</td>
           <td>${salida ? `<span class="${getColorClass(salida.forecastedOrAuditedDelay)}">${formatoRetraso(salida.forecastedOrAuditedDelay)}</span>` : ''}</td>
-          <td>${salida?.plannedPlatform || llegada?.plannedPlatform || ''}</td>
-          <td>${traducirVia(salida?.resultantPlatform) || traducirVia(llegada?.resultantPlatform) || ''}</td>
+          <td>${viaInfo.plataforma}</td>
+          <td>${traducirVia(viaInfo.estado) || ''}</td>
           <td>${estadoPaso.texto}</td>
         `;
         uiElements.tablaPasosBody.appendChild(fila);
-        if(traducirEstado(paso.departurePassthroughStepSides?.circulationState || paso.arrivalPassthroughStepSides?.circulationState) === "SUPRIMIDO") fila.classList.add('estado-sup');
+        if(paso.departurePassthroughStepSides?.supressed || paso.arrivalPassthroughStepSides?.supressed){
+            fila.classList.add('estado-sup');
+        }
     });
     
     if (estadoCirculacion === 'PENDIENTE DE CIRCULAR') {
         ajustarFilasParaEstado(estadoCirculacion);
     }
+}
+
+function obtenerVia(salida, llegada) {
+    // Prioridad: CTC > SITRA > OPERATOR > PLANNED/RELIABLE_PLANNED
+    const prioridad = ['CTC', 'SITRA', 'OPERATOR'];
+    for (const tipo of prioridad) {
+        if (salida?.resultantPlatform === tipo && salida?.[`${tipo.toLowerCase()}Platform`]) {
+            return { plataforma: salida[`${tipo.toLowerCase()}Platform`], estado: tipo };
+        }
+        if (llegada?.resultantPlatform === tipo && llegada?.[`${tipo.toLowerCase()}Platform`]) {
+            return { plataforma: llegada[`${tipo.toLowerCase()}Platform`], estado: tipo };
+        }
+    }
+    // Si ambos son PLANNED o RELIABLE_PLANNED, mostrar plannedPlatform
+    if (
+        (['PLANNED', 'RELIABLE_PLANNED'].includes(salida?.resultantPlatform) || !salida?.resultantPlatform) &&
+        (['PLANNED', 'RELIABLE_PLANNED'].includes(llegada?.resultantPlatform) || !llegada?.resultantPlatform)
+    ) {
+        return { 
+            plataforma: salida?.plannedPlatform || llegada?.plannedPlatform || '', 
+            estado: salida?.resultantPlatform || llegada?.resultantPlatform || '' 
+        };
+    }
+    // Si solo uno es PLANNED/RELIABLE_PLANNED y el otro es null, mostrar plannedPlatform
+    return { 
+        plataforma: salida?.plannedPlatform || llegada?.plannedPlatform || '', 
+        estado: salida?.resultantPlatform || llegada?.resultantPlatform || '' 
+    };
 }
 
 // --- NAVEGACIÓN ENTRE TRENES ---
@@ -330,66 +362,6 @@ export function autocompletarEstaciones() {
     }
 }
 
-export function autocompletarEstacionesTele() {
-    const estacionesArray = Object.entries(getEstaciones());
-    const estacion = document.getElementById("stationInputTele");
-    const estacionInput = estacion.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-    const sugerencias = document.getElementById("sugerenciasTele");
-    sugerencias.innerHTML = '';
-
-    // Limpia el atributo data-codigo si el usuario edita el input
-    estacion.removeAttribute('data-codigo');
-
-    if (estacionInput.length < 2) {
-        sugerencias.classList.remove('visible');
-        return;
-    }
-
-    const palabras = estacionInput.split(/[\s-]+/).filter(p => p.length > 0);
-    const esNumerico = /^\d+$/.test(estacionInput);
-
-    const coincidencias = estacionesArray.filter(([codigo, nombre]) => {
-        const nombreLower = nombre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        const coincideNombre = palabras.every(palabra => nombreLower.includes(palabra));
-        const coincideCodigo = esNumerico && codigo.padStart(5, '0').includes(estacionInput);
-        return coincideNombre || coincideCodigo;
-    });
-
-    const titulo = document.createElement('div');
-    titulo.textContent = "Sugerencias";
-    titulo.classList.add("sugerencias-titulo");
-    sugerencias.appendChild(titulo);
-
-    if (coincidencias.length > 0) {
-        coincidencias.forEach(([codigo, nombre]) => {
-            const item = document.createElement('div');
-            item.className = "sugerencia";
-            item.innerHTML = `
-                <span class="nombre-estacion-wrap">${nombre}</span>
-                <span class="codigo-estacion">${codigo.padStart(5, '0')}</span>
-            `;
-            item.dataset.codigo = codigo;
-            item.addEventListener('click', () => {
-                estacion.value = nombre;
-                estacion.setAttribute('data-codigo', codigo);
-                sugerencias.classList.remove('visible');
-                document.getElementById('clearStationInputTele').classList.add('visible');
-                estacion.classList.add('input-con-x');
-            });
-            sugerencias.appendChild(item);
-        });
-        sugerencias.classList.add('visible');
-    } else {
-        const sinCoincidencias = document.createElement("div");
-        sinCoincidencias.textContent = "(sin coincidencias)";
-        sinCoincidencias.classList.add("sugerencia", "no-click");
-        sugerencias.appendChild(sinCoincidencias);
-        sugerencias.classList.add('visible');
-    }
-}
-
-
-
 export function mostrarEstacion() {
     const trenes = getProximosTrenes();
     const paginaActual = getPaginaActual();
@@ -407,14 +379,24 @@ export function mostrarEstacion() {
 function renderizarPanel(trenes) {
     const estaciones = getEstaciones();
 
+    // Ordenar trenes por fecha y hora real (timestamp)
+    trenes.sort((a, b) => {
+        const pasoA = a.passthroughStep.departurePassthroughStepSides || a.passthroughStep.arrivalPassthroughStepSides;
+        const pasoB = b.passthroughStep.departurePassthroughStepSides || b.passthroughStep.arrivalPassthroughStepSides;
+        return getTimestampReal(pasoA) - getTimestampReal(pasoB);
+    });
+
     // Fecha de hoy
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
 
+    //OBSERVACIONES DE ESTACIONES (TODO)
+    //document.getElementById("infoEstacion").innerHTML = ``;
+
     trenes.forEach(tren => {
         const paso = tren.passthroughStep.departurePassthroughStepSides || tren.passthroughStep.arrivalPassthroughStepSides;
-        const launchingDate = paso.plannedTime;
-        const fecha = launchingDate ? new Date(launchingDate) : null;
+        const timestampReal = getTimestampReal(paso);
+        const fecha = timestampReal ? new Date(timestampReal) : null;
 
         if (fecha) {
             // Normaliza la fecha a las 00:00:00
@@ -440,7 +422,7 @@ function renderizarPanel(trenes) {
             horaReal
         );
         const fila = document.createElement('tr');
-        // Obtén los nombres de las estaciones
+
         const origen = estaciones[tren.commercialPathInfo.commercialPathKey.originStationCode.replace(/^0+/, '')] || tren.commercialPathInfo.commercialPathKey.originStationCode;
         const destino = estaciones[tren.commercialPathInfo.commercialPathKey.destinationStationCode.replace(/^0+/, '')] || tren.commercialPathInfo.commercialPathKey.destinationStationCode;
 
@@ -462,6 +444,8 @@ function renderizarPanel(trenes) {
             `;
         }
 
+        const numeroTren = tren.commercialPathInfo.commercialPathKey.commercialCirculationKey.commercialNumber || '';
+
         fila.innerHTML = `
         <td>
             <span${tacharHora ? ' style="text-decoration: line-through;"' : ''}>${horaPlanificada}</span>
@@ -474,25 +458,41 @@ function renderizarPanel(trenes) {
             ${celdaDestinoOrigen}
         </td>
         <td>
-            <span class="numero-tren-clicable" style="cursor:pointer;" onclick="buscarTrenClick(${tren.commercialPathInfo.commercialPathKey.commercialCirculationKey.commercialNumber}, this)" title="Ver marcha">
-                ${tren.commercialPathInfo.commercialPathKey.commercialCirculationKey.commercialNumber|| ''}
+            <span class="numero-tren-clicable" style="cursor:pointer;" onclick="buscarTrenClick('${numeroTren}')" title="Ver marcha">
+                ${numeroTren}
             </span>
         </td>
         <td>
             ${tren.commercialPathInfo.opeProComPro?.operator || ''}
-            - ${traducirOperador(tren.commercialPathInfo.opeProComPro?.operator) || ''}
+            ${
+                traducirOperador(tren.commercialPathInfo.opeProComPro?.operator)
+                    ? ' - ' + traducirOperador(tren.commercialPathInfo.opeProComPro?.operator)
+                    : ''
+            }
             <br>
             <span class="origen-difuminado">
-                ${tren.commercialPathInfo.opeProComPro?.product || ''}${tren.commercialPathInfo.opeProComPro?.commercialProduct.trim() ? ' - ' + tren.commercialPathInfo.opeProComPro?.commercialProduct : ''}
+                ${tren.commercialPathInfo.opeProComPro?.product || ''}
+                ${
+                    tren.commercialPathInfo.opeProComPro?.commercialProduct.trim()
+                        ? ' - ' + tren.commercialPathInfo.opeProComPro?.commercialProduct
+                        : ''
+                }
             </span>
         </td>
-        <td>${paso.plannedPlatform || ''}</td>
+        <td>${obtenerVia(paso,paso).plataforma || ''}</td>
         <td><span class="${claseEstado}">${estadoTraducido || ''}</span></td>
+        <td>${traducirParada(tren.passthroughStep.stopType)}</td>
         `;
         uiElements.tablaPanelBody.appendChild(fila);
     });
 
     ajustarFilasParaEstadoEstacion();
+}
+
+function getTimestampReal(paso) {
+    if (!paso?.plannedTime) return 0;
+    const retraso = paso.forecastedOrAuditedDelay || 0;
+    return paso.plannedTime + retraso * 1000;
 }
 
 function ajustarFilasParaEstadoEstacion() {
@@ -509,7 +509,7 @@ function ajustarFilasParaEstadoEstacion() {
     }
 }
 
-function buscarTrenClick(numero, button) {
+function buscarTrenClick(numero) {
     // Cambiar pestaña activa
     document.getElementById("marchasButton").click();
     // Cambiar texto barra de búsqueda
@@ -520,6 +520,128 @@ function buscarTrenClick(numero, button) {
     document.getElementById("buscarTrenButton").click();
 }
 window.buscarTrenClick = buscarTrenClick;
+
+// FAVORITOS
+function getFavoritosEstaciones() {
+    return JSON.parse(localStorage.getItem('favoritosEstaciones') || '[]');
+}
+function setFavoritosEstaciones(favs) {
+    localStorage.setItem('favoritosEstaciones', JSON.stringify(favs));
+}
+export function toggleFavoritoEstacion(codigo) {
+    let favs = getFavoritosEstaciones();
+    if (favs.includes(codigo)) {
+        favs = favs.filter(c => c !== codigo);
+    } else {
+        favs.push(codigo);
+    }
+    setFavoritosEstaciones(favs);
+    mostrarFavoritoEstrella();
+}
+
+export function mostrarFavoritoEstrella() {
+  const estacionInput = document.getElementById("numeroEst");
+  const estrella = document.getElementById("estrellaFavoritoEst");
+  const estaciones = getEstaciones();
+  let codigo = null;
+  const inputNorm = estacionInput.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/-/g, " ").replace(/\s+/g, " ").trim();
+
+  // Si el input es numérico, buscar por código también
+  const esNumerico = /^\d+$/.test(estacionInput.value.trim());
+
+  for (const [cod, nombre] of Object.entries(estaciones)) {
+    const nombreNorm = nombre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/-/g, " ").replace(/\s+/g, " ").trim();
+
+    // Coincidencia por nombre normalizado
+    if (nombreNorm === inputNorm) {
+      codigo = cod;
+      break;
+    }
+
+    // Coincidencia por código (rellenado a 5 dígitos)
+    if (esNumerico && (cod === estacionInput.value.trim() || cod.padStart(5, '0') === estacionInput.value.trim())) {
+      codigo = cod;
+      break;
+    }
+  }
+
+  if (!codigo) {
+    estrella.classList.remove('favorito-activo');
+    return;
+  }
+  const favs = getFavoritosEstaciones();
+  if (favs.includes(codigo)) {
+    estrella.classList.add('favorito-activo');
+  } else {
+    estrella.classList.remove('favorito-activo');
+  }
+}
+
+// FAVORITOS TRENES
+function getFavoritosTrenes() {
+    return JSON.parse(localStorage.getItem('favoritosTrenes') || '[]');
+}
+function setFavoritosTrenes(favs) {
+    localStorage.setItem('favoritosTrenes', JSON.stringify(favs));
+}
+export function toggleFavoritoTren(numero) {
+    let favs = getFavoritosTrenes();
+    if (favs.includes(numero)) {
+        favs = favs.filter(n => n !== numero);
+    } else {
+        favs.push(numero);
+    }
+    setFavoritosTrenes(favs);
+    mostrarFavoritoEstrellaTren();
+}
+export function mostrarFavoritoEstrellaTren() {
+    const input = document.getElementById("numeroTren");
+    const estrella = document.getElementById("estrellaFavoritoNumero");
+    const numero = input.value.trim();
+    const favs = getFavoritosTrenes();
+    if (favs.includes(numero)) {
+        estrella.classList.add('favorito-activo');
+    } else {
+        estrella.classList.remove('favorito-activo');
+    }
+}
+export function mostrarFavoritosTren() {
+    const input = document.getElementById("numeroTren");
+    const favoritosDiv = document.getElementById("favoritos");
+    favoritosDiv.innerHTML = '';
+
+    if (input.value.trim().length < 2) {
+        const favs = getFavoritosTrenes();
+        const titulo = document.createElement('div');
+        titulo.textContent = "Favoritos";
+        titulo.classList.add("sugerencias-titulo");
+        favoritosDiv.appendChild(titulo);
+
+        if (favs.length > 0) {
+            favs.forEach(numero => {
+                const item = document.createElement('div');
+                item.textContent = numero;
+                item.classList.add("sugerencia");
+                item.addEventListener('click', () => {
+                    input.value = numero;
+                    favoritosDiv.innerHTML = '';
+                    mostrarFavoritoEstrellaTren();
+                    // Mostrar la X y la estrella aunque se pierda el foco
+                    document.getElementById('clearNumeroTren').classList.add('visible');
+                    document.getElementById('estrellaFavoritoNumero').classList.add('visible');
+                    input.classList.add('input-con-x');
+                });
+                favoritosDiv.appendChild(item);
+            });
+            favoritosDiv.classList.add('visible');
+        } else {
+            favoritosDiv.classList.remove('visible');
+        }
+    } else {
+        favoritosDiv.classList.remove('visible');
+        favoritosDiv.innerHTML = '';
+    }
+}
 
 // FUNCIONES GENERALES
 
