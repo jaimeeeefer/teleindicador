@@ -797,7 +797,7 @@ export function renderizarPanelTeleindicador(datos) {
         }
 
         const linea = info.line ?? "-";
-        const core = info.core
+        const core = info.core ?? "-";
         const destinoCodigo = info.commercialDestinationStationCode ?? "-";
         const destino = estaciones[destinoCodigo.replace(/^0+/, '')] ?? destinoCodigo;
         const operador = traducirOperador(info.opeProComPro?.operator);
