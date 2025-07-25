@@ -151,7 +151,7 @@ clearBtn.addEventListener('click', () => {
 document.getElementById("buscarTeleButton").addEventListener("click", async () => {
   const input = document.getElementById("stationInputTele");
   const codigo = input?.dataset?.codigo || "";
-  const tipoPanel = document.getElementById("tipoPanelTele").textContent;
+  const tipoPanel = document.getElementById("tipoPanelTele").textContent.toLowerCase();
   const tipoTren = document.getElementById("trainTypeTele").textContent;
   const tbody = document.getElementById("tablaTeleindicadorBody");
 
