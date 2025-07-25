@@ -57,34 +57,31 @@ function setupEventListeners() {
 
     // Manejar tabs de navegación (marcha <-> estación)
     DOMElements.tabButtons.forEach(button => {
-    button.addEventListener("click", () => {
-        const destinoID = button.dataset.target;
+        button.addEventListener("click", () => {
+            const destinoID = button.dataset.target;
 
-        // Llama a la función centralizada para mostrar la pestaña correcta
-        mostrarTab(destinoID);
+            // Oculta todas las pantallas
+            DOMElements.pantallas.forEach(p => p.classList.remove("visible"));
 
-        // Actualiza el botón activo
-        DOMElements.tabButtons.forEach(btn => btn.classList.remove("active"));
-        button.classList.add("active");
+            // Muestra solo la seleccionada
+            if (destinoID === "consulta") {
+                document.getElementById("consulta")?.classList.add("visible");
+            } else if (destinoID === "estacion") {
+                document.getElementById("estacion")?.classList.add("visible");
+            } else if (destinoID === "teleindicadorTab") {
+                document.getElementById("teleindicadorTab")?.classList.add("visible");
+            }
+
+            // Actualiza el botón activo
+            DOMElements.tabButtons.forEach(btn => btn.classList.remove("active"));
+            button.classList.add("active");
         });
     });
 }
 
-
 function mostrarTab(tabId) {
-    // Oculta todas las pantallas
-    DOMElements.pantallas.forEach(div => div.classList.remove('visible'));
-
-    // Muestra solo la que se ha seleccionado
-    const pantallaActiva = document.getElementById(tabId);
-    if (pantallaActiva) {
-        pantallaActiva.classList.add('visible');
-    }
-
-    // Muestra los botones inferiores solo en las pestañas principales
-    if (tabId === 'consulta' || tabId === 'estacion') {
-        document.getElementById('botonesCentro').classList.add('visible');
-    }
+  document.querySelectorAll('.pantalla').forEach(div => div.classList.remove('visible'));
+  document.getElementById(tabId).classList.add('visible');
 }
 
 async function init() {
