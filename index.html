@@ -212,25 +212,32 @@
       <div class="sugerenciasContainer">
         <div id="sugerenciasTele"></div>
       </div>
-      <div id="parametrosTeleindicador" style="margin-top: 1.5em;">
+      <div id="parametrosTeleindicador">
         <div class="form-row">
           <span style="font-family: 'AdifHaussM';">Mostrar:</span>
-          <select id="tipoPanelTele" class="tipo-panel-select">
-            <option value="salidas">Salidas</option>
-            <option value="llegadas">Llegadas</option>
-          </select>
+          <div class="custom-select" id="customTipoPanel">
+            <div class="custom-select-selected">Salidas</div>
+            <div id="tipoPanelTele" class="custom-select-options">
+              <div data-value="salidas">Salidas</div>
+              <div data-value="llegadas">Llegadas</div>
+            </div>
+            <input type="hidden" name="tipoPanel" id="tipoPanelCustom" value="salidas">
+          </div>
         </div>
-
         <div class="form-row">
           <span style="font-family: 'AdifHaussM';">Tipo:</span>
-          <select id="trainTypeTele" class="tipo-tren-select">
-            <option value="Todos">Todos</option>
-            <option value="Mercancías">Mercancías</option>
-            <option value="AVLDMD">AVLDMD</option>
-            <option value="Cercanías">Cercanías</option>
-            <option value="Viajeros">Viajeros</option>
-            <option value="Otros">Otros</option>
-          </select>
+          <div class="custom-select" id="customTipoTren">
+            <div class="custom-select-selected">Todos</div>
+            <div class="custom-select-options">
+              <div data-value="ALL">Todos</div>
+              <div data-value="GOODS">Mercancías</div>
+              <div data-value="AVLDMD">AVLDMD</div>
+              <div data-value="CERCANIAS">Cercanías</div>
+              <div data-value="TRAVELERS">Viajeros</div>
+              <div data-value="OTROS">Otros</div>
+            </div>
+            <input type="hidden" name="tipoTren" id="tipoTrenCustom" value="ALL">
+          </div>
         </div>
       </div>
     </div>
