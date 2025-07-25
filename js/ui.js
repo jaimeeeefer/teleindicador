@@ -717,11 +717,6 @@ function traducirOperador(operador) {
     return operadores[operador] || '';
 }
 
-function mostrarTab(tabId) {
-    document.querySelectorAll('.pantalla').forEach(div => div.style.display = 'none');
-    document.getElementById(tabId).style.display = 'block';
-}
-
 function obtenerRutaPictograma(linea) {
     const nombresArchivos = {
         'C1': 'Cercanías_C1_(Rojo).svg',
