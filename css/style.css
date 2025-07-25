@@ -370,8 +370,8 @@ tbody tr:hover { background-color: var(--table-row-hover-bg); }
   display: flex; justify-content: center; margin-bottom: 0rem;
 }
 
-#sugerencias .visible,
-#sugerenciasTele .visible {
+#sugerencias.visible,
+#sugerenciasTele.visible {
 opacity: 1;
 visibility: visible;
 transform: translateY(0);
@@ -423,9 +423,9 @@ color: var(--button-hover-color);
   transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out, visibility 0.2s;
 }
 
-#sugerencias .visible,
-#sugerenciasTele .visible,
-#favoritos .visible {
+#sugerencias.visible,
+#sugerenciasTele.visible,
+#favoritos.visible {
   opacity: 1;
   visibility: visible;
   transform: translateY(0);
