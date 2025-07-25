@@ -77,9 +77,14 @@
 
   <div id="consulta" class="pantalla">
     <div class="consulta-container">
-      <div class="form-row">
-        <input type="text" id="numeroTren" inputmode="numeric" placeholder="Número de tren" autocomplete="off"/>
-        <button id="buscarTrenButton">Buscar</button>
+      <div class="form-row barraBusqueda">
+        <button type="button" id="estrellaFavoritoNumero" class="estrella-favorito" title="Añadir/Quitar favorito" tabindex="-1">★</button>
+        <div class="input-sugerencias-wrapper">
+          <input type="text" id="numeroTren" inputmode="numeric" placeholder="Número de tren" autocomplete="off"/>
+          <button type="button" id="clearNumeroTren" class="clear-input-btn" aria-label="Borrar">×</button>
+          <div id="favoritos"></div>
+        </div>
+        <button id="buscarTrenButton" style="margin-right: 0.5em;">Buscar</button>
       </div>
       <div class="resultado-header">Resultado:</div>
       <pre id="resultado">Esperando consulta...</pre>
