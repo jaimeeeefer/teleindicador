@@ -718,7 +718,23 @@ tbody tr:hover { background-color: var(--table-row-hover-bg); }
   justify-content: center;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 400px) {
+  .teleindicador-panel {
+    padding: 0 0.5em;
+  }
+
+  .panel-tele {
+    font-size: 0.75rem;
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .panel-tele th,
+  .panel-tele td {
+    padding: 0.3em 0.5em;
+    font-size: 0.75rem;
+  }
+
   .teleindicador-row {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -728,13 +744,13 @@ tbody tr:hover { background-color: var(--table-row-hover-bg); }
     padding: 0.6em 0.8em;
   }
 
-  .teleindicador-header {
-    display: none; /* Oculta la cabecera en móvil para ahorrar espacio */
-  }
-
   .teleindicador-row > * {
     text-align: left;
     padding: 0;
+  }
+
+  .teleindicador-header {
+    display: none;
   }
 
   .destino-con-pastilla {
@@ -751,26 +767,11 @@ tbody tr:hover { background-color: var(--table-row-hover-bg); }
     width: 100%;
     max-width: 100%;
   }
-}
-
-@media (max-width: 400px) {
-  .teleindicador-panel {
-    padding: 0 0.5em;
-  }
-
-  .panel-tele {
-    font-size: 0.75rem;
-  }
-
-  .panel-tele th,
-  .panel-tele td {
-    padding: 0.3em 0.5em;
-  }
 
   .cabecera-tele {
     flex-direction: column;
     align-items: center;
-    gap: 0.2em;
+    gap: 0.3em;
   }
 
   .cabecera-tele img {
@@ -784,6 +785,7 @@ tbody tr:hover { background-color: var(--table-row-hover-bg); }
 
   .titulo-tele {
     font-size: 1.1rem;
+    text-align: center;
   }
 }
 
