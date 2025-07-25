@@ -169,6 +169,7 @@ document.getElementById("buscarTeleButton").addEventListener("click", async () =
     // 2. Convierte la selección del usuario al formato que espera la API
     let tipoTrenApi = "ALL";
     const tipoTrenMapping = {
+        "Todos": "ALL",
         "Mercancías": "GOODS",
         "AVLDMD": "AVLDMD",
         "Cercanías": "CERCANIAS",
