@@ -851,7 +851,7 @@ export function autocompletarEstacionesTele() {
     const estacionesArray = Object.entries(getEstaciones());
     const estacion = document.getElementById("stationInputTele");
     const estacionInput = estacion.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-    const sugerencias = document.getElementById("sugerencias");
+    const sugerencias = document.getElementById("sugerenciasTele");
     sugerencias.innerHTML = '';
 
     // Limpia el atributo data-codigo si el usuario edita el input
