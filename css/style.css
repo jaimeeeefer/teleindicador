@@ -719,19 +719,27 @@ tbody tr:hover { background-color: var(--table-row-hover-bg); }
 }
 
 @media (max-width: 600px) {
-  .teleindicador-panel {
-    font-size: 1.1em;
-    padding: 0.3em 0.5em;
+  .teleindicador-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-row-gap: 0.4em;
+    grid-column-gap: 1em;
+    font-size: 0.85em;
+    padding: 0.6em 0.8em;
   }
 
-  .teleindicador-row {
-    font-size: 0.85em;
-    padding: 0.3em 0.4em;
-    gap: 0.2em;
+  .teleindicador-header {
+    display: none; /* Oculta la cabecera en móvil para ahorrar espacio */
+  }
+
+  .teleindicador-row > * {
+    text-align: left;
+    padding: 0;
   }
 
   .destino-con-pastilla {
     font-size: 1em;
+    gap: 0.3em;
   }
 }
 
