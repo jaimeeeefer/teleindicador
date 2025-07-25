@@ -149,46 +149,45 @@ clearBtn.addEventListener('click', () => {
 });
 
 document.getElementById("buscarTeleButton").addEventListener("click", async () => {
-  // 1) Recogemos el código (dataset.codigo) tal y como ya lo tenías
-    const inputEst = document.getElementById("stationInputTele");
-    const codigo = inputEst?.dataset?.codigo ?? "";
+  const input = document.getElementById("stationInputTele");
+  const codigo = input?.dataset?.codigo || "";
+  const tipoPanel = document.getElementById("tipoPanelTele").value;
+  const tipoTren = document.getElementById("trainTypeTele").value;
+  const tbody = document.getElementById("tablaTeleindicadorBody");
 
-    // 2) Ahora leemos el tipo de panel SALIDAS/LLEGADAS
-    //    directamente del <input hidden id="tipoPanelTele">
-    const tipoPanel = document.getElementById("tipoPanelTele").value;
+  // Valida que se haya seleccionado una estación
+  if (!codigo || !/^\d+$/.test(codigo)) {
+    tbody.innerHTML = "<tr><td colspan='7' style='text-align:center;'>Por favor, selecciona una estación válida de la lista.</td></tr>";
+    return;
+  }
 
-    // 3) Y el tipo de tren API (ALL, GOODS, AVLDMD…) del <input hidden id="trainTypeTele">
-    //    ¡Ya viene en el formato correcto, no hace falta mapping!
-    const tipoTrenApi = document.getElementById("trainTypeTele").value;
+  // 1. Muestra el estado de "Cargando..." dentro de la tabla
+  tbody.innerHTML = "<tr><td colspan='7' style='text-align:center;'>Cargando...</td></tr>";
+  mostrarTab("teleindicadorTab"); // Asegura que la pestaña sea visible
 
-    const tbody = document.getElementById("tablaTeleindicadorBody");
-
-    // Validación del código de estación
-    if (!codigo || !/^\d+$/.test(codigo)) {
-      tbody.innerHTML =
-        "<tr><td colspan='7' style='text-align:center;'>Por favor, selecciona una estación válida de la lista.</td></tr>";
-      return;
+  try {
+    // 2. Convierte la selección del usuario al formato que espera la API
+    let tipoTrenApi = "ALL";
+    const tipoTrenMapping = {
+        "Mercancías": "GOODS",
+        "AVLDMD": "AVLDMD",
+        "Cercanías": "CERCANIAS",
+        "Viajeros": "TRAVELERS",
+        "Otros": "OTHERS"
+    };
+    if (tipoTrenMapping[tipoTren]) {
+        tipoTrenApi = tipoTrenMapping[tipoTren];
     }
+    
+    // 3. Llama a la API y espera los resultados
+    const trenes = await buscarEstacionPorCodigoParaTeleindicador(codigo, tipoPanel, tipoTrenApi);
+    
+    // 4. Pasa los datos (o un array vacío) a la función de renderizado
+    renderizarPanelTeleindicador(trenes); 
 
-    // Mensaje de carga y nos aseguramos de que esté visible la pestaña
-    tbody.innerHTML =
-      "<tr><td colspan='7' style='text-align:center;'>Cargando...</td></tr>";
-    mostrarTab("teleindicadorTab");
-
-    try {
-      // Llamada a la API con los tres parámetros siempre definidos
-      const trenes = await buscarEstacionPorCodigoParaTeleindicador(
-        codigo,
-        tipoPanel,
-        tipoTrenApi
-      );
-
-      // Renderizamos la tabla con los datos
-      renderizarPanelTeleindicador(trenes);
-    } catch (err) {
-      // En caso de error, indicarlo en la tabla y loggear
-      tbody.innerHTML =
-        "<tr><td colspan='7' style='text-align:center;'>Error al consultar el servidor. Inténtalo de nuevo.</td></tr>";
-      console.error("Teleindicador >", err);
-    }
-  });
+  } catch (err) {
+    // 5. Si hay un error en la llamada, muéstralo también dentro de la tabla
+    tbody.innerHTML = "<tr><td colspan='7' style='text-align:center;'>Error al consultar el servidor. Inténtalo de nuevo.</td></tr>";
+    console.error(err);
+  }
+});
