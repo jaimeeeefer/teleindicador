@@ -677,11 +677,6 @@ export function renderizarPanelTeleindicador(datos) {
         celdaHora.innerHTML = horaMostrada;
         fila.appendChild(celdaHora);
 
-        // Línea (texto o pictograma extra)
-        const celdaLinea = document.createElement("td");
-        celdaLinea.textContent = linea;
-        fila.appendChild(celdaLinea);
-
         // Destino (con pastilla)
         const pictograma = obtenerRutaPictograma(linea);
         const celdaDestino = document.createElement("td");
@@ -718,12 +713,7 @@ export function renderizarPanelTeleindicador(datos) {
         const celdaVia = document.createElement("td");
         celdaVia.textContent = via;
         fila.appendChild(celdaVia);
-
-        // Tipo
-        const celdaTipo = document.createElement("td");
-        celdaTipo.textContent = tipo;
-        fila.appendChild(celdaTipo);
-
+        
         // Añadir la fila completa
         tbody.appendChild(fila);
     });
