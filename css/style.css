@@ -175,8 +175,11 @@ body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: var(--bg-color);
   color: var(--text-color);
-  padding: 2rem;
-  margin: 8px;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  margin: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -267,8 +270,8 @@ position: fixed;
 top: 50%; /* Corregido desde el original para centrar mejor */
 left: 50%;
 transform: translate(-50%, -50%);
-height: auto; /* Ajustado */
-width: auto; /* Ajustado */
+height: auto;
+width: auto;
 display: grid;
 place-items: center;
 background-color: var(--bg-color);
@@ -362,67 +365,110 @@ tbody tr:hover { background-color: var(--table-row-hover-bg); }
 .estado-es { box-shadow: inset 10px 0 0 0 rgba(50, 170, 50, 0.8); }
 .estado-sup { box-shadow: inset 10px 0 0 0 rgba(255, 0, 0, 0.8); }
 
-/* PANEL DE SUGERENCIAS FLOTANTE, IGUAL EN AMBOS TABS */
-.sugerencias {
-  position: absolute;
-  left: 0;
-  top: 100%;
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
-  margin-left: 0;
-  z-index: 1000;
-  background-color: var(--input-bg);
-  border: 2px solid var(--input-bg);
-  border-radius: 0 0 14px 14px;
-  box-shadow: 0 4px 12px var(--shadow-color);
-  max-height: 180px;
-  overflow-y: auto;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(-10px);
-  transition: opacity 0.2s, transform 0.2s, visibility 0.2s;
-  padding: 0;
-  margin: 0;
+/* Caja de sugerencias */
+.sugerenciasContainer{
+  display: flex; justify-content: center; margin-bottom: 0rem;
 }
-.sugerencias.visible {
-  opacity: 1;
-  visibility: visible;
-  transform: none;
-  display: block;
+
+#sugerencias.visible {
+opacity: 1;
+visibility: visible;
+transform: translateY(0);
 }
-.sugerencias div {
-  padding: 0.75rem 1rem;
-  cursor: pointer;
-  color: var(--text-color);
-  font-family: 'AdifHaussM', sans-serif;
-  font-size: 0.95rem;
-  transition: background-color 0.2s, color 0.2s;
-  border-bottom: 1px solid var(--bg-color);
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: none;
-  border: none;
+
+
+#sugerencias div {
+padding: 0.75rem 1rem;
+cursor: pointer;
+color: var(--text-color);
+font-family: 'AdifHaussM', sans-serif;
+font-size: 0.95rem;
+transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+border-bottom: 1px solid var(--bg-color);
 }
-.sugerencias div:last-child {
-  border-bottom: none;
-}
-.sugerencias div:hover {
-  background-color: var(--button-hover-bg);
-  color: var(--button-hover-color);
-}
-.codigo-estacion {
-  font-size: 0.85em;
-  color: var(--input-placeholder);
-  margin-left: 2px;
-  font-family: 'AdifHaussL', sans-serif;
-  font-feature-settings: 'tnum' 1;
+
+#sugerencias div:last-child {
+border-bottom: none;
 }
 
 
 /* --- Estilo al pasar el ratón por encima (Hover) --- */
+#sugerencias div:hover {
+background-color: var(--button-hover-bg);
+color: var(--button-hover-color);
+}
+
+#sugerencias,
+#favoritos {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  max-height: 17rem;
+  margin-left: 0;
+  overflow-y: auto;
+  z-index: 1000;
+  background-color: var(--input-bg);
+  border: 2px solid var(--input-bg);
+  border-radius: 10px;
+  box-shadow: 0 4px 12px var(--shadow-color);
+
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out, visibility 0.2s;
+}
+
+#sugerencias.visible,
+#favoritos.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  display: block;
+}
+
+#sugerencias div,
+#favoritos .sugerencia {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  color: var(--text-color);
+  font-family: 'AdifHaussM', sans-serif;
+  font-feature-settings: "tnum" 1;
+  font-size: 0.95rem;
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+  border-bottom: 1px solid var(--bg-color);
+}
+
+#sugerencias div:last-child,
+#favoritos .sugerencia:last-child {
+  border-bottom: none;
+}
+
+#sugerencias div:hover,
+#favoritos .sugerencia:hover {
+  background-color: var(--button-hover-bg);
+  color: var(--button-hover-color);
+}
+
+#favoritos .sugerencia.no-click {
+  color: var(--input-placeholder);
+  cursor: default;
+  pointer-events: none;
+}
+
+#favoritos .sugerencias-titulo,
+#sugerencias .sugerencias-titulo {
+  padding: 0.3em 0.8em 0.2em 0.8em !important;
+  font-size: 0.68em !important;
+  cursor: default !important;
+  border-bottom: 1px solid var(--bg-color) !important;
+  color: var(--input-placeholder) !important;
+  background: var(--bg-color);
+  pointer-events: none !important;
+  margin-bottom: 0.1em !important;
+  font-family: 'AdifHaussM', sans-serif !important;
+  text-transform: uppercase !important;
+  transition: none !important;
+}
 
 /* TABLA DE SALIDAS */
 .salidas-container {
@@ -599,8 +645,14 @@ tbody tr:hover { background-color: var(--table-row-hover-bg); }
   background-color: var(--button-hover-bg);
   color: var(--button-hover-color);
 }
+.codigo-estacion {
+    font-size: 0.85em;
+    color: var(--input-placeholder);
+    margin-left: 2px;
+    font-family: 'AdifHaussL', sans-serif;
+    font-feature-settings: 'tnum' 1;
+}
 
-/* --- Ajuste de ancho para input en .form-row --- */
 .form-row input {
   width: 320px;
   min-width: 0;
@@ -694,14 +746,6 @@ tbody tr:hover { background-color: var(--table-row-hover-bg); }
 }
 
 .input-sugerencias-wrapper {
-  display: inline-block;
-  position: relative;
-  width: 320px;
-  max-width: 100%;
-  min-width: 0;
-}
-
-.input-sugerencias-wrapper {
   position: relative;
   display: inline-block;
   width: 320px;
@@ -745,10 +789,6 @@ tbody tr:hover { background-color: var(--table-row-hover-bg); }
 .input-sugerencias-wrapper input.input-con-x {
   padding-right: 2.2em !important;
 }
-.input-con-x {
-  padding-right: 1.3em !important;
-}
-
 .fila-separador-dia td {
   background: var(--table-separator-bg);
   color: var(--table-separator-color);
@@ -776,98 +816,128 @@ tbody tr:hover { background-color: var(--table-row-hover-bg); }
 .numero-tren-clicable:hover {
   text-decoration: underline;
 }
-
-.panel-tele {
-  margin: 0 auto;
-  width: 96vw;
-  /* ...otros estilos */
-}
-
-.teleindicador-row {
-  display: grid;
-  grid-template-columns: 1fr 0.9fr 2fr 1.6fr 1fr 1fr 0.5fr;
-  align-items: center;
-  padding: 0.1em 0.5em;
-  border-bottom: 1px solid #bee6be;
-  background: #21486b;
-  color: #fff;
-  font-family: 'AdifHaussL', Arial, sans-serif;
-}
-.teleindicador-header {
-  background: #baf6c4;
-  color: #182946;
-  font-weight: bold;
-}
-.teleindicador-row:nth-child(odd):not(.teleindicador-header) {
-  background: #254e7a;
-}
-
-.filtros-tele {
+.input-sugerencias-wrapper .clear-input-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  color: #aaa;
+  border: none;
+  border-radius: 0;
+  font-size: 1.2em;
+  padding: 0 0.3em;
+  min-width: unset;
+  width: auto;
+  height: auto;
+  box-shadow: none;
+  margin: 0;
+  transition: opacity 0.18s ease, visibility 0.18s;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 1em;
-  width: 100%;
+  opacity: 0;
+  visibility: hidden;
+  z-index: 2;
+}
+.input-sugerencias-wrapper input.input-con-x {
+  padding-right: 2.2em !important; /* o más si la X es grande */
 }
 
-.tren-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background-color: #132039;
-  color: white;
-  padding: 0.8em 1em;
-  margin-bottom: 0.5em;
-  border-radius: 6px;
-  font-size: 1.1em;
-  font-family: 'Fira Sans', sans-serif;
+.input-sugerencias-wrapper .clear-input-btn:hover {
+  color: #e74c3c;
+  background: transparent;
+}
+.input-con-x {
+  padding-right: 1.8em !important;
+}
+.infoTablaGlobal + .infoTablaGlobal {
+    margin-top: 1em;
+}
+.sugerencias-titulo {
+  text-align: center;
+  text-transform: uppercase;
+  font-size: 0.78em;
+  font-family: 'AdifHaussM', sans-serif;
+  letter-spacing: 0.08em;
+  color: var(--input-placeholder);
+  padding: 0.3em 1em 0.1em 1em;
+  cursor: default;
+  user-select: none;
+  background: transparent;
+  border-bottom: 1px solid var(--bg-color);
+  pointer-events: none;
+  margin-bottom: 0.1em;
 }
 
-.tren-hora {
-  font-weight: bold;
-  width: 70px;
+#sugerencias .sugerencias-titulo {
+  padding: 0.3em 0.8em 0.2em 0.8em !important;
+  font-size: 0.68em !important;
+  cursor: default !important;
+  border-bottom: 1px solid var(--bg-color) !important;
+  color: var(--input-placeholder) !important;
+  background: var(--bg-color);
+  pointer-events: none !important;
+  margin-bottom: 0.1em !important;
+  font-family: 'AdifHaussM', sans-serif !important;
+  text-transform: uppercase !important;
+  transition: none !important;
 }
 
-.tren-linea-destino {
-  flex: 1;
-  margin-left: 1em;
+#sugerencias .sugerencias-titulo:hover {
+  background: transparent !important;
+  color: var(--input-placeholder) !important;
 }
 
-.linea {
-  font-weight: bold;
-  background-color: #3498db;
-  border-radius: 4px;
-  padding: 0.2em 0.6em;
+.input-sugerencias-wrapper .estrella-favorito {
+  position: static;
   margin-right: 0.5em;
-  color: #fff;
+  margin-left: 0;
+  background: none;
+  color: #aaa;
+  border: none;
+  border-radius: 0;
+  font-size: 1.2em;
+  padding: 0 0.3em;
+  min-width: unset;
+  width: auto;
+  height: auto;
+  box-shadow: none;
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
 }
 
-.destino {
-  font-weight: bold;
+.estrella-favorito {
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  color: #aaa !important;
+  font-size: 1.7em !important;
+  padding: 0 0 0 0.2rem !important;
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: color 0.2s;
 }
 
-.tren-operador {
-  font-size: 0.9em;
-  color: #dcdcdc;
-  margin-right: 1em;
-  width: 120px;
-  text-align: right;
+.estrella-favorito.favorito-activo {
+  color: gold !important;
 }
 
-.tren-num {
-  font-weight: bold;
-  width: 80px;
-  text-align: right;
+.nombre-estacion-wrap {
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
-
-.tren-via {
-  font-weight: bold;
-  width: 60px;
-  text-align: right;
+.barraBusqueda{
+  gap: 0.5rem;
 }
-
-.pastilla-linea {
-    height: 1.3em;
-    margin-right: 0.5em;
-    vertical-align: middle;
+#parametrosEstacion{
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+.resultado-header{
+  padding-left: 1rem;
+  padding-right: 1rem;
 }
