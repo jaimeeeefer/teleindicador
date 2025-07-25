@@ -718,21 +718,41 @@ function traducirOperador(operador) {
 }
 
 
-function obtenerRutaPictograma(linea) {
-    const nombresArchivos = {
-        'C1': 'Cercanías_C1_(Rojo).svg',
-        'C2': 'Cercanías_C2.svg',
-        'C3': 'Cercanías_C3_(Azul).svg',
-        'C4': 'Cercanías_C4_(MoradoAM).svg',
-        'C5': 'Cercanías_C5.svg',
-        'C6': 'Cercanías_C6_(AzulAM).svg',
-        'C7': 'Cercanías_C7_(NaranjaAM).svg',
-        'C8': 'Cercanías_C8.svg',
-        'C9': 'Cercanías_C9.svg',
-        'C10': 'Cercanías_C10.svg'
+function obtenerRutaPictograma(linea, core) {
+    const pictogramasCercanias = {
+        MADRID: {
+            C1: 'C1AZUL.svg',
+            C2: 'C2VERDE.svg',
+            C3: 'C3MORADO.svg',
+            C4: 'C4AZUL.svg',
+            C4a: 'C4AAZUL.svg',
+            C4b: 'C4BAZUL.svg',
+            C5: 'C5AMARILLO.svg',
+            C7: 'C7ROJA.svg',
+            C8: 'C8GRIS.svg',
+            C8a: 'C8AGRIS.svg',
+            C9: 'C9NARANJA.svg',
+            C10: 'C10VERDE.svg'
+        },
+        BILBAO: {
+            C1: 'C1ROJA.svg',
+            C2: 'C2VERDE.svg',
+            C3: 'C3AZUL.svg',
+            C4: 'C4MORADO.svg',
+            C5: 'C5AZUL.svg'
+        },
+        SEVILLA: {
+            C1: 'C1ROJA.svg',
+            C2: 'C2VERDE.svg',
+            C3: 'C3AZUL.svg',
+            C4: 'C4MORADO.svg'
+        }
+        // ... añade otros núcleos si los necesitas
     };
-    if (!linea) return null;
-    return nombresArchivos[linea] ? `img/${nombresArchivos[linea]}` : null;
+    if (!linea || !core) return null;
+    const imgsNucleo = pictogramasCercanias[core.toUpperCase()];
+    if (!imgsNucleo) return null;
+    return imgsNucleo[linea] ? `img/${imgsNucleo[linea]}` : null;
 }
 
 export function renderizarPanelTeleindicador(datos) {
@@ -777,6 +797,7 @@ export function renderizarPanelTeleindicador(datos) {
         }
 
         const linea = info.line ?? "-";
+        const core = info.core
         const destinoCodigo = info.commercialDestinationStationCode ?? "-";
         const destino = estaciones[destinoCodigo.replace(/^0+/, '')] ?? destinoCodigo;
         const operador = traducirOperador(info.opeProComPro?.operator);
@@ -796,7 +817,7 @@ export function renderizarPanelTeleindicador(datos) {
         fila.appendChild(celdaHora);
 
         // Destino (con pastilla)
-        const pictograma = obtenerRutaPictograma(linea);
+        const pictograma = obtenerRutaPictograma(linea, core);
         const celdaDestino = document.createElement("td");
         celdaDestino.className = "destino-con-pastilla";
         celdaDestino.style.display = "flex";
