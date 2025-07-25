@@ -649,7 +649,7 @@ tbody tr:hover { background-color: var(--table-row-hover-bg); }
 
   /* --- Reglas que antes estaban solo en 400px pero se pueden aplicar ya en 600px --- */
   .teleindicador-panel {
-    padding: 0 0.5em;
+    padding: 0 1em;
   }
 
   .panel-tele {
@@ -684,6 +684,7 @@ tbody tr:hover { background-color: var(--table-row-hover-bg); }
 
   .destino-con-pastilla {
     font-size: 1em;
+    align-items: center;
     gap: 0.3em;
   }
 }
