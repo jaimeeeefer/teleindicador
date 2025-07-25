@@ -200,6 +200,8 @@ body {
 .visible { display: block !important; }
 h1, h2 { margin-bottom: 1rem; }
 pre {
+  margin-left: 1rem;
+  margin-right: 1rem;
   background: var(--pre-bg);
   color: var(--pre-color);
   padding: 1rem;
@@ -304,8 +306,8 @@ text-align: center;
 .tab-button.active:hover { background-color: var(--button-hover-bg); color: var(--button-hover-color);}
 .tab-button.active:hover::after { background-color: var(--button-hover-color);}
 .consulta-container{margin: 0 auto; max-width: 1000px; justify-content: center; align-items: center; overflow-x: visible; overflow-y: visible;}
-.texto-datos { margin: 0 auto; max-width: 1000px; justify-content: center; align-items: center; overflow-x: auto; }
-.titulo-magallanes { font-size: 3rem; color: var(--header-color); text-align: center; margin-bottom: 1rem; font-weight: lighter; position: relative; margin-top: 0; font-family: 'AdifHaussM', sans-serif;}
+.texto-datos { display: grid; margin: 0 1.5rem; justify-content: center; align-items: center; overflow-x: auto; }
+.titulo-magallanes { font-size: 3rem; color: var(--header-color); text-align: center; margin-bottom: 1rem; margin-right: 0.5rem; margin-left: 0.5rem; font-weight: lighter; position: relative; margin-top: 0; font-family: 'AdifHaussM', sans-serif;}
 .titulo-magallanes::after { content: ''; display: block; width: 60px; height: 4px; background-color: var(--header-color); margin: 1rem auto 0; border-radius: 2px; }
 .icono-magallanes { width: 3.5rem; height: 3.5rem; transform: translateY(10px); }
 .form-row { display: flex; justify-content: center; align-items: center; gap: 1rem; margin-bottom: 0; position: relative; /* Añadido para posicionar sugerencias respecto a este contenedor */ }
