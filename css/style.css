@@ -540,7 +540,8 @@ color: var(--button-hover-color);
 }
 
 /* --- Estilos para parametrosEstacion --- */
-#parametrosEstacion {
+#parametrosEstacion,
+#parametrosTeleindicador {
   margin: 1.5rem 0 1rem 0;
   display: flex;
   flex-direction: row;
@@ -552,7 +553,8 @@ color: var(--button-hover-color);
   min-width: 0;
 }
 
-#parametrosEstacion .form-row {
+#parametrosEstacion .form-row,
+#parametrosTeleindicador .form-row {
   flex: 1 1 180px;
   min-width: 120px;
   max-width: 260px;
@@ -561,14 +563,16 @@ color: var(--button-hover-color);
   justify-content: flex-start;
 }
 
-#parametrosEstacion label {
+#parametrosEstacion label,
+#parametrosTeleindicador label {
   font-family: 'AdifHaussM', sans-serif;
   font-size: 1rem;
   color: var(--text-color);
   margin-right: 0.5rem;
 }
 
-#parametrosEstacion select {
+#parametrosEstacion select,
+#parametrosTeleindicador select {
   padding: 0.5rem 1rem;
   border-radius: 10px;
   border: 2px solid transparent;
@@ -582,7 +586,8 @@ color: var(--button-hover-color);
   cursor: pointer;
 }
 
-#parametrosEstacion select option {
+#parametrosEstacion select option,
+#parametrosTeleindicador select option {
   background-color: var(--input-bg);
   color: var(--text-color);
   font-family: 'AdifHaussM', sans-serif;
@@ -592,7 +597,8 @@ color: var(--button-hover-color);
   transition: background 0.2s, color 0.2s;
 }
 
-#parametrosEstacion select:hover {
+#parametrosEstacion select:hover,
+#parametrosTeleindicador select:hover {
   background-color: var(--button-hover-bg);
   color: var(--button-hover-color);
 }
@@ -681,12 +687,14 @@ color: var(--button-hover-color);
   }
 
 
-  #parametrosEstacion .form-row {
+  #parametrosEstacion .form-row,
+  #parametrosTeleindicador .form-row {
     flex-direction: column;
     align-items: stretch;
   }
 
-  #parametrosEstacion select {
+  #parametrosEstacion select,
+  #parametrosTeleindicador select {
     width: 100%;
     max-width: 100%;
   }
@@ -945,7 +953,8 @@ color: var(--button-hover-color);
 .barraBusqueda{
   gap: 0.5rem;
 }
-#parametrosEstacion{
+#parametrosEstacion,
+#parametrosTeleindicador {
   padding-left: 1rem;
   padding-right: 1rem;
 }
