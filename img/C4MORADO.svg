@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Generator: Adobe Illustrator 25.2.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+
+<svg
+   version="1.1"
+   id="svg10"
+   inkscape:version="1.1.2 (b8e25be833, 2022-02-05)"
+   sodipodi:docname="Cercanías_C4_MoradoAM.svg"
+   x="0px"
+   y="0px"
+   viewBox="0 0 356.9479065 196.3253326"
+   style="enable-background:new 0 0 356.9479065 196.3253326;"
+   xml:space="preserve"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+   id="defs21"><linearGradient
+   inkscape:collect="always"
+   id="linearGradient844"><stop
+     style="stop-color:#000000;stop-opacity:1;"
+     offset="0"
+     id="stop840" /><stop
+     style="stop-color:#000000;stop-opacity:0;"
+     offset="1"
+     id="stop842" /></linearGradient>
+	
+<linearGradient
+   inkscape:collect="always"
+   xlink:href="#linearGradient844"
+   id="linearGradient846"
+   x1="3.3932114"
+   y1="98.162664"
+   x2="351.59933"
+   y2="98.162664"
+   gradientUnits="userSpaceOnUse" /></defs><sodipodi:namedview
+   id="namedview19"
+   pagecolor="#ffffff"
+   bordercolor="#666666"
+   borderopacity="1.0"
+   inkscape:pageshadow="2"
+   inkscape:pageopacity="0.0"
+   inkscape:pagecheckerboard="0"
+   showgrid="false"
+   inkscape:zoom="0.79423354"
+   inkscape:cx="-86.246672"
+   inkscape:cy="-64.212851"
+   inkscape:window-width="1920"
+   inkscape:window-height="1017"
+   inkscape:window-x="-8"
+   inkscape:window-y="-8"
+   inkscape:window-maximized="1"
+   inkscape:current-layer="svg10" />
+<style
+   type="text/css"
+   id="style2">
+	.st0{fill-rule:evenodd;clip-rule:evenodd;fill:#F5333F;}
+	.st1{fill-rule:evenodd;clip-rule:evenodd;fill:#FFFFFF;}
+</style>
+<g
+   id="g6"
+   style="fill-opacity:1;fill:#802168">
+		<path
+   class="st0"
+   d="M 265.02823,3.2786984 H 89.964325 c -47.608326,0 -86.5711136,38.9503856 -86.5711136,86.5711056 v 16.625716 c 0,47.62073 38.9627836,86.57111 86.5711136,86.57111 H 265.02823 c 47.60834,0 86.5711,-38.95038 86.5711,-86.57111 V 89.849808 c 0,-47.620724 -38.97518,-86.5711096 -86.5711,-86.5711096 z"
+   id="path4"
+   style="fill-opacity:1;fill:#802168" />
+	</g>
+<g
+   id="g16">
+	<path
+   class="st1"
+   d="M121.8372192,75.8988495l22.4243317-22.4175682c-24.7003784-24.7003803-64.9721527-24.7003803-89.6725311,0   c-24.6891022,24.6958733-24.6891022,64.9789276,0,89.6725311c24.7003784,24.7003937,64.9721527,24.7003937,89.6725311,0   l-22.8912735-22.8980331c-11.2155533,11.2087784-29.7397079,15.104454-44.3569183,0.4804688   c-12.3479385-12.3479309-12.3479385-32.4894562,0-44.8373947C89.3477554,63.5531731,109.496048,63.5531731,121.8372192,75.8988495z   "
+   id="path10" />
+	<rect
+   x="151.6468506"
+   y="87.7482681"
+   class="st1"
+   width="52.8159561"
+   height="21.1520977"
+   id="rect12" />
+	<path
+   class="st1"
+   d="M262.5166016,56.8513603h-1.7391663l-27.6170654,53.0911598h29.3562317V56.8513603L262.5166016,56.8513603z    M292.0578003,130.212616v31.4653625h-29.5411987V130.212616h-51.5820618v-15.6413116l43.8448639-79.5307159h36.3129425v74.9019318   h15.2623596v20.2700958H292.0578003z"
+   id="path14" />
+</g>
+</svg>
