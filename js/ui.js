@@ -751,6 +751,7 @@ function obtenerRutaPictograma(linea, core) {
             C7: 'C7ROJA.svg',
             C8: 'C8GRIS.svg',
             C8a: 'C8AGRIS.svg',
+            C8b: 'C8BGRIS.svg',
             C9: 'C9NARANJA.svg',
             C10: 'C10VERDE.svg'
         },
@@ -773,6 +774,67 @@ function obtenerRutaPictograma(linea, core) {
     const imgsNucleo = pictogramasCercanias[core.toUpperCase()];
     if (!imgsNucleo) return null;
     return imgsNucleo[linea] ? `img/${imgsNucleo[linea]}` : null;
+}
+
+function obtenerRutaIconoADIF(adif) {
+  const reglas = {
+    AVLDMD: {
+      commercialProduct: {
+        "AVANT": 'AVANT.png',
+        "ALVIA": 'ALVIA.png',
+        "MD": 'MD.png',
+        "REGIONAL": 'REG.png',
+        "REGIONAL EXPRES": 'REX.png',
+        "INTERCITY": 'ICITY.png',
+        "AVLO": 'AVLO.png',
+        "OUIGO": 'OUIGO.png',
+        "IRYO": 'IRYO.png',
+      },
+      default: 'RENFE.png'
+    },
+    GOODS: {
+      operator: {
+        CT: '',
+        // …otros operadores de mercancías
+      },
+      default: ''
+    },
+    CERCANIAS: {
+      operator: {
+        RF: 'CERCAN.PNG'
+      },
+      default: 'CERCAN.PNG'
+    },
+    // …añade aquí cada trafficType que necesites
+  };
+
+  const { trafficType, opeProComPro = {} } = adif;
+  const regla = reglas[trafficType];
+  if (!regla) return '';  // sin regla → nada
+
+  // 1) commercialProduct si existe en la regla
+  if (regla.commercialProduct) {
+    const prod = opeProComPro.commercialProduct;
+    if (prod && regla.commercialProduct[prod]) {
+      return `/teleindicador/img/${regla.commercialProduct[prod]}`;
+    }
+  }
+
+  // 2) operator si existe en la regla
+  if (regla.operator) {
+    const op = opeProComPro.operator;
+    if (op && regla.operator[op]) {
+      return `/teleindicador/img/${regla.operator[op]}`;
+    }
+  }
+
+  // 3) default de este trafficType, si lo hay
+  if (regla.default) {
+    return `/teleindicador/img/${regla.default}`;
+  }
+
+  // 4) sin default → nada
+  return '';
 }
 
 export function renderizarPanelTeleindicador(datos) {
@@ -860,7 +922,22 @@ export function renderizarPanelTeleindicador(datos) {
 
         // Operador
         const celdaOperador = document.createElement("td");
-        celdaOperador.textContent = operador;
+        const ruta = obtenerRutaIconoADIF(tren.commercialPathInfo);
+
+        if (ruta) {
+        const img = document.createElement("img");
+        img.src = ruta;
+        img.alt = (
+            tren.commercialPathInfo.opeProComPro?.commercialProduct ||
+            tren.commercialPathInfo.opeProComPro?.operator ||
+            tren.commercialPathInfo.opeProComPro?.product ||
+            ''
+        );
+        img.onerror = () => { img.src = '/teleindicador/img/default.svg'; };
+        img.style.height = '1.5em';
+        celdaOperador.appendChild(img);
+        }
+        // si ruta === '' queda celda vacía
         fila.appendChild(celdaOperador);
 
         // Nº tren
