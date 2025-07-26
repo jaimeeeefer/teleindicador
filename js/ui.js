@@ -919,7 +919,6 @@ export function renderizarPanelTeleindicador(datos) {
             img.src = pictograma;
             img.alt = linea;
             img.className = "pastilla-linea";
-            img.style.height = "1.5em";
             celdaDestino.appendChild(img);
         }
 
