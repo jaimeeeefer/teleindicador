@@ -655,6 +655,12 @@ function formatearTimestampHora(ms) {
     return new Date(ms).toLocaleTimeString('es-ES');
 }
 
+function formatearTimestampHoraTele(timestamp) {
+    if (!timestamp) return "-";
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }); // SIN segundos
+}
+
 function calcularHoraReal(horaTeoricaStr, retrasoSegundos) {
     if (!horaTeoricaStr || retrasoSegundos === null) return '';
     const [horas, minutos, segundos] = horaTeoricaStr.split(':').map(Number);
@@ -788,7 +794,7 @@ export function renderizarPanelTeleindicador(datos) {
             && (infoextra.forecastedOrAuditedDelay >= 180 || infoextra.forecastedOrAuditedDelay < 0)
             && estadoTraducido !== 'PENDIENTE DE CIRCULAR';
 
-        let horaPlanificada = infoextra?.plannedTime ? formatearTimestampHora(infoextra.plannedTime) : "-";
+        let horaPlanificada = infoextra?.plannedTime ? formatearTimestampHoraTele(infoextra.plannedTime) : "-";
         let horaMostrada = horaPlanificada;
 
         if (tacharHora) {
