@@ -603,9 +603,10 @@ color: var(--button-hover-color);
   color: var(--button-hover-color);
 }
 
-#teleindicador table td,
-#teleindicador table th {
-  vertical-align: middle;
+.destino-con-pastilla {
+  display: flex;
+  align-items: center;   /* centra verticalmente pastilla + texto */
+  gap: 0.5em;            /* separación entre la “pastilla” y el texto */
 }
 
 .custom-select {
