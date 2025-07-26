@@ -603,6 +603,11 @@ color: var(--button-hover-color);
   color: var(--button-hover-color);
 }
 
+#teleindicador table td,
+#teleindicador table th {
+  vertical-align: middle;
+}
+
 .custom-select {
   position: relative;
   width: 200px;
