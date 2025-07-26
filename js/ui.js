@@ -935,7 +935,7 @@ export function renderizarPanelTeleindicador(datos) {
             ''
         );
         img.onerror = () => { img.src = ''; };
-        img.style.height = '1.5em';
+        img.style.height = '3em';
         celdaOperador.appendChild(img);
         }
         // si ruta === '' queda celda vacía
