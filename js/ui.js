@@ -907,28 +907,37 @@ export function renderizarPanelTeleindicador(datos) {
         // Hora
         const celdaHora = document.createElement("td");
         celdaHora.innerHTML = horaMostrada;
+
+        // ─── LÓGICA DE PARPADEO ───
+        // `infoextra.plannedTime` es un timestamp en ms.
+        // Calculamos cuántos minutos faltan desde ahora:
+        const diffMin = (infoextra.plannedTime - Date.now()) / 1000 / 60;
+        if (diffMin >= 0 && diffMin <= 5) {
+        celdaHora.classList.add('parpadeante');
+        }
+
         fila.appendChild(celdaHora);
 
         // Destino (con pastilla)
         const pictograma = obtenerRutaPictograma(linea, core);
-        const celdaDestino = document.createElement("td"); // 1. Creamos la celda <td> vacía.
-        
-        const wrapperDiv = document.createElement("div"); // 2. Creamos un <div> contenedor.
-        wrapperDiv.className = "destino-con-pastilla";   // 3. Le aplicamos la clase flex a este <div>.
-        
+        const celdaDestino = document.createElement("td");
+
+        const wrapperDiv = document.createElement("div");
+        wrapperDiv.className = "destino-con-pastilla";
+
         if (pictograma) {
             const img = document.createElement("img");
             img.src = pictograma;
             img.alt = linea;
             img.className = "pastilla-linea";
-            wrapperDiv.appendChild(img); // 4. Añadimos la imagen al <div>.
+            wrapperDiv.appendChild(img);
         }
-        
+
         const spanDestino = document.createElement("span");
         spanDestino.textContent = destino ?? "-";
-        wrapperDiv.appendChild(spanDestino); // 5. Añadimos el texto al <div>.
-        
-        celdaDestino.appendChild(wrapperDiv); // 6. Finalmente, metemos el <div> con todo su contenido en el <td>.
+        wrapperDiv.appendChild(spanDestino);
+
+        celdaDestino.appendChild(wrapperDiv);
         fila.appendChild(celdaDestino);
 
         // Operador
