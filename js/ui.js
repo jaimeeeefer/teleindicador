@@ -913,9 +913,6 @@ export function renderizarPanelTeleindicador(datos) {
         const pictograma = obtenerRutaPictograma(linea, core);
         const celdaDestino = document.createElement("td");
         celdaDestino.className = "destino-con-pastilla";
-        celdaDestino.style.display = "flex";
-        celdaDestino.style.alignItems = "center";
-        celdaDestino.style.gap = "0.5em";
 
         if (pictograma) {
             const img = document.createElement("img");
