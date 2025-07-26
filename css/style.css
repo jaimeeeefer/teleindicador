@@ -619,17 +619,27 @@ color: var(--button-hover-color);
   max-width: 4em;
 }
 
-@keyframes parpadeo {
-  0%, 100% { opacity: 1; }
-  50%      { opacity: 0; }
+@-webkit-keyframes fadeBlink {
+  0%   { opacity: 1; }
+  50%  { opacity: 0; }
+  100% { opacity: 1; }
 }
-
-#parpadeante {
-  animation: parpadeo 1s step-start infinite;
+@-moz-keyframes fadeBlink {
+  0%   { opacity: 1; }
+  50%  { opacity: 0; }
+  100% { opacity: 1; }
+}
+@keyframes fadeBlink {
+  0%   { opacity: 1; }
+  50%  { opacity: 0; }
+  100% { opacity: 1; }
 }
 
 .parpadeante {
-  animation: parpadeo 1s step-start infinite;
+  /* usa la animación con ease-in-out en lugar de step-start */
+  -webkit-animation: fadeBlink 1s ease-in-out infinite;
+     -moz-animation: fadeBlink 1s ease-in-out infinite;
+          animation: fadeBlink 1s ease-in-out infinite;
 }
 
 .custom-select {
