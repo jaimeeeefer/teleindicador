@@ -607,14 +607,17 @@ color: var(--button-hover-color);
   display: flex;
   align-items: center;
   gap: 0.5em;
-  height: 100%;
+}
+
+.destino-con-pastilla > * {
+  align-self: center;       /* fuerza a cada hijo a situarse en el centro vertical */
 }
 
 .destino-con-pastilla .pastilla-linea {
-  height: 1.5em;    /* o 24px, lo que mejor encaje en tu fila */
-  width: auto;      /* ¡importante para mantener proporción! */
-  max-width: 4em;   /* opcional: para que no crezca demasiado de ancho */
-  display: block;   /* evita saltos inesperados */
+  height: 1.5em;
+  width: auto;
+  max-width: 4em;
+  display: block;
 }
 
 .custom-select {
