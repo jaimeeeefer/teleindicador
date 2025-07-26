@@ -912,7 +912,7 @@ export function renderizarPanelTeleindicador(datos) {
         // `infoextra.plannedTime` es un timestamp en ms.
         // Calculamos cuántos minutos faltan desde ahora:
         const diffMin = (infoextra.plannedTime - Date.now()) / 1000 / 60;
-        if (diffMin >= -5 && diffMin <= 5) {
+        if (diffMin >= -10 && diffMin <= 5) {
         celdaHora.classList.add('parpadeante');
         }
 
