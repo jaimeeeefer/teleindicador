@@ -628,6 +628,10 @@ color: var(--button-hover-color);
   animation: parpadeo 1s step-start infinite;
 }
 
+.parpadeante {
+  animation: parpadeo 1s step-start infinite;
+}
+
 .custom-select {
   position: relative;
   width: 200px;
