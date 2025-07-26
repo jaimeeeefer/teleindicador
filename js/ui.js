@@ -934,7 +934,7 @@ export function renderizarPanelTeleindicador(datos) {
             tren.commercialPathInfo.opeProComPro?.product ||
             ''
         );
-        img.onerror = () => { img.src = '/teleindicador/img/default.svg'; };
+        img.onerror = () => { img.src = ''; };
         img.style.height = '1.5em';
         celdaOperador.appendChild(img);
         }
