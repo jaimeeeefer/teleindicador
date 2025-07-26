@@ -911,20 +911,24 @@ export function renderizarPanelTeleindicador(datos) {
 
         // Destino (con pastilla)
         const pictograma = obtenerRutaPictograma(linea, core);
-        const celdaDestino = document.createElement("td");
-        celdaDestino.className = "destino-con-pastilla";
-
+        const celdaDestino = document.createElement("td"); // 1. Creamos la celda <td> vacía.
+        
+        const wrapperDiv = document.createElement("div"); // 2. Creamos un <div> contenedor.
+        wrapperDiv.className = "destino-con-pastilla";   // 3. Le aplicamos la clase flex a este <div>.
+        
         if (pictograma) {
             const img = document.createElement("img");
             img.src = pictograma;
             img.alt = linea;
             img.className = "pastilla-linea";
-            celdaDestino.appendChild(img);
+            wrapperDiv.appendChild(img); // 4. Añadimos la imagen al <div>.
         }
-
+        
         const spanDestino = document.createElement("span");
         spanDestino.textContent = destino ?? "-";
-        celdaDestino.appendChild(spanDestino);
+        wrapperDiv.appendChild(spanDestino); // 5. Añadimos el texto al <div>.
+        
+        celdaDestino.appendChild(wrapperDiv); // 6. Finalmente, metemos el <div> con todo su contenido en el <td>.
         fila.appendChild(celdaDestino);
 
         // Operador
