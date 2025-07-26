@@ -789,6 +789,7 @@ function obtenerRutaIconoADIF(adif) {
         "AVLO": 'AVLO.png',
         "OUIGO": 'OUIGO.png',
         "IRYO": 'IRYO.png',
+        "Material Vacio": 'SSERV.png'
       },
       default: 'RENFE.png'
     },
