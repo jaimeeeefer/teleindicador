@@ -617,7 +617,6 @@ color: var(--button-hover-color);
   height: 1.5em;
   width: auto;
   max-width: 4em;
-  display: block;
 }
 
 .custom-select {
