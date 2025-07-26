@@ -619,6 +619,15 @@ color: var(--button-hover-color);
   max-width: 4em;
 }
 
+@keyframes parpadeo {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0; }
+}
+
+#parpadeante {
+  animation: parpadeo 1s step-start infinite;
+}
+
 .custom-select {
   position: relative;
   width: 200px;
