@@ -817,7 +817,7 @@ function obtenerRutaIconoADIF(adif) {
   if (regla.commercialProduct) {
     const prod = opeProComPro.commercialProduct;
     if (prod && regla.commercialProduct[prod]) {
-      return `/teleindicador/img/${regla.commercialProduct[prod]}`;
+      return `img/${regla.commercialProduct[prod]}`;
     }
   }
 
@@ -825,13 +825,13 @@ function obtenerRutaIconoADIF(adif) {
   if (regla.operator) {
     const op = opeProComPro.operator;
     if (op && regla.operator[op]) {
-      return `/teleindicador/img/${regla.operator[op]}`;
+      return `img/${regla.operator[op]}`;
     }
   }
 
   // 3) default de este trafficType, si lo hay
   if (regla.default) {
-    return `/teleindicador/img/${regla.default}`;
+    return `img/${regla.default}`;
   }
 
   // 4) sin default → nada
