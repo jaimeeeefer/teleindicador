@@ -795,8 +795,19 @@ function obtenerRutaIconoADIF(adif) {
     },
     GOODS: {
       operator: {
-        CT: '',
-        // …otros operadores de mercancías
+        "CM": 'CAPTRAIN.png',
+        "MW": 'MEDWAY.png',
+        "CF": 'CEFSA.png',
+        "CT": 'CONTI.png',
+        "RM": 'RM.png',
+        "AD": 'ADIF.png',
+        "GT": 'GO.png',
+        "LC": 'LCR.png',
+        "TT": 'TRANSFESA.png',
+        "LG": 'LOGITREN.png',
+        "AL": 'ALSA.png',
+        "RX": 'ATHOS.png',
+        "TR": 'TRACCION.png',
       },
       default: ''
     },
@@ -806,7 +817,6 @@ function obtenerRutaIconoADIF(adif) {
       },
       default: 'CERCAN.png'
     },
-    // …añade aquí cada trafficType que necesites
   };
 
   const { trafficType, opeProComPro = {} } = adif;
@@ -935,7 +945,7 @@ export function renderizarPanelTeleindicador(datos) {
             ''
         );
         img.onerror = () => { img.src = ''; };
-        img.style.height = '3em';
+        img.style.height = '2.5em';
         celdaOperador.appendChild(img);
         }
         // si ruta === '' queda celda vacía
