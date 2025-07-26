@@ -605,8 +605,9 @@ color: var(--button-hover-color);
 
 .destino-con-pastilla {
   display: flex;
-  align-items: center;   /* centra verticalmente pastilla + texto */
-  gap: 0.5em;            /* separación entre la “pastilla” y el texto */
+  align-items: center;
+  gap: 0.5em;
+  height: 100%;
 }
 
 .custom-select {
