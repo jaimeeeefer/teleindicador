@@ -610,6 +610,13 @@ color: var(--button-hover-color);
   height: 100%;
 }
 
+.destino-con-pastilla .pastilla-linea {
+  height: 1.5em;    /* o 24px, lo que mejor encaje en tu fila */
+  width: auto;      /* ¡importante para mantener proporción! */
+  max-width: 4em;   /* opcional: para que no crezca demasiado de ancho */
+  display: block;   /* evita saltos inesperados */
+}
+
 .custom-select {
   position: relative;
   width: 200px;
