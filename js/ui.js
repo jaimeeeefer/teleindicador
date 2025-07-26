@@ -673,6 +673,20 @@ function calcularHoraReal(horaTeoricaStr, retrasoSegundos) {
     return `${h}:${m}:${s}`;
 }
 
+function calcularHoraRealTele(horaTeoricaStr, retrasoSegundos) {
+    if (!horaTeoricaStr || retrasoSegundos === null) return '';
+    // Permitir hora con o sin segundos
+    let [horas, minutos, segundos] = horaTeoricaStr.split(':').map(Number);
+    if (segundos === undefined || isNaN(segundos)) segundos = 0;
+    let totalSegundos = horas * 3600 + minutos * 60 + segundos + retrasoSegundos;
+    totalSegundos = ((totalSegundos % 86400) + 86400) % 86400; // Manejar días y negativos
+    
+    const h = Math.floor(totalSegundos / 3600).toString().padStart(2, '0');
+    const m = Math.floor((totalSegundos % 3600) / 60).toString().padStart(2, '0');
+    const s = (totalSegundos % 60).toString().padStart(2, '0');
+    return `${h}:${m}`; // si quieres mostrar sin segundos
+}
+
 function formatoRetraso(segundosTotales) {
     if (segundosTotales === null) return '';
     const negativo = segundosTotales < 0 ? '-' : '';
@@ -798,7 +812,7 @@ export function renderizarPanelTeleindicador(datos) {
         let horaMostrada = horaPlanificada;
 
         if (tacharHora) {
-            const horaEstim = calcularHoraReal(horaPlanificada, infoextra.forecastedOrAuditedDelay);
+            const horaEstim = calcularHoraRealTele(horaPlanificada, infoextra.forecastedOrAuditedDelay);
             horaMostrada = `<span style="text-decoration:line-through;color:gray;">${horaPlanificada}</span><br><span class="${getColorClass(infoextra.forecastedOrAuditedDelay)}">${horaEstim}</span>`;
         }
 
