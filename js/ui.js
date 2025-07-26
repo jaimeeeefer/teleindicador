@@ -802,9 +802,9 @@ function obtenerRutaIconoADIF(adif) {
     },
     CERCANIAS: {
       operator: {
-        RF: 'CERCAN.PNG'
+        RF: 'CERCAN.png'
       },
-      default: 'CERCAN.PNG'
+      default: 'CERCAN.png'
     },
     // …añade aquí cada trafficType que necesites
   };
