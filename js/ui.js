@@ -1033,6 +1033,8 @@ export function renderizarPanelTeleindicador(datos) {
         // Nº tren
         const celdaNumTren = document.createElement("td");
         celdaNumTren.textContent = numeroTren;
+        celdaNumTren.classList.add("numero-tren-clicable")
+        celdaNumTren.setAttribute("onclick",`buscarTrenClick('${numeroTren}')`);
         fila.appendChild(celdaNumTren);
 
         // Vía
