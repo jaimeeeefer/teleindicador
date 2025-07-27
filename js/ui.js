@@ -954,7 +954,8 @@ export function renderizarPanelTeleindicador(datos) {
             ''
         );
         img.onerror = () => { img.src = ''; };
-        img.style.height = '2.5em';
+        //img.style.height = '2.5em';
+        img.classList.add("icono-operador");
         celdaOperador.appendChild(img);
         }
         // si ruta === '' queda celda vacía
@@ -1028,7 +1029,7 @@ export function autocompletarEstacionesTele() {
                 estacion.value = nombre;
                 estacion.setAttribute('data-codigo', codigo);
                 sugerencias.classList.remove('visible');
-                document.getElementById('clearStationInputTele').classList.add('visible');
+                document.getElementById('clearNumeroTele').classList.add('visible');
                 estacion.classList.add('input-con-x');
             });
             sugerencias.appendChild(item);
