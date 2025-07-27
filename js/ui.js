@@ -1020,7 +1020,7 @@ export function renderizarPanelTeleindicador(datos) {
     // parpadeo 0–5 min
     if (horaEstimMs) {
       const diffMin = (horaEstimMs - Date.now()) / 1000 / 60;
-      if (diffMin >= 0 && diffMin <= 5) {
+      if (diffMin >= -10 && diffMin <= 5) {
         tdHora.classList.add("parpadeante");
       }
     }
