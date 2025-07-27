@@ -537,11 +537,52 @@ export function toggleFavoritoEstacion(codigo) {
     }
     setFavoritosEstaciones(favs);
     mostrarFavoritoEstrella();
+    mostrarFavoritoEstrellaTele();
 }
 
 export function mostrarFavoritoEstrella() {
   const estacionInput = document.getElementById("numeroEst");
   const estrella = document.getElementById("estrellaFavoritoEst");
+  const estaciones = getEstaciones();
+  let codigo = null;
+  const inputNorm = estacionInput.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/-/g, " ").replace(/\s+/g, " ").trim();
+
+  // Si el input es numérico, buscar por código también
+  const esNumerico = /^\d+$/.test(estacionInput.value.trim());
+
+  for (const [cod, nombre] of Object.entries(estaciones)) {
+    const nombreNorm = nombre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/-/g, " ").replace(/\s+/g, " ").trim();
+
+    // Coincidencia por nombre normalizado
+    if (nombreNorm === inputNorm) {
+      codigo = cod;
+      break;
+    }
+
+    // Coincidencia por código (rellenado a 5 dígitos)
+    if (esNumerico && (cod === estacionInput.value.trim() || cod.padStart(5, '0') === estacionInput.value.trim())) {
+      codigo = cod;
+      break;
+    }
+  }
+
+  if (!codigo) {
+    estrella.classList.remove('favorito-activo');
+    return;
+  }
+  const favs = getFavoritosEstaciones();
+  if (favs.includes(codigo)) {
+    estrella.classList.add('favorito-activo');
+  } else {
+    estrella.classList.remove('favorito-activo');
+  }
+}
+
+// FAVORITOS TELEINDICADOR
+
+export function mostrarFavoritoEstrellaTele() {
+  const estacionInput = document.getElementById("stationInputTele");
+  const estrella = document.getElementById("estrellaFavoritoTele");
   const estaciones = getEstaciones();
   let codigo = null;
   const inputNorm = estacionInput.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/-/g, " ").replace(/\s+/g, " ").trim();
