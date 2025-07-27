@@ -789,7 +789,8 @@ function obtenerRutaIconoADIF(adif) {
         "AVLO": 'AVLO.png',
         "OUIGO": 'OUIGO.png',
         "IRYO": 'IRYO.png',
-        "Material Vacio": 'SSERV.png'
+        "Material Vacio": 'SSERV.png',
+        "REGIONAL RAM": 'FEVE.png'
       },
       default: 'RENFE.png'
     },
@@ -807,13 +808,14 @@ function obtenerRutaIconoADIF(adif) {
         "LG": 'LOGITREN.png',
         "AL": 'ALSA.png',
         "RX": 'ATHOS.png',
-        "TR": 'TRACCION.png',
+        "TR": 'TRACCION.png'
       },
       default: ''
     },
     CERCANIAS: {
-      operator: {
-        RF: 'CERCAN.png'
+      commercialProduct: {
+        "CERCANIAS": 'CERCAN.png',
+        "CERCANIAS RAM": 'FEVE.png'
       },
       default: 'CERCAN.png'
     },
