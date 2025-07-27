@@ -87,11 +87,6 @@ function setupEventListeners() {
     });
 }
 
-function mostrarTab(tabId) {
-  document.querySelectorAll('.pantalla').forEach(div => div.classList.remove('visible'));
-  document.getElementById(tabId).classList.add('visible');
-}
-
 async function init() {
     initTheme();
     if ('serviceWorker' in navigator) {
@@ -190,7 +185,6 @@ document.getElementById("buscarTeleButton").addEventListener("click", async () =
 
   // 1. Muestra el estado de "Cargando..." dentro de la tabla
   tbody.innerHTML = "<tr><td colspan='7' style='text-align:center;'>Cargando...</td></tr>";
-  mostrarTab("teleindicadorTab"); // Asegura que la pestaña sea visible
 
   try {
     // 2. Convierte la selección del usuario al formato que espera la API
