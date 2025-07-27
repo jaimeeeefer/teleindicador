@@ -1097,11 +1097,44 @@ export function autocompletarEstacionesTele() {
     estacion.removeAttribute('data-codigo');
 
     if (estacionInput.length < 2) {
-        sugerencias.classList.remove('visible');
+        // Mostrar favoritos
+        const favs = getFavoritosEstaciones();
+        if (favs.length > 0) {
+            const estaciones = getEstaciones();
+            const titulo = document.createElement('div');
+            titulo.textContent = "Favoritos";
+            titulo.classList.add("sugerencias-titulo");
+            sugerencias.appendChild(titulo);
+
+            favs.forEach(codigo => {
+                const nombre = estaciones[codigo];
+                if (!nombre) return;
+                const item = document.createElement('div');
+                item.innerHTML = `
+                    <span class="nombre-estacion-wrap">${nombre}</span>
+                    <span class="codigo-estacion">${codigo.padStart(5, '0')}</span>
+                `;
+                item.dataset.codigo = codigo;
+                item.addEventListener('click', () => {
+                    estacion.value = nombre;
+                    estacion.setAttribute('data-codigo', codigo);
+                    sugerencias.classList.remove('visible');
+                    mostrarFavoritoEstrella();
+                    document.getElementById('clearNumeroTele').classList.add('visible');
+                    document.getElementById('estrellaFavoritoTele').classList.add('visible');
+                    estacion.classList.add('input-con-x');
+                });
+                sugerencias.appendChild(item);
+            });
+            sugerencias.classList.add('visible');
+        } else sugerencias.classList.remove('visible');
         return;
     }
 
+    // Dividir en palabras (divisor: espacio o guión)
     const palabras = estacionInput.split(/[\s-]+/).filter(p => p.length > 0);
+
+    // Si el input es numérico, buscar también por código
     const esNumerico = /^\d+$/.test(estacionInput);
 
     const coincidencias = estacionesArray.filter(([codigo, nombre]) => {
@@ -1111,6 +1144,7 @@ export function autocompletarEstacionesTele() {
         return coincideNombre || coincideCodigo;
     });
 
+    // Añadir título de sugerencias
     const titulo = document.createElement('div');
     titulo.textContent = "Sugerencias";
     titulo.classList.add("sugerencias-titulo");
@@ -1119,18 +1153,15 @@ export function autocompletarEstacionesTele() {
     if (coincidencias.length > 0) {
         coincidencias.forEach(([codigo, nombre]) => {
             const item = document.createElement('div');
-            item.className = "sugerencia";
             item.innerHTML = `
-                <span class="nombre-estacion-wrap">${nombre}</span>
-                <span class="codigo-estacion">${codigo.padStart(5, '0')}</span>
+            <span class="nombre-estacion-wrap">${nombre}</span>
+            <span class="codigo-estacion">${codigo.padStart(5, '0')}</span>
             `;
             item.dataset.codigo = codigo;
             item.addEventListener('click', () => {
                 estacion.value = nombre;
                 estacion.setAttribute('data-codigo', codigo);
                 sugerencias.classList.remove('visible');
-                document.getElementById('clearNumeroTele').classList.add('visible');
-                estacion.classList.add('input-con-x');
             });
             sugerencias.appendChild(item);
         });
@@ -1140,6 +1171,6 @@ export function autocompletarEstacionesTele() {
         sinCoincidencias.textContent = "(sin coincidencias)";
         sinCoincidencias.classList.add("sugerencia", "no-click");
         sugerencias.appendChild(sinCoincidencias);
-        sugerencias.classList.add('visible');
+        return;
     }
 }
