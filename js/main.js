@@ -129,7 +129,9 @@ document.querySelectorAll('.custom-select').forEach(function(select) {
 });
 
 const numeroEst = document.getElementById('numeroEst');
+const numeroTele = document.getElementById('stationInputTele');
 const clearBtn = document.getElementById('clearNumeroEst');
+const clearBtnTele = document.getElementById('clearNumeroTele');
 
 numeroEst.addEventListener('input', () => {
   if (numeroEst.value) {
@@ -146,6 +148,23 @@ clearBtn.addEventListener('click', () => {
   clearBtn.style.display = 'none';
   numeroEst.classList.remove('input-con-x');
   numeroEst.focus();
+});
+
+numeroTele.addEventListener('input', () => {
+  if (numeroTele.value) {
+    clearBtnTele.style.display = 'flex';
+    numeroTele.classList.add('input-con-x');
+  } else {
+    clearBtnTele.style.display = 'none';
+    numeroTele.classList.remove('input-con-x');
+  }
+});
+
+clearBtnTele.addEventListener('click', () => {
+  numeroTele.value = '';
+  clearBtnTele.style.display = 'none';
+  numeroTele.classList.remove('input-con-x');
+  numeroTele.focus();
 });
 
 document.getElementById("buscarTeleButton").addEventListener("click", async () => {
