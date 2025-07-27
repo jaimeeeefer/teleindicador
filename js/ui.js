@@ -762,6 +762,21 @@ function obtenerRutaPictograma(linea, core) {
             C4: 'C4MORADO.svg',
             C5: 'C5AZUL.svg'
         },
+        SANTANDER: {
+            C1: 'C1ROJA.svg',
+            C2: 'C2VERDE.svg',
+            C3: 'C3AZULOSCURO.svg'
+        },
+        ASTURIAS: {
+            C1: 'C1ROJA.svg',
+            C2: 'C2VERDE.svg',
+            C3: 'C3AZULOSCURO.svg',
+            C4: 'C4MORADO.svg',
+            C5: 'C5VERDE.svg',
+            C6: 'C6AZUL.svg',
+            C7: 'C7NARANJA.svg',
+            C8: 'C8AMARILLO.svg',
+        },
         SEVILLA: {
             C1: 'C1ROJA.svg',
             C2: 'C2VERDE.svg',
