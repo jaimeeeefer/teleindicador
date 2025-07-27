@@ -906,145 +906,109 @@ function obtenerRutaIconoADIF(adif) {
 }
 
 export function renderizarPanelTeleindicador(datos) {
-    const tbody = document.getElementById("tablaTeleindicadorBody");
-    const estaciones = getEstaciones();
-    const tipoPanelSelect = document.getElementById("tipoPanelTele");
-    const tipo = tipoPanelSelect?.textContent?.toLowerCase();
+  const tbody             = document.getElementById("tablaTeleindicadorBody");
+  const estaciones        = getEstaciones();
+  const tipoPanelSelect   = document.getElementById("tipoPanelTele");
+  const tipo              = tipoPanelSelect.value.toLowerCase(); // 'salidas' o 'llegadas'
 
-    if (tipoPanelSelect) {
-        const titulo = document.getElementById("titulo-cabecera-tele");
-        if (titulo) {
-            titulo.textContent = tipoPanelSelect.textContent.toUpperCase();
-        }
+  // Actualiza el título
+  const titulo = document.getElementById("titulo-cabecera-tele");
+  if (titulo) titulo.textContent = tipoPanelSelect.value.toUpperCase();
+
+  // Limpia tabla
+  tbody.innerHTML = "";
+  if (!Array.isArray(datos) || datos.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" class="centrado">No hay datos disponibles</td></tr>`;
+    return;
+  }
+
+  datos.forEach(tren => {
+    const info      = tren.commercialPathInfo || {};
+    const paso      = tipo === 'llegadas'
+      ? tren.passthroughStep?.arrivalPassthroughStepSides || {}
+      : tren.passthroughStep?.departurePassthroughStepSides || {};
+    const delaySeg  = paso.forecastedOrAuditedDelay || 0;
+    const plannedMs = paso.plannedTime || 0;
+    const estMs     = plannedMs + delaySeg * 1000;
+
+    // Formatea horas y retrasos
+    const plannedStr   = plannedMs   ? formatearTimestampHoraTele(plannedMs)   : "-";
+    const estimatedStr = estMs       ? formatearTimestampHoraTele(estMs)       : "-";
+    const delayStr     = delaySeg    ? formatoRetraso(delaySeg)                 : "";
+    const showReal     = delaySeg !== 0 && paso.circulationState !== 'PENDING_TO_CIRCULATE';
+
+    // Decide si tachar hora teórica
+    const estadoTrad = traducirEstado(paso.circulationState);
+    const tacharHora = showReal && (delaySeg >= 60 || delaySeg < 0) && estadoTrad !== 'PENDIENTE DE CIRCULAR';
+
+    // Destino/Origen
+    const origenCodigo  = info.commercialPathKey.commercialCirculationKey.originStationCode;
+    const destinoCodigo = info.commercialPathKey.destinationStationCode;
+    const origen        = estaciones[origenCodigo.replace(/^0+/, '')] || origenCodigo;
+    const destino       = estaciones[destinoCodigo.replace(/^0+/, '')] || destinoCodigo;
+    const labelDestino  = tipo === 'salidas'
+      ? `<span>${destino}</span><br><span class="origen-difuminado">ORIGEN: ${origen}</span>`
+      : `<span>${origen}</span><br><span class="origen-difuminado">DESTINO: ${destino}</span>`;
+
+    // Número de tren
+    const numeroTren = info.commercialPathKey.commercialCirculationKey.commercialNumber || "-";
+
+    // Operador y producto
+    const opCode = info.opeProComPro?.operator || "";
+    const opName = traducirOperador(opCode);
+    const prod   = info.opeProComPro?.product || "";
+    const comm   = info.opeProComPro?.commercialProduct?.trim() || "";
+    const operadorHTML = `
+      <span>${opCode}${opName ? ' – ' + opName : ''}</span><br>
+      <span class="origen-difuminado">
+        ${prod}${comm ? ' – ' + comm : ''}
+      </span>
+    `;
+
+    // Vía
+    const via = paso.plannedPlatform || "-";
+
+    // Pictograma de línea (si hubiera)
+    const pictograma = obtenerRutaPictograma(info.line, info.core);
+    const destinoHTML = pictograma
+      ? `<div class="destino-con-pastilla">
+           <img src="${pictograma}" class="pastilla-linea" alt="${info.line}" />
+           <span>${tipo === 'salidas' ? destino : origen}</span>
+         </div>`
+      : `<span>${tipo === 'salidas' ? destino : origen}</span>`;
+
+    // Construye la fila
+    const fila = document.createElement("tr");
+    fila.innerHTML = `
+      <td>
+        <span${tacharHora ? ' class="tachado"' : ''}>${plannedStr}</span>
+        ${showReal
+          ? `<span class="hora-real ${getColorClass(delaySeg)}">${estimatedStr}</span>`
+          : ''}
+      </td>
+      <td>
+        ${showReal
+          ? `<span class="${getColorClass(delaySeg)}">${delayStr}</span>`
+          : ''}
+      </td>
+      <td>${destinoHTML}</td>
+      <td>
+        <span class="numero-tren-clicable" onclick="buscarTrenClick('${numeroTren}')">
+          ${numeroTren}
+        </span>
+      </td>
+      <td>${operadorHTML}</td>
+      <td>${via}</td>
+    `;
+
+    // Parpadeo en el primer <td> si faltan ≤5 min
+    const diffMin = (estMs - Date.now()) / 1000 / 60;
+    if (estMs && diffMin >= 0 && diffMin <= 5) {
+      fila.querySelector("td:first-child").classList.add("parpadeante");
     }
 
-    if (!tbody) {
-        console.error("No se encontró el tbody de la tabla del teleindicador");
-        return;
-    }
-
-    tbody.innerHTML = "";
-
-    if (!Array.isArray(datos) || datos.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">No hay datos disponibles</td></tr>`;
-        return;
-    }
-
-    datos.forEach((tren) => {
-        // Extraer info
-        const info = tren.commercialPathInfo || {};
-        const infoextra = tipo === 'llegadas'
-            ? tren.passthroughStep?.arrivalPassthroughStepSides || {}
-            : tren.passthroughStep?.departurePassthroughStepSides || {};
-        const estadoTraducido = traducirEstado(infoextra.circulationState || "");
-        
-        let tacharHora = infoextra.forecastedOrAuditedDelay !== null
-            && (infoextra.forecastedOrAuditedDelay >= 60 || infoextra.forecastedOrAuditedDelay < 0)
-            && estadoTraducido !== 'PENDIENTE DE CIRCULAR';
-
-        let horaPlanificada = infoextra?.plannedTime ? formatearTimestampHoraTele(infoextra.plannedTime) : "-";
-        let horaMostrada = horaPlanificada;
-        const retraso = (infoextra.forecastedOrAuditedDelay || 0) * 1000;
-        const horaEstimTele = infoextra.plannedTime != null
-            ? infoextra.plannedTime + (infoextra.forecastedOrAuditedDelay || 0) * 1000
-            : null;
-        
-
-        if (tacharHora) {
-            const horaEstim = calcularHoraRealTele(horaPlanificada, infoextra.forecastedOrAuditedDelay);
-            horaMostrada = `<span style="text-decoration:line-through;color:gray;">${horaPlanificada}</span><br><span class="${getColorClass(infoextra.forecastedOrAuditedDelay)}">${horaEstim}</span>`;
-        }
-
-        const linea = info.line ?? "-";
-        const core = info.core ?? "-";
-        const destinoCodigo = tipo === 'llegadas'
-            ? info.commercialOriginStationCode ?? "-"
-            : info.commercialDestinationStationCode ?? "-";
-        const destino = estaciones[destinoCodigo.replace(/^0+/, '')] ?? destinoCodigo;
-        const operador = traducirOperador(info.opeProComPro?.operator);
-        const numeroTren = info.commercialPathKey?.commercialCirculationKey?.commercialNumber ?? "-";
-        const via = infoextra.plannedPlatform ?? "-";
-
-        // Saltar filas vacías
-        if (horaMostrada === "-" && destino === "-" && numeroTren === "-") return;
-
-        // -- Crear la fila y las celdas:
-        const fila = document.createElement("tr");
-
-        // Hora
-        const celdaHora = document.createElement("td");
-        celdaHora.innerHTML = horaMostrada;
-
-        // ─── LÓGICA DE PARPADEO ───
-        // `infoextra.plannedTime` es un timestamp en ms.
-        // Calculamos cuántos minutos faltan desde ahora:
-        if (horaEstimTele) {
-            const diffMin = (horaEstimTele - Date.now()) / 1000 / 60;
-            if (diffMin >= -10 && diffMin <= 5) {
-            celdaHora.classList.add('parpadeante');
-            }
-        }
-
-        fila.appendChild(celdaHora);
-
-        // Destino (con pastilla)
-        const pictograma = obtenerRutaPictograma(linea, core);
-        const celdaDestino = document.createElement("td");
-
-        const wrapperDiv = document.createElement("div");
-        wrapperDiv.className = "destino-con-pastilla";
-
-        if (pictograma) {
-            const img = document.createElement("img");
-            img.src = pictograma;
-            img.alt = linea;
-            img.className = "pastilla-linea";
-            wrapperDiv.appendChild(img);
-        }
-
-        const spanDestino = document.createElement("span");
-        spanDestino.textContent = destino ?? "-";
-        wrapperDiv.appendChild(spanDestino);
-
-        celdaDestino.appendChild(wrapperDiv);
-        fila.appendChild(celdaDestino);
-
-        // Operador
-        const celdaOperador = document.createElement("td");
-        const ruta = obtenerRutaIconoADIF(tren.commercialPathInfo);
-
-        if (ruta) {
-        const img = document.createElement("img");
-        img.src = ruta;
-        img.alt = (
-            tren.commercialPathInfo.opeProComPro?.commercialProduct ||
-            tren.commercialPathInfo.opeProComPro?.operator ||
-            tren.commercialPathInfo.opeProComPro?.product ||
-            ''
-        );
-        img.onerror = () => { img.src = ''; };
-        //img.style.height = '2.5em';
-        img.classList.add("icono-operador");
-        celdaOperador.appendChild(img);
-        }
-        // si ruta === '' queda celda vacía
-        fila.appendChild(celdaOperador);
-
-        // Nº tren
-        const celdaNumTren = document.createElement("td");
-        celdaNumTren.textContent = numeroTren;
-        celdaNumTren.classList.add("numero-tren-clicable")
-        celdaNumTren.setAttribute("onclick",`buscarTrenClick('${numeroTren}')`);
-        fila.appendChild(celdaNumTren);
-
-        // Vía
-        const celdaVia = document.createElement("td");
-        celdaVia.textContent = via;
-        fila.appendChild(celdaVia);
-        
-        // Añadir la fila completa
-        tbody.appendChild(fila);
-    });
+    tbody.appendChild(fila);
+  });
 }
 
 function actualizarHoraCabeceraTele() {
