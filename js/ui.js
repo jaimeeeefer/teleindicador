@@ -861,7 +861,7 @@ export function renderizarPanelTeleindicador(datos) {
     const tbody = document.getElementById("tablaTeleindicadorBody");
     const estaciones = getEstaciones();
     const tipoPanelSelect = document.getElementById("tipoPanelTele");
-    const tipo = tipoPanelSelect?.value?.toLowerCase();
+    const tipo = tipoPanelSelect?.textContent?.toLowerCase();
 
     if (tipoPanelSelect) {
         const titulo = document.getElementById("titulo-cabecera-tele");
@@ -908,8 +908,8 @@ export function renderizarPanelTeleindicador(datos) {
         const linea = info.line ?? "-";
         const core = info.core ?? "-";
         const destinoCodigo = tipo === 'llegadas'
-            ? tren.commercialOriginStationCode ?? "-"
-            : tren.commercialDestinationStationCode ?? "-";
+            ? info.commercialOriginStationCode ?? "-"
+            : info.commercialDestinationStationCode ?? "-";
         const destino = estaciones[destinoCodigo.replace(/^0+/, '')] ?? destinoCodigo;
         const operador = traducirOperador(info.opeProComPro?.operator);
         const numeroTren = info.commercialPathKey?.commercialCirculationKey?.commercialNumber ?? "-";
