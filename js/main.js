@@ -148,9 +148,7 @@ function setupEventListeners() {
     autocompletarEstaciones();
     mostrarFavoritoEstrella();
   });
-  // **Aquí**: buscarEstación al hacer click
   DOMElements.buscarEstButton.addEventListener("click", buscarEstacion);
-  // favoritos de estación
   DOMElements.estrellaEstBtn.addEventListener('click', () => {
     const nombre   = DOMElements.estacionInput.value.trim();
     const estaciones = getEstaciones();
@@ -160,10 +158,25 @@ function setupEventListeners() {
   });
   DOMElements.cargarMas.addEventListener("click", cargarMas);
 
-  // — Teleindicador
-  DOMElements.stationInputTele.addEventListener("input", autocompletarEstacionesTele);
-  DOMElements.stationInputTele.addEventListener("focus", autocompletarEstacionesTele);
-  DOMElements.stationInputTele.addEventListener("input", mostrarFavoritoEstrellaTele);
+  // — Teleindicador (incluye clear & favorito)
+  DOMElements.stationInputTele.addEventListener("input", () => {
+    actualizarControlesInput(
+      DOMElements.stationInputTele,
+      DOMElements.clearNumeroTele,
+      DOMElements.estrellaTeleBtn
+    );
+    autocompletarEstacionesTele();
+    mostrarFavoritoEstrellaTele();
+  });
+  DOMElements.stationInputTele.addEventListener("focus", () => {
+    actualizarControlesInput(
+      DOMElements.stationInputTele,
+      DOMElements.clearNumeroTele,
+      DOMElements.estrellaTeleBtn
+    );
+    autocompletarEstacionesTele();
+    mostrarFavoritoEstrellaTele();
+  });
   DOMElements.clearNumeroTele.addEventListener("click", () => {
     DOMElements.stationInputTele.value = "";
     DOMElements.stationInputTele.focus();
