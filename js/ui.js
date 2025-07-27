@@ -906,110 +906,155 @@ function obtenerRutaIconoADIF(adif) {
 }
 
 export function renderizarPanelTeleindicador(datos) {
-    const tbody             = document.getElementById("tablaTeleindicadorBody");
-    const estaciones        = getEstaciones();
-    const tipoPanelSelect   = document.getElementById("tipoPanelTele");
-    const tipo              = tipoPanelSelect.textContent.toLowerCase(); // 'salidas' | 'llegadas'
+  const tbody             = document.getElementById("tablaTeleindicadorBody");
+  const estaciones        = getEstaciones();
+  const tipoPanelSelect   = document.getElementById("tipoPanelTele");
+  const tipo              = tipoPanelSelect?.textContent.toLowerCase();
 
-    // Actualiza el encabezado
+  // Actualiza el título
+  if (tipoPanelSelect) {
     const titulo = document.getElementById("titulo-cabecera-tele");
     if (titulo) titulo.textContent = tipoPanelSelect.textContent.toUpperCase();
+  }
 
-    // Limpia la tabla
-    tbody.innerHTML = "";
-    if (!Array.isArray(datos) || datos.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="centrado">No hay datos disponibles</td></tr>`;
-        return;
+  if (!tbody) {
+    console.error("No se encontró el tbody de la tabla del teleindicador");
+    return;
+  }
+
+  tbody.innerHTML = "";
+  if (!Array.isArray(datos) || datos.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">No hay datos disponibles</td></tr>`;
+    return;
+  }
+
+  datos.forEach((tren) => {
+    // ── 1) Extraer info ───────────────────────────────────────────────────────────
+    const info      = tren.commercialPathInfo || {};
+    const infoextra = tipo === 'llegadas'
+      ? tren.passthroughStep?.arrivalPassthroughStepSides   || {}
+      : tren.passthroughStep?.departurePassthroughStepSides || {};
+    const estadoTrad = traducirEstado(infoextra.circulationState || "");
+
+    const delaySec  = infoextra.forecastedOrAuditedDelay || 0;
+    const tacharHora = delaySec !== null
+      && (delaySec >= 60 || delaySec < 0)
+      && estadoTrad !== 'PENDIENTE DE CIRCULAR';
+
+    const plannedMs = infoextra.plannedTime || 0;
+    const horaPlan  = plannedMs
+      ? formatearTimestampHoraTele(plannedMs)
+      : "-";
+    let horaMostrada = horaPlan;
+
+    // cálculo hora estimada (ms)
+    const horaEstimMs = plannedMs
+      ? plannedMs + delaySec * 1000
+      : null;
+
+    if (tacharHora) {
+      const horaEstimStr = calcularHoraRealTele(horaPlan, delaySec);
+      horaMostrada = `
+        <span class="tachado">${horaPlan}</span><br>
+        <span class="${getColorClass(delaySec)}">${horaEstimStr}</span>
+      `;
     }
 
-    datos.forEach(tren => {
-        const info      = tren.commercialPathInfo || {};
-        const paso      = tipo === 'llegadas'
-            ? tren.passthroughStep?.arrivalPassthroughStepSides   || {}
-            : tren.passthroughStep?.departurePassthroughStepSides || {};
-        const plannedMs = paso.plannedTime  || 0;
-        const delaySec  = paso.forecastedOrAuditedDelay || 0;
-        const realMs    = plannedMs + delaySec * 1000;
+    // estación origen/destino
+    const oriCode = info.commercialPathKey?.commercialCirculationKey?.originStationCode;
+    const desCode = info.commercialPathKey?.commercialCirculationKey?.destinationStationCode;
+    const origen  = oriCode
+      ? estaciones[oriCode.replace(/^0+/, '')] || oriCode
+      : "-";
+    const destino = desCode
+      ? estaciones[desCode.replace(/^0+/, '')] || desCode
+      : "-";
 
-        // Formatea horas y retraso
-        const plannedStr   = plannedMs   ? formatearTimestampHoraTele(plannedMs) : "-";
-        const realStr      = realMs      ? formatearTimestampHoraTele(realMs)  : "-";
-        const delayStr     = delaySec    ? formatoRetraso(delaySec)            : "";
-        const colorClass   = getColorClass(delaySec);
-        const estadoTrans  = traducirEstado(paso.circulationState || "");
-        const tacharHora   = delaySec !== 0 && estadoTrans !== 'PENDIENTE DE CIRCULAR';
+    // pictograma de línea
+    const pictograma = obtenerRutaPictograma(info.line, info.core);
 
-        // Estación origen/destino
-        const oriCode = info.commercialPathKey.commercialPathKey?.originStationCode
-                       || info.commercialPathKey.originStationCode;
-        const desCode = info.commercialPathKey.commercialPathKey?.destinationStationCode
-                       || info.commercialPathKey.destinationStationCode;
-        const origen  = estaciones[oriCode.replace(/^0+/, '')] || oriCode;
-        const destino = estaciones[desCode.replace(/^0+/, '')] || desCode;
+    // operador
+    const opCode = info.opeProComPro?.operator || "";
+    const opName = traducirOperador(opCode);
 
-        // Línea / pictograma
-        const pictograma = obtenerRutaPictograma(info.line, info.core);
+    // producto comercial / product
+    const commProd = info.opeProComPro?.commercialProduct?.trim() || "";
+    const prod    = info.opeProComPro?.product || "";
 
-        // Número tren y operador
-        const numeroTren = info.commercialPathKey.commercialCirculationKey.commercialNumber || "-";
-        const opCode     = info.opeProComPro?.operator || "";
-        const opName     = traducirOperador(opCode);
-        const prodCode   = info.opeProComPro?.product || "";
-        const commProd   = info.opeProComPro?.commercialProduct?.trim() || "";
+    // número de tren
+    const numeroTren = info.commercialPathKey?.commercialCirculationKey?.commercialNumber || "-";
 
-        // Vía
-        const via = paso.plannedPlatform || "-";
+    // vía
+    const via = infoextra.plannedPlatform || "-";
 
-        // Construcción del HTML de la fila
-        const html = `
-          <td>
-            <span${tacharHora ? ' class="tachado"' : ''}>${plannedStr}</span>
-            ${delaySec
-              ? `<span class="hora-real ${colorClass}">${realStr}</span>`
-              : ``}
-          </td>
-          <td>
-            ${delaySec
-              ? `<span class="${colorClass}">${delayStr}</span>`
-              : ``}
-          </td>
-          <td>
-            <div class="destino-con-pastilla">
-              ${pictograma
-                ? `<img src="${pictograma}" class="pastilla-linea" alt="${info.line}" />`
-                : ``}
-              <span>
-                ${tipo === 'salidas' ? destino : origen}
-              </span>
-            </div>
-          </td>
-          <td>
-            <span 
-              class="numero-tren-clicable" 
-              onclick="buscarTrenClick('${numeroTren}')">
-              ${numeroTren}
-            </span>
-          </td>
-          <td>
-            <span>${opCode}${opName ? ' – ' + opName : ''}</span><br>
-            <span class="origen-difuminado">
-              ${prodCode}${commProd ? ' – ' + commProd : ''}
-            </span>
-          </td>
-          <td><span>${via}</span></td>
-        `;
+    // ── 2) Crea la fila + celdas ─────────────────────────────────────────────────
+    const fila = document.createElement("tr");
 
-        const fila = document.createElement("tr");
-        fila.innerHTML = html;
+    // — Celda Hora —
+    const tdHora = document.createElement("td");
+    tdHora.innerHTML = `<span>${horaMostrada}</span>`;
+    // parpadeo 0–5 min
+    if (horaEstimMs) {
+      const diffMin = (horaEstimMs - Date.now()) / 1000 / 60;
+      if (diffMin >= 0 && diffMin <= 5) {
+        tdHora.classList.add("parpadeante");
+      }
+    }
+    fila.appendChild(tdHora);
 
-        // Parpadeo si quedan 0–5 minutos
-        const diffMin = (realMs - Date.now()) / 1000 / 60;
-        if (realMs && diffMin >= 0 && diffMin <= 5) {
-          fila.querySelector("td:first-child").classList.add("parpadeante");
-        }
+    // — Celda Destino/Origen —
+    const tdDest = document.createElement("td");
+    const wrapper = document.createElement("div");
+    wrapper.className = "destino-con-pastilla";
+    if (pictograma) {
+      const img = document.createElement("img");
+      img.src = pictograma;
+      img.alt = info.line || "";
+      img.className = "pastilla-linea";
+      wrapper.appendChild(img);
+    }
+    const spanDest = document.createElement("span");
+    spanDest.textContent = tipo === 'llegadas' ? origen : destino;
+    wrapper.appendChild(spanDest);
+    tdDest.appendChild(wrapper);
+    fila.appendChild(tdDest);
 
-        tbody.appendChild(fila);
-    });
+    // — Celda Operador —
+    const tdOp = document.createElement("td");
+    const rutaOp = obtenerRutaIconoADIF(info);
+    if (rutaOp) {
+      const spanOp = document.createElement("span");
+      spanOp.innerHTML = `
+        <img src="${rutaOp}" 
+             alt="${commProd || opCode}" 
+             class="icono-operador" />
+        <br>
+        <span class="origen-difuminado">
+          ${opCode}${opName ? ' – ' + opName : ''}
+          ${prod || commProd ? '<br>' + prod + (commProd ? ' – ' + commProd : '') : ''}
+        </span>
+      `;
+      tdOp.appendChild(spanOp);
+    }
+    fila.appendChild(tdOp);
+
+    // — Celda Nº Tren —
+    const tdNum = document.createElement("td");
+    const spanNum = document.createElement("span");
+    spanNum.className = "numero-tren-clicable";
+    spanNum.textContent = numeroTren;
+    spanNum.setAttribute("onclick", `buscarTrenClick('${numeroTren}')`);
+    tdNum.appendChild(spanNum);
+    fila.appendChild(tdNum);
+
+    // — Celda Vía —
+    const tdVia = document.createElement("td");
+    tdVia.innerHTML = `<span>${via}</span>`;
+    fila.appendChild(tdVia);
+
+    // Añade fila
+    tbody.appendChild(fila);
+  });
 }
 
 function actualizarHoraCabeceraTele() {
