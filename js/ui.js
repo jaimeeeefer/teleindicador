@@ -961,8 +961,14 @@ export function renderizarPanelTeleindicador(datos) {
     }
 
     // estación origen/destino
-    const origen = info.commercialOriginStationCode
-    const destino = info.commercialDestinationStationCode
+    const oriCode = info.commercialOriginStationCode
+    const desCode = info.commercialDestinationStationCode
+    const origen  = oriCode
+      ? estaciones[oriCode.replace(/^0+/, '')] || oriCode
+      : "-";
+    const destino = desCode
+      ? estaciones[desCode.replace(/^0+/, '')] || desCode
+      : "-";
 
     // pictograma de línea
     const pictograma = obtenerRutaPictograma(info.line, info.core);
