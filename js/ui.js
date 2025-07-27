@@ -876,6 +876,10 @@ function obtenerRutaIconoADIF(adif) {
       default: 'CERCAN.png'
     },
     OTHER: {
+      commercialProduct: {
+        "Material Vacio": 'SSERV.png',
+        "Servicio Interno": 'SSERV.png',
+      },
       operator: {
         "CM": 'CAPTRAIN.png',
         "MW": 'MEDWAY.png',
@@ -891,10 +895,6 @@ function obtenerRutaIconoADIF(adif) {
         "AL": 'ALSA.png',
         "RX": 'ATHOS.png',
         "TR": 'TRACCION.png'
-      },
-      commercialProduct: {
-        "Material Vacio": 'SSERV.png',
-        "Servicio Interno": 'SSERV.png',
       },
       default: 'SSERV.png'
     },
