@@ -913,7 +913,7 @@ export function renderizarPanelTeleindicador(datos) {
 
   // Actualiza el título
   const titulo = document.getElementById("titulo-cabecera-tele");
-  if (titulo) titulo.textContent = tipoPanelSelect.value.toUpperCase();
+  if (titulo) titulo.textContent = tipoPanelSelect.textContent.toUpperCase();
 
   // Limpia tabla
   tbody.innerHTML = "";
