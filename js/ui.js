@@ -962,7 +962,7 @@ export function renderizarPanelTeleindicador(datos) {
 
     // estación origen/destino
     const origen = info.commercialOriginStationCode
-    const desCode = info.commercialDestinationStationCode
+    const destino = info.commercialDestinationStationCode
 
     // pictograma de línea
     const pictograma = obtenerRutaPictograma(info.line, info.core);
