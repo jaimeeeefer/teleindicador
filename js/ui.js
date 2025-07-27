@@ -861,7 +861,7 @@ export function renderizarPanelTeleindicador(datos) {
     const tbody = document.getElementById("tablaTeleindicadorBody");
     const estaciones = getEstaciones();
     const tipoPanelSelect = document.getElementById("tipoPanelTele");
-    const tipo = tipoPanelSelect?.textContent?.toLowerCase();
+    const tipo = tipoPanelSelect?.value?.toLowerCase();
 
     if (tipoPanelSelect) {
         const titulo = document.getElementById("titulo-cabecera-tele");
