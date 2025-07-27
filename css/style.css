@@ -731,6 +731,9 @@ color: var(--button-hover-color);
     max-width: 100%;
   }
 
+  .panel-tele td:nth-child(2) {
+    text-align: left !important;
+  }
 
   #parametrosEstacion .form-row,
   #parametrosTeleindicador .form-row {
