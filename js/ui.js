@@ -1022,11 +1022,6 @@ export function renderizarPanelTeleindicador(datos) {
         <img src="${rutaOp}" 
              alt="${commProd || opCode}" 
              class="icono-operador" />
-        <br>
-        <span class="origen-difuminado">
-          ${opCode}${opName ? ' – ' + opName : ''}
-          ${prod || commProd ? '<br>' + prod + (commProd ? ' – ' + commProd : '') : ''}
-        </span>
       `;
       tdOp.appendChild(spanOp);
     }
