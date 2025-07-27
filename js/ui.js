@@ -883,9 +883,12 @@ export function renderizarPanelTeleindicador(datos) {
 
         let horaPlanificada = infoextra?.plannedTime ? formatearTimestampHoraTele(infoextra.plannedTime) : "-";
         let horaMostrada = horaPlanificada;
-        const horaEstim = calcularHoraRealTele(horaPlanificada, infoextra.forecastedOrAuditedDelay);
+        const retraso = (infoextra.forecastedOrAuditedDelay || 0) * 1000;
+        const horaEstimTele = horaPlanificada + retraso;
+        
 
         if (tacharHora) {
+            const horaEstim = calcularHoraRealTele(horaPlanificada, infoextra.forecastedOrAuditedDelay);
             horaMostrada = `<span style="text-decoration:line-through;color:gray;">${horaPlanificada}</span><br><span class="${getColorClass(infoextra.forecastedOrAuditedDelay)}">${horaEstim}</span>`;
         }
 
@@ -911,7 +914,7 @@ export function renderizarPanelTeleindicador(datos) {
         // ─── LÓGICA DE PARPADEO ───
         // `infoextra.plannedTime` es un timestamp en ms.
         // Calculamos cuántos minutos faltan desde ahora:
-        const diffMin = (horaEstim - Date.now()) / 1000 / 60;
+        const diffMin = (horaEstimTele - Date.now()) / 1000 / 60;
         if (diffMin >= -10 && diffMin <= 5) {
         celdaHora.classList.add('parpadeante');
         }
