@@ -909,7 +909,7 @@ export function renderizarPanelTeleindicador(datos) {
   const tbody             = document.getElementById("tablaTeleindicadorBody");
   const estaciones        = getEstaciones();
   const tipoPanelSelect   = document.getElementById("tipoPanelTele");
-  const tipo              = tipoPanelSelect.value.toLowerCase(); // 'salidas' o 'llegadas'
+  const tipo              = tipoPanelSelect.textContent.toLowerCase(); // 'salidas' o 'llegadas'
 
   // Actualiza el título
   const titulo = document.getElementById("titulo-cabecera-tele");
