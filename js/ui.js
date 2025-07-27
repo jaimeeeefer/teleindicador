@@ -876,14 +876,14 @@ export function renderizarPanelTeleindicador(datos) {
         const info = tren.commercialPathInfo || {};
         const infoextra = tren.passthroughStep?.departurePassthroughStepSides || {};
         const estadoTraducido = traducirEstado(infoextra.circulationState || "");
-        const horaEstim = calcularHoraRealTele(horaPlanificada, infoextra.forecastedOrAuditedDelay);
-
+        
         let tacharHora = infoextra.forecastedOrAuditedDelay !== null
             && (infoextra.forecastedOrAuditedDelay >= 60 || infoextra.forecastedOrAuditedDelay < 0)
             && estadoTraducido !== 'PENDIENTE DE CIRCULAR';
 
         let horaPlanificada = infoextra?.plannedTime ? formatearTimestampHoraTele(infoextra.plannedTime) : "-";
         let horaMostrada = horaPlanificada;
+        const horaEstim = calcularHoraRealTele(horaPlanificada, infoextra.forecastedOrAuditedDelay);
 
         if (tacharHora) {
             horaMostrada = `<span style="text-decoration:line-through;color:gray;">${horaPlanificada}</span><br><span class="${getColorClass(infoextra.forecastedOrAuditedDelay)}">${horaEstim}</span>`;
