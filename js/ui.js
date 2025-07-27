@@ -942,8 +942,8 @@ export function renderizarPanelTeleindicador(datos) {
     const tacharHora = showReal && (delaySeg >= 60 || delaySeg < 0) && estadoTrad !== 'PENDIENTE DE CIRCULAR';
 
     // Destino/Origen
-    const origenCodigo  = info.commercialPathKey.commercialCirculationKey.originStationCode;
-    const destinoCodigo = info.commercialPathKey.destinationStationCode;
+    const origenCodigo  = info.commercialOriginStationCode;
+    const destinoCodigo = info.commercialDestinationStationCode;
     const origen        = estaciones[origenCodigo.replace(/^0+/, '')] || origenCodigo;
     const destino       = estaciones[destinoCodigo.replace(/^0+/, '')] || destinoCodigo;
     const labelDestino  = tipo === 'salidas'
