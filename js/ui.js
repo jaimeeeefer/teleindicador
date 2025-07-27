@@ -815,7 +815,14 @@ function obtenerRutaIconoADIF(adif) {
     CERCANIAS: {
       commercialProduct: {
         "CERCANIAS": 'CERCAN.png',
-        "CERCANIAS RAM": 'FEVE.png'
+        "CERCANIAS RAM": 'FEVE.png',
+        "RODALIES": 'RODCAT.png',
+        "RODALIES-R17": 'REXCAT.png',
+        "RODALIES-R16": 'REXCAT.png',
+        "RODALIES-R15": 'REGCAT.png',
+        "RODALIES-R14": 'REGCAT.png',
+        "RODALIES-R13": 'REGCAT.png',
+        "RODALIES-R12": 'REGCAT.png'
       },
       default: 'CERCAN.png'
     },
