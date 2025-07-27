@@ -603,6 +603,10 @@ color: var(--button-hover-color);
   color: var(--button-hover-color);
 }
 
+.panel-tele td:nth-child(2) {
+  text-align: left !important;
+}
+
 .icono-operador {
   border-radius: 0.4rem; 
   overflow: hidden;  
