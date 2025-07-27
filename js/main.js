@@ -61,7 +61,15 @@ function setupEventListeners() {
             const destinoID = button.dataset.target;
 
             // Oculta todas las pantallas
-            DOMElements.pantallas.forEach(p => p.classList.remove("visible"));
+            // DOMElements.pantallas.forEach(p => p.classList.remove("visible"));
+
+            const screens = [
+              document.getElementById('consulta'),
+              document.getElementById('estacion'),
+              document.getElementById('teleindicadorTab')
+            ];
+
+            screens.forEach(el => el?.classList.remove('visible'));
 
             // Muestra solo la seleccionada
             if (destinoID === "consulta") {
