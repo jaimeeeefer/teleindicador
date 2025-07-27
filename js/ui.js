@@ -838,7 +838,13 @@ function obtenerRutaIconoADIF(adif) {
         "OUIGO": 'OUIGO.png',
         "IRYO": 'IRYO.png',
         "Material Vacio": 'SSERV.png',
-        "REGIONAL RAM": 'FEVE.png'
+        "REGIONAL RAM": 'FEVE.png',
+        "RODALIES-R17": 'REXCAT.png',
+        "RODALIES-R16": 'REXCAT.png',
+        "RODALIES-R15": 'REGCAT.png',
+        "RODALIES-R14": 'REGCAT.png',
+        "RODALIES-R13": 'REGCAT.png',
+        "RODALIES-R12": 'REGCAT.png'
       },
       default: 'RENFE.png'
     },
@@ -864,13 +870,7 @@ function obtenerRutaIconoADIF(adif) {
       commercialProduct: {
         "CERCANIAS": 'CERCAN.png',
         "CERCANIAS RAM": 'FEVE.png',
-        "RODALIES": 'RODCAT.png',
-        "RODALIES-R17": 'REXCAT.png',
-        "RODALIES-R16": 'REXCAT.png',
-        "RODALIES-R15": 'REGCAT.png',
-        "RODALIES-R14": 'REGCAT.png',
-        "RODALIES-R13": 'REGCAT.png',
-        "RODALIES-R12": 'REGCAT.png'
+        "RODALIES": 'RODCAT.png'
       },
       default: 'CERCAN.png'
     },
