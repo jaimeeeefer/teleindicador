@@ -775,7 +775,40 @@ function obtenerRutaPictograma(linea, core) {
             C5: 'C5VERDE.svg',
             C6: 'C6AZUL.svg',
             C7: 'C7NARANJA.svg',
-            C8: 'C8AMARILLO.svg',
+            C8: 'C8AMARILLO.svg'
+        },
+        "SAN SEBASTIAN": {
+            C1: 'C1ROJA.svg'
+        },
+        FERROL: {
+            C1: 'C1ROJA.svg'
+        },
+        LEON: {
+            C1: 'C1ROJA.svg'
+        },
+        ZARAGOZA: {
+            C1: 'C1ROJA.svg'
+        },
+        VALENCIA: {
+            C1: 'C1AZUL.svg',
+            C2: 'C2AMARILLO.svg',
+            C3: 'C3MORADO.svg',
+            C5: 'C5VERDE.svg',
+            C6: 'C6AZULOSCURO.svg'
+        },
+        MURCIA: {
+            C1: 'C1AZUL.svg',
+            C2: 'C2VERDE.svg',
+            C3: 'C3MORADO.svg'
+        },
+        MALAGA: {
+            C1: 'C1AZUL.svg',
+            C2: 'C2VERDE.svg'
+        },
+        CADIZ: {
+            C1: 'C1ROJA.svg',
+            C1a: 'C1AROJA.svg',
+            T1: 'T1VERDE.svg'
         },
         SEVILLA: {
             C1: 'C1ROJA.svg',
