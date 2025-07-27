@@ -875,6 +875,29 @@ function obtenerRutaIconoADIF(adif) {
       },
       default: 'CERCAN.png'
     },
+    OTHER: {
+      operator: {
+        "CM": 'CAPTRAIN.png',
+        "MW": 'MEDWAY.png',
+        "CF": 'CEFSA.png',
+        "CT": 'CONTI.png',
+        "RM": 'RM.png',
+        "RF": 'RENFE.png',
+        "AD": 'ADIF.png',
+        "GT": 'GO.png',
+        "LC": 'LCR.png',
+        "TT": 'TRANSFESA.png',
+        "LG": 'LOGITREN.png',
+        "AL": 'ALSA.png',
+        "RX": 'ATHOS.png',
+        "TR": 'TRACCION.png'
+      },
+      commercialProduct: {
+        "Material Vacio": 'SSERV.png',
+        "Servicio Interno": 'SSERV.png',
+      },
+      default: 'SSERV.png'
+    },
   };
 
   const { trafficType, opeProComPro = {} } = adif;
