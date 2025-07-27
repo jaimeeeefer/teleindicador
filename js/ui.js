@@ -886,7 +886,7 @@ export function renderizarPanelTeleindicador(datos) {
         let horaPlanificada = infoextra?.plannedTime ? formatearTimestampHoraTele(infoextra.plannedTime) : "-";
         let horaMostrada = horaPlanificada;
         const retraso = (infoextra.forecastedOrAuditedDelay || 0) * 1000;
-        const horaEstimTele = horaPlanificada + retraso;
+        const horaEstimTele = infoextra?.plannedTime? + retraso : "";
         
 
         if (tacharHora) {
@@ -901,7 +901,6 @@ export function renderizarPanelTeleindicador(datos) {
         const operador = traducirOperador(info.opeProComPro?.operator);
         const numeroTren = info.commercialPathKey?.commercialCirculationKey?.commercialNumber ?? "-";
         const via = infoextra.plannedPlatform ?? "-";
-        const tipo = info.trainType ?? "-";
 
         // Saltar filas vacías
         if (horaMostrada === "-" && destino === "-" && numeroTren === "-") return;
