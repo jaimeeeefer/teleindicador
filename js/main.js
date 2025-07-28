@@ -44,6 +44,8 @@ const DOMElements = {
   clearTrenBtn:           document.getElementById("clearNumeroTren"),
   estrellaTrenBtn:        document.getElementById("estrellaFavoritoNumero"),
   trenFavoritosDiv:       document.getElementById("favoritos"),
+  btnAnterior:            document.getElementById("btnAnterior"),
+  btnSiguiente:           document.getElementById("btnSiguiente"),
 
   // — Estación
   estacionInput:          document.getElementById("numeroEst"),
@@ -119,6 +121,8 @@ function setupEventListeners() {
     const num = DOMElements.trenInput.value.trim();
     if (num) toggleFavoritoTren(num);
   });
+  DOMElements.btnAnterior.addEventListener('click', mostrarTrenAnterior);
+  DOMElements.btnSiguiente.addEventListener('click', mostrarTrenSiguiente);
 
   // — Estación
   DOMElements.estacionInput.addEventListener('input', () => {
@@ -183,7 +187,6 @@ function setupEventListeners() {
     autocompletarEstacionesTele();
     mostrarFavoritoEstrellaTele();
   });
-  DOMElements.stationInputTele.addEventListener("change", mostrarFavoritoEstrellaTele);
   DOMElements.clearNumeroTele.addEventListener("click", () => {
     DOMElements.stationInputTele.value = "";
     DOMElements.stationInputTele.focus();
