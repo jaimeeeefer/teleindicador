@@ -1160,6 +1160,11 @@ export function autocompletarEstacionesTele() {
                     estacion.value = nombre;
                     estacion.setAttribute('data-codigo', codigo);
                     sugerencias.classList.remove('visible');
+                    actualizarControlesInput(
+                        estacion,
+                        document.getElementById('clearNumeroTele'),
+                        document.getElementById('estrellaFavoritoTele')
+                        );
                     mostrarFavoritoEstrella();
                     document.getElementById('clearNumeroTele').classList.add('visible');
                     document.getElementById('estrellaFavoritoTele').classList.add('visible');
@@ -1203,12 +1208,6 @@ export function autocompletarEstacionesTele() {
                 estacion.value = nombre;
                 estacion.setAttribute('data-codigo', codigo);
                 sugerencias.classList.remove('visible');
-                actualizarControlesInput(
-                    estacion,
-                    document.getElementById('clearNumeroTele'),
-                    document.getElementById('estrellaFavoritoTele')
-                );
-                mostrarFavoritoEstrellaTele();
             });
             sugerencias.appendChild(item);
         });
