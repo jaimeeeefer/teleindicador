@@ -1,5 +1,8 @@
 // js/main-teleindicador.js
 
+// ------------------------
+// --- IMPORTS
+// ------------------------
 import { initTheme, toggleTheme } from './theme.js';
 import {
   login,
@@ -30,40 +33,40 @@ import {
 
 const DOMElements = {
   // — Global UI
-  loginButton:        document.getElementById("loginButton"),
-  toggleThemeBtn:     document.getElementById("toggleThemeBtn"),
-  cerrarSesionButton: document.getElementById("cerrarSesionButton"),
+  loginButton:            document.getElementById("loginButton"),
+  toggleThemeBtn:         document.getElementById("toggleThemeBtn"),
+  cerrarSesionButton:     document.getElementById("cerrarSesionButton"),
+  clearResultadosButton:  document.getElementById("clearResultadosButton"),
 
   // — Tren
-  buscarTrenButton:   document.getElementById("buscarTrenButton"),
-  trenInput:          document.getElementById("numeroTren"),
-  clearTrenBtn:       document.getElementById("clearNumeroTren"),
-  estrellaTrenBtn:    document.getElementById("estrellaFavoritoNumero"),
-  trenFavoritosDiv:   document.getElementById("favoritos"),
+  buscarTrenButton:       document.getElementById("buscarTrenButton"),
+  trenInput:              document.getElementById("numeroTren"),
+  clearTrenBtn:           document.getElementById("clearNumeroTren"),
+  estrellaTrenBtn:        document.getElementById("estrellaFavoritoNumero"),
+  trenFavoritosDiv:       document.getElementById("favoritos"),
 
   // — Estación
-  estacionInput:      document.getElementById("numeroEst"),
-  buscarEstButton:    document.getElementById("buscarEstButton"),
-  sugerenciasDiv:     document.getElementById("sugerencias"),
-  clearEstBtn:        document.getElementById("clearNumeroEst"),
-  estrellaEstBtn:     document.getElementById("estrellaFavoritoEst"),
-  cargarMas:          document.getElementById("cargarMas"),
+  estacionInput:          document.getElementById("numeroEst"),
+  buscarEstButton:        document.getElementById("buscarEstButton"),
+  sugerenciasDiv:         document.getElementById("sugerencias"),
+  clearEstBtn:            document.getElementById("clearNumeroEst"),
+  estrellaEstBtn:         document.getElementById("estrellaFavoritoEst"),
+  cargarMas:              document.getElementById("cargarMas"),
 
   // — Teleindicador
-  stationInputTele:   document.getElementById("stationInputTele"),
-  buscarTeleButton:   document.getElementById("buscarTeleButton"),
-  clearNumeroTele:    document.getElementById("clearNumeroTele"),
-  estrellaTeleBtn:    document.getElementById("estrellaFavoritoTele"),
+  stationInputTele:       document.getElementById("stationInputTele"),
+  buscarTeleButton:       document.getElementById("buscarTeleButton"),
+  clearNumeroTele:        document.getElementById("clearNumeroTele"),
+  estrellaTeleBtn:        document.getElementById("estrellaFavoritoTele"),
 
-  // — Pistas y pestañas
-  tabButtons:         document.querySelectorAll(".tab-button"),
-  pantallas:          document.querySelectorAll(".pantalla"),
-  consultaTab:        document.getElementById("consulta"),
-  estacionTab:        document.getElementById("estacion"),
-  teleindicadorTab:   document.getElementById("teleindicadorTab"),
+  // — Pestañas
+  tabButtons:             document.querySelectorAll(".tab-button"),
+  consultaTab:            document.getElementById("consulta"),
+  estacionTab:            document.getElementById("estacion"),
+  teleindicadorTab:       document.getElementById("teleindicadorTab"),
 
-  // — Custom selects
-  customSelects:      document.querySelectorAll('.custom-select')
+  // — Selectores personalizados
+  customSelects:          document.querySelectorAll('.custom-select')
 };
 
 function actualizarControlesInput(input, clearBtn, favBtn) {
@@ -78,6 +81,9 @@ function setupEventListeners() {
   DOMElements.toggleThemeBtn.addEventListener("click", toggleTheme);
   DOMElements.loginButton      .addEventListener("click", login);
   DOMElements.cerrarSesionButton.addEventListener("click", cerrarSesion);
+
+    // — Clear resultados (Tren)  
+  DOMElements.clearResultadosButton.addEventListener("click", clearResultados);
 
   // — Tren
   DOMElements.buscarTrenButton.addEventListener("click", buscarTren);
