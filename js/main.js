@@ -183,6 +183,7 @@ function setupEventListeners() {
     autocompletarEstacionesTele();
     mostrarFavoritoEstrellaTele();
   });
+  DOMElements.stationInputTele.addEventListener("change", mostrarFavoritoEstrellaTele);
   DOMElements.clearNumeroTele.addEventListener("click", () => {
     DOMElements.stationInputTele.value = "";
     DOMElements.stationInputTele.focus();
