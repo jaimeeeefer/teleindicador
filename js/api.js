@@ -209,9 +209,16 @@ function clearEstacion() {
     paginaActual = 0;
 }
 
-export function clearResultados(){
+function clearTeleindicador() {
+    const tbody = document.getElementById("tablaTeleindicadorBody");
+    if (tbody) tbody.innerHTML = "";
+}
+
+// --- FUNCIONALIDAD CLEAR RESULTADOS GLOBAL ---
+export function clearResultados() {
     clearMarcha();
     clearEstacion();
+    clearTeleindicador();
 }
 
 export async function buscarEstacionPorCodigoParaTeleindicador(codigo, tipoPanelSeleccionado, tipoTren) {
