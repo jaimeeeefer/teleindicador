@@ -1203,6 +1203,12 @@ export function autocompletarEstacionesTele() {
                 estacion.value = nombre;
                 estacion.setAttribute('data-codigo', codigo);
                 sugerencias.classList.remove('visible');
+                actualizarControlesInput(
+                    estacion,
+                    document.getElementById('clearNumeroTele'),
+                    document.getElementById('estrellaFavoritoTele')
+                );
+                mostrarFavoritoEstrellaTele();
             });
             sugerencias.appendChild(item);
         });
