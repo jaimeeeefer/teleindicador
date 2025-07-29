@@ -207,7 +207,7 @@ function setupEventListeners() {
     const tipoTren  = document.getElementById("trainTypeTele").textContent;
     const tbody     = document.getElementById("tablaTeleindicadorBody");
 
-    if (!/^\d+$/.test(codigo)) {
+    if (!codigo) {
       tbody.innerHTML = `<tr><td colspan="7" style="text-align:center">
         Por favor, selecciona una estación válida.
       </td></tr>`;
