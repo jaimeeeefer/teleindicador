@@ -1145,7 +1145,7 @@ export function renderizarPanelTeleindicador(datos) {
       // 3. Creamos el HTML con el tiempo restante estático
       tdHora.innerHTML = `
         <div class="countdown-container">
-            <span">${tiempoRestanteStr}</span>
+            <span">${tiempoRestanteStr}</span><br>
             <span">${horaEstimStr}</span>
         </div>
       `;
