@@ -880,6 +880,7 @@ function obtenerRutaIconoADIF(adif) {
         "AVLO": 'AVLO.png',
         "OUIGO": 'OUIGO.png',
         "IRYO": 'IRYO.png',
+        "TGV INOUI": 'TGV.png',
         "Material Vacio": 'SSERV.png',
         "REGIONAL RAM": 'FEVE.png',
         "RODALIES-R17": 'REXCAT.png',
