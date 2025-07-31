@@ -884,11 +884,11 @@ function obtenerRutaPictograma(linea, core, adif) {
         }
         // ... añade otros núcleos si los necesitas
     };
-    if (!linea) return null;
+
     const lineaKey = linea.toUpperCase().trim();
     const coreKey = core ? core.toUpperCase() : "";
     const imgsNucleo = pictogramasCercanias[coreKey];
-    if (imgsNucleo && imgsNucleo[lineaKey]) {
+    if (lineaKey && imgsNucleo && imgsNucleo[lineaKey]) {
         return `img/${imgsNucleo[lineaKey]}`;
     }
 
