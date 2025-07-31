@@ -1127,39 +1127,35 @@ export function renderizarPanelTeleindicador(datos) {
     const tdHora = document.createElement("td");
     const diffMin = horaEstimMs ? (horaEstimMs - Date.now()) / 60000 : null;
 
-    if (diffMin <= 10 && diffMin > 5) {
-    // calculamos el texto una sola vez
-    let tiempoRestanteStr;
-    if (diffMin < 1) {
-        tiempoRestanteStr = `${Math.floor(diffMin * 60)} s`;
-    } else {
-        tiempoRestanteStr = `${Math.floor(diffMin)} min`;
+    if (diffMin !== null && diffMin >= 0 && diffMin <= 5) {
+      // 1. Añadimos la clase para que parpadee
+      tdHora.classList.add("parpadeante");
     }
 
-    tdHora.innerHTML = `
+    if (diffMin !== null && diffMin >= 0 && diffMin < 10) {
+      // 2. Calculamos los minutos o segundos restantes UNA SOLA VEZ
+      let tiempoRestanteStr;
+      if (diffMin < 1) {
+        const diffSec = Math.floor(diffMin * 60);
+        tiempoRestanteStr = `${diffSec} s`;
+      } else {
+        tiempoRestanteStr = `${Math.floor(diffMin)} min`;
+      }
+      
+      // 3. Creamos el HTML con el tiempo restante estático
+      tdHora.innerHTML = `
         <div class="countdown-container">
-        <span class="countdown-timer">${tiempoRestanteStr}</span>
-        <span class="countdown-subtext">${horaEstimStr}</span>
+            <span class="countdown-timer">${tiempoRestanteStr}</span>
+            <span class="countdown-subtext">${horaEstimStr}</span>
         </div>
-    `;
-    }
-    // 2) A 5 minutos o menos ⇒ parpadeo (tu lógica de parpadeante)
-    else if (diffMin <= 5 && diffMin >= 0) {
-    tdHora.classList.add('parpadeante');
-    tdHora.innerHTML = `
-        <div class="countdown-container">
-        <span class="countdown-timer">${horaEstimStr}</span>
-        <span class="countdown-subtext">${horaPlan}</span>
-        </div>
-    `;
-    }
-    // 3) Resto de casos ⇒ tu renderizado habitual
-    else {
-    const tacharHora = delaySec !== 0 && estadoTrad !== 'PENDIENTE DE CIRCULAR';
-    tdHora.innerHTML = tacharHora
-        ? `<span style="text-decoration:line-through;color:gray;">${horaPlan}</span>
-        <br><span class="${getColorClass(delaySec)}">${horaEstimStr}</span>`
+      `;
+    } else {
+      // Lógica para trenes a más de 10 minutos (sin cambios)
+      const tacharHora = delaySec !== 0 && estadoTrad !== 'PENDIENTE DE CIRCULAR';
+      const horaMostrada = tacharHora
+        ? `<span style="text-decoration:line-through;color:gray;">${horaPlan}</span><br><span class="${getColorClass(delaySec)}">${horaEstimStr}</span>`
         : `<span>${horaPlan}</span>`;
+      tdHora.innerHTML = horaMostrada;
     }
     fila.appendChild(tdHora);
 
