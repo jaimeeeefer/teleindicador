@@ -885,7 +885,7 @@ function obtenerRutaPictograma(linea, core) {
     };
     if (!linea) return null;
     const coreKey = core ? core.toUpperCase() : "";
-    const imgsNucleo = pictogramasCercanias[core.toUpperCase()];
+    const imgsNucleo = pictogramasCercanias[coreKey];
     if (!imgsNucleo) return null;
     return imgsNucleo[linea] ? `img/${imgsNucleo[linea]}` : null;
 }
