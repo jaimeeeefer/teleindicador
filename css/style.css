@@ -629,6 +629,17 @@ color: var(--button-hover-color);
   max-width: 4em;
 }
 
+.scheduled {
+  display: block;
+  font-size: 0.75em;
+  color: var(--texto-secundario);
+}
+
+.countdown {
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
 @-webkit-keyframes fadeBlink {
   0%   { opacity: 1; }
   50%  { opacity: 0; }
