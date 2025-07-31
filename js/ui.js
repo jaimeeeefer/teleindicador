@@ -899,6 +899,8 @@ function obtenerRutaPictograma(linea, core) {
         }
         // o bien, si quieres una lista global de products:
         const pictosPorProducto = {
+        "RODALIES-RL1": 'RL1.svg',
+        "RODALIES-RL2": 'RL2.svg',
         "RODALIES-RL3": 'RL3.svg',
         "RODALIES-RL4": 'RL4.svg',
         };
