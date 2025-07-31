@@ -799,8 +799,8 @@ function obtenerRutaPictograma(linea, core, adif) {
         BARCELONA: {
             R1: 'R1.svg',
             R2: 'R2.svg',
-            R2S: 'R2SUD.png',
-            R2N: 'R2NORD.png',
+            R2S: 'R2SUD.svg',
+            R2N: 'R2NORD.svg',
             R3: 'R3.svg',
             R4: 'R4.svg',
             R7: 'R7.svg',
