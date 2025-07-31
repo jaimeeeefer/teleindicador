@@ -875,6 +875,7 @@ function obtenerRutaIconoADIF(adif) {
         "REGIONAL": 'REG.png',
         "REGIONAL EXPRES": 'REX.png',
         "INTERCITY": 'ICITY.png',
+        "EUROMED": 'EUROMED.png',
         "AVE": 'AVE.png',
         "AVLO": 'AVLO.png',
         "OUIGO": 'OUIGO.png',
