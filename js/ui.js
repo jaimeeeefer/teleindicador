@@ -919,7 +919,12 @@ function obtenerRutaIconoADIF(adif) {
         "RODALIES-R14": 'REGCAT.png',
         "RODALIES-R13": 'REGCAT.png',
         "RODALIES-R12": 'REGCAT.png',
-        "RODALIES-R11": 'REGCAT.png'
+        "RODALIES-R11": 'REGCAT.png',
+        "RODALIES-RL3": 'RODCAT.png',
+        "RODALIES-RL4": 'RODCAT.png',
+        "RODALIES-RG1": 'RODCAT.png',
+        "RODALIES-RT1": 'RODCAT.png',
+        "RODALIES-RT2": 'RODCAT.png'
       },
       default: 'RENFE.png'
     },
