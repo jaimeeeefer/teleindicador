@@ -873,6 +873,7 @@ function obtenerRutaIconoADIF(adif) {
         "AVANT-EXPRES": 'AVANTEXP.png',
         "ALVIA": 'ALVIA.png',
         "MD": 'MD.png',
+        "PROXIMIDAD": 'PROXID.png',
         "REGIONAL": 'REG.png',
         "REGIONAL EXPRES": 'REX.png',
         "INTERCITY": 'ICITY.png',
