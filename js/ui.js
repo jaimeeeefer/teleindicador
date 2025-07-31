@@ -870,6 +870,7 @@ function obtenerRutaIconoADIF(adif) {
     AVLDMD: {
       commercialProduct: {
         "AVANT": 'AVANT.png',
+        "AVANT-EXPRES": 'AVANTEXP.png',
         "ALVIA": 'ALVIA.png',
         "MD": 'MD.png',
         "REGIONAL": 'REG.png',
