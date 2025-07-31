@@ -1121,7 +1121,7 @@ export function renderizarPanelTeleindicador(datos) {
     const tdHora = document.createElement("td");
 
     // 1) siempre mostramos la hora programada en pequeño
-    const scheduled = `<span class="scheduled">${horaPlanificada}</span>`;
+    const scheduled = `<span class="scheduled">${horaMostrada}</span>`;
 
     // 2) si faltan ≤10 min y ya ha pasado la hora programada…
     let dynamic;
