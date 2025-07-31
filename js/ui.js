@@ -1118,28 +1118,29 @@ export function renderizarPanelTeleindicador(datos) {
     // vía
     const via = infoextra.plannedPlatform || "-";
 
+    // ── 2) Crea la fila + celdas ─────────────────────────────────────────────────
+    const fila = document.createElement("tr");
+
+    // — Celda Hora —
     const tdHora = document.createElement("td");
+    const diffMin = horaEstimMs ? (horaEstimMs - Date.now()) / 60000 : null;
 
-    // 1) siempre mostramos la hora programada en pequeño
-    const scheduled = `<span class="scheduled">${horaMostrada}</span>`;
-
-    // 2) si faltan ≤10 min y ya ha pasado la hora programada…
-    if (horaEstimStr
-        && horaEstimStr > Date.now()
-        && (horaEstimStr - Date.now()) <= 10 * 60 * 1000) {
-    inner += `<br>
-        <span class="countdown ${getColorClass(delaySec)}"
-            data-ts="${horaEstimStr}">
-        </span>`;
+    if (diffMin !== null && diffMin >= 0 && diffMin < 10) {
+      // Si faltan menos de 10 mins, muestra la cuenta atrás
+      tdHora.innerHTML = `
+        <div class="countdown-container">
+            <span class="countdown-timer" data-tstamp="${horaEstimMs}"></span>
+            <span class="countdown-subtext">${horaEstimStr}</span>
+        </div>
+      `;
     } else {
-    // 3) fuera de umbral, tu lógica existente: tachado o coloreado
-    inner += `<br>
-        <span class="hora-real ${getColorClass(delaySec)}">
-        ${horaMostrada}
-        </span>`;
+      // Si no, muestra la hora normal (con o sin tachado)
+      const tacharHora = delaySec !== 0 && estadoTrad !== 'PENDIENTE DE CIRCULAR';
+      const horaMostrada = tacharHora
+        ? `<span style="text-decoration:line-through;color:gray;">${horaPlan}</span><br><span class="${getColorClass(delaySec)}">${horaEstimStr}</span>`
+        : `<span>${horaPlan}</span>`;
+      tdHora.innerHTML = horaMostrada;
     }
-
-    tdHora.innerHTML = scheduled + dynamic;
     fila.appendChild(tdHora);
 
     // — Celda Destino/Origen —
@@ -1199,7 +1200,36 @@ function actualizarHoraCabeceraTele() {
         el.textContent = ahora.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     }
 }
+
+function actualizarContadores() {
+  const ahora = Date.now();
+  document.querySelectorAll('.countdown-timer').forEach(el => {
+    const tstamp = parseInt(el.dataset.tstamp, 10);
+    if (isNaN(tstamp)) return;
+
+    const diffSec = Math.round((tstamp - ahora) / 1000);
+
+    if (diffSec < 0) {
+      el.textContent = "0 s";
+      // Opcional: una vez llega a cero, podrías quitarle la clase para que no se actualice más
+      el.classList.remove('countdown-timer');
+      return;
+    }
+
+    const min = Math.floor(diffSec / 60);
+    const sec = diffSec % 60;
+
+    // Formato como en la foto: "X min" o "XX s"
+    if (min > 0) {
+      el.textContent = `${min} min`;
+    } else {
+      el.textContent = `${sec} s`;
+    }
+  });
+}
+
 setInterval(actualizarHoraCabeceraTele, 1000);
+setInterval(actualizarContadores, 1000);
 actualizarHoraCabeceraTele();
 
 export function autocompletarEstacionesTele() {
@@ -1290,18 +1320,3 @@ export function autocompletarEstacionesTele() {
         return;
     }
 }
-
-setInterval(() => {
-  document.querySelectorAll('.countdown').forEach(el => {
-    const ts   = Number(el.dataset.ts);
-    const diff = ts - Date.now();
-    if (diff <= 0) {
-      el.textContent = '00:00';
-      el.classList.remove('countdown');
-    } else {
-      const mm = String(Math.floor(diff/60000)).padStart(2,'0');
-      const ss = String(Math.floor((diff%60000)/1000)).padStart(2,'0');
-      el.textContent = `${mm}:${ss}`;
-    }
-  });
-}, 1000);
