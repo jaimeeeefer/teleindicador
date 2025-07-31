@@ -906,7 +906,8 @@ function obtenerRutaIconoADIF(adif) {
         "LG": 'LOGITREN.png',
         "AL": 'ALSA.png',
         "RX": 'ATHOS.png',
-        "TR": 'TRACCION.png'
+        "TR": 'TRACCION.png',
+        "EC": 'EC.png'
       },
       default: ''
     },
