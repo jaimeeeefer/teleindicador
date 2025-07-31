@@ -980,19 +980,19 @@ function obtenerRutaIconoADIF(adif) {
   const regla = reglas[trafficType];
   if (!regla) return '';  // sin regla → nada
 
-  // 1) commercialProduct si existe en la regla
-  if (regla.commercialProduct) {
-    const prod = opeProComPro.commercialProduct;
-    if (prod && regla.commercialProduct[prod]) {
-      return `img/${regla.commercialProduct[prod]}`;
-    }
-  }
-
-  // 2) operator si existe en la regla
+  // 1) operator si existe en la regla
   if (regla.operator) {
     const op = opeProComPro.operator;
     if (op && regla.operator[op]) {
       return `img/${regla.operator[op]}`;
+    }
+  }
+
+  // 2) commercialProduct si existe en la regla
+  if (regla.commercialProduct) {
+    const prod = opeProComPro.commercialProduct;
+    if (prod && regla.commercialProduct[prod]) {
+      return `img/${regla.commercialProduct[prod]}`;
     }
   }
 
