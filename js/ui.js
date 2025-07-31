@@ -1124,18 +1124,19 @@ export function renderizarPanelTeleindicador(datos) {
     const scheduled = `<span class="scheduled">${horaMostrada}</span>`;
 
     // 2) si faltan ≤10 min y ya ha pasado la hora programada…
-    let dynamic;
-    if (horaEstimMs && horaEstimMs > Date.now() && horaEstimMs - Date.now() <= 10*60*1000) {
-    // countdown dinámico
-    dynamic = `<br><span 
-                    class="countdown ${getColorClass(delaySec)}" 
-                    data-ts="${horaEstimMs}"
-                ></span>`;
-    } else if (tacharHora) {
-    // tu lógica de retraso “grande” (tachado o coloreado)
-    dynamic = `<br><span class="hora-real ${getColorClass(delaySec)}">${realStr}</span>`;
+    if (horaEstimTele
+        && horaEstimTele > Date.now()
+        && (horaEstimTele - Date.now()) <= 10 * 60 * 1000) {
+    inner += `<br>
+        <span class="countdown ${getColorClass(delaySec)}"
+            data-ts="${horaEstimTele}">
+        </span>`;
     } else {
-    dynamic = "";
+    // 3) fuera de umbral, tu lógica existente: tachado o coloreado
+    inner += `<br>
+        <span class="hora-real ${getColorClass(delaySec)}">
+        ${horaMostrada}
+        </span>`;
     }
 
     tdHora.innerHTML = scheduled + dynamic;
