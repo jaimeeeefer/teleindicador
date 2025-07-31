@@ -796,6 +796,30 @@ function obtenerRutaPictograma(linea, core) {
             C9: 'C9NARANJA.svg',
             C10: 'C10VERDE.svg'
         },
+        BARCELONA: {
+            R1: 'R1.svg',
+            R2: 'R2.svg',
+            R2S: 'R2SUD.png',
+            R2N: 'R2NORD.png',
+            R3: 'R3.svg',
+            R4: 'R4.svg',
+            R7: 'R7.svg',
+            R8: 'R8.svg'
+        },
+        "": {
+            R11: 'R11.svg',
+            R12: 'R12.svg',
+            R13: 'R13.svg',
+            R14: 'R14.svg',
+            R15: 'R15.svg',
+            R16: 'R16.svg',
+            R17: 'R17.svg',
+            R18: 'R18.svg',
+            RG1: 'RG1.svg',
+            RT1: 'RT1.svg',
+            RT2: 'RT2.svg',
+            RL3: 'RL3.svg'
+        },
         BILBAO: {
             C1: 'C1ROJA.svg',
             C2: 'C2VERDE.svg',
@@ -868,6 +892,9 @@ function obtenerRutaPictograma(linea, core) {
 function obtenerRutaIconoADIF(adif) {
   const reglas = {
     AVLDMD: {
+      operator: {
+        "FG": 'FGC.png',
+      },
       commercialProduct: {
         "AVANT": 'AVANT.png',
         "AVANT-EXPRES": 'AVANTEXP.png',
