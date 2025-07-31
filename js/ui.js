@@ -779,7 +779,7 @@ function traducirOperador(operador) {
 }
 
 
-function obtenerRutaPictograma(linea, core) {
+function obtenerRutaPictograma(linea, core, adif) {
     const pictogramasCercanias = {
         MADRID: {
             C1: 'C1AZUL.svg',
@@ -1099,7 +1099,7 @@ export function renderizarPanelTeleindicador(datos) {
       : "-";
 
     // pictograma de línea
-    const pictograma = obtenerRutaPictograma(info.line, info.core);
+    const pictograma = obtenerRutaPictograma(info.line, info.core, info);
 
     // operador
     const opCode = info.opeProComPro?.operator || "";
