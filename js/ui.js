@@ -1082,7 +1082,7 @@ export function renderizarPanelTeleindicador(datos) {
     const horaEstimMs = plannedMs
       ? plannedMs + delaySec * 1000
       : null;
-      
+
     const horaEstimStr = calcularHoraRealTele(horaPlan, delaySec);
 
     if (tacharHora) {
@@ -1128,15 +1128,27 @@ export function renderizarPanelTeleindicador(datos) {
     const diffMin = horaEstimMs ? (horaEstimMs - Date.now()) / 60000 : null;
 
     if (diffMin !== null && diffMin >= 0 && diffMin < 10) {
-      // Si faltan menos de 10 mins, muestra la cuenta atrás
+      // 1. Añadimos la clase para que parpadee
+      tdHora.classList.add("parpadeante");
+
+      // 2. Calculamos los minutos o segundos restantes UNA SOLA VEZ
+      let tiempoRestanteStr;
+      if (diffMin < 1) {
+        const diffSec = Math.floor(diffMin * 60);
+        tiempoRestanteStr = `${diffSec} s`;
+      } else {
+        tiempoRestanteStr = `${Math.floor(diffMin)} min`;
+      }
+      
+      // 3. Creamos el HTML con el tiempo restante estático
       tdHora.innerHTML = `
         <div class="countdown-container">
-            <span class="countdown-timer" data-tstamp="${horaEstimMs}"></span>
+            <span class="countdown-timer">${tiempoRestanteStr}</span>
             <span class="countdown-subtext">${horaEstimStr}</span>
         </div>
       `;
     } else {
-      // Si no, muestra la hora normal (con o sin tachado)
+      // Lógica para trenes a más de 10 minutos (sin cambios)
       const tacharHora = delaySec !== 0 && estadoTrad !== 'PENDIENTE DE CIRCULAR';
       const horaMostrada = tacharHora
         ? `<span style="text-decoration:line-through;color:gray;">${horaPlan}</span><br><span class="${getColorClass(delaySec)}">${horaEstimStr}</span>`
