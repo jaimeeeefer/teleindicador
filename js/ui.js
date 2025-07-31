@@ -1124,12 +1124,12 @@ export function renderizarPanelTeleindicador(datos) {
     const scheduled = `<span class="scheduled">${horaMostrada}</span>`;
 
     // 2) si faltan ≤10 min y ya ha pasado la hora programada…
-    if (horaEstimTele
-        && horaEstimTele > Date.now()
-        && (horaEstimTele - Date.now()) <= 10 * 60 * 1000) {
+    if (horaEstimStr
+        && horaEstimStr > Date.now()
+        && (horaEstimStr - Date.now()) <= 10 * 60 * 1000) {
     inner += `<br>
         <span class="countdown ${getColorClass(delaySec)}"
-            data-ts="${horaEstimTele}">
+            data-ts="${horaEstimStr}">
         </span>`;
     } else {
     // 3) fuera de umbral, tu lógica existente: tachado o coloreado
