@@ -818,7 +818,8 @@ function obtenerRutaPictograma(linea, core) {
             RG1: 'RG1.svg',
             RT1: 'RT1.svg',
             RT2: 'RT2.svg',
-            RL3: 'RL3.svg'
+            RL3: 'RL3.svg',
+            RL4: 'RL4.svg'
         },
         BILBAO: {
             C1: 'C1ROJA.svg',
@@ -886,8 +887,28 @@ function obtenerRutaPictograma(linea, core) {
     if (!linea) return null;
     const coreKey = core ? core.toUpperCase() : "";
     const imgsNucleo = pictogramasCercanias[coreKey];
-    if (!imgsNucleo) return null;
-    return imgsNucleo[linea] ? `img/${imgsNucleo[linea]}` : null;
+    if (imgsNucleo && imgsNucleo[lineaKey]) {
+        return `img/${imgsNucleo[lineaKey]}`;
+    }
+
+    const prod = adif?.opeProComPro?.commercialProduct?.toUpperCase()?.trim();
+    if (prod) {
+        // reusar el mismo núcleo, o incluso buscar en un bloque global
+        if (imgsNucleo && imgsNucleo[prod]) {
+        return `img/${imgsNucleo[prod]}`;
+        }
+        // o bien, si quieres una lista global de products:
+        const pictosPorProducto = {
+        "RODALIES-RL3": 'RL3.svg',
+        "RODALIES-RL4": 'RL4.svg',
+        };
+        if (pictosPorProducto[prod]) {
+        return `img/${pictosPorProducto[prod]}`;
+        }
+    }
+
+    // 4) Si nada coincide, devolvemos null
+    return null;
 }
 
 function obtenerRutaIconoADIF(adif) {
