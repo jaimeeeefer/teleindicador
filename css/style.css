@@ -638,13 +638,13 @@ color: var(--button-hover-color);
 }
 
 .countdown-timer {
-  font-size: 1.8em; /* Tamaño grande para los minutos/segundos */
-  font-weight: bold;
-  color: var(--delay-color-verde); /* O el color que prefieras */
+  font-size: 1.1em; /* Mismo tamaño que el texto normal */
+  font-weight: normal; /* Le quitamos la negrita */
+  color: var(--text-color); /* Usamos el color del texto principal (blanco en tema oscuro) */
 }
 
 .countdown-subtext {
-  font-size: 1.1em; /* Tamaño normal para la hora HH:MM */
+  font-size: 1.1em; /* Mismo tamaño que el texto normal */
   color: var(--text-color);
   margin-top: 2px;
 }
