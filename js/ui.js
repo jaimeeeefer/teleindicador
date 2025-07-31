@@ -1052,47 +1052,93 @@ export function renderizarPanelTeleindicador(datos) {
     console.error("No se encontró el tbody de la tabla del teleindicador");
     return;
   }
-  tbody.innerHTML = "";
 
+  tbody.innerHTML = "";
   if (!Array.isArray(datos) || datos.length === 0) {
     tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">No hay datos disponibles</td></tr>`;
     return;
   }
 
   datos.forEach((tren) => {
+    // ── 1) Extraer info ───────────────────────────────────────────────────────────
     const info      = tren.commercialPathInfo || {};
     const infoextra = tipo === 'llegadas'
       ? tren.passthroughStep?.arrivalPassthroughStepSides   || {}
       : tren.passthroughStep?.departurePassthroughStepSides || {};
+    const estadoTrad = traducirEstado(infoextra.circulationState || "");
 
-    // --- cálculo de hora programada y real (ms)
-    const delaySec      = infoextra.forecastedOrAuditedDelay || 0;
-    const plannedMs     = infoextra.plannedTime || 0;
-    const scheduledStr  = plannedMs ? formatearTimestampHoraTele(plannedMs) : "-";
-    const realTs        = plannedMs ? plannedMs + delaySec * 1000 : null;
-    const realStr       = realTs ? calcularHoraRealTele(scheduledStr, delaySec) : "";
+    const delaySec  = infoextra.forecastedOrAuditedDelay || 0;
+    const tacharHora = delaySec !== null
+      && (delaySec >= 60 || delaySec < 0)
+      && estadoTrad !== 'PENDIENTE DE CIRCULAR';
 
-    // --- resto de extracción de destino, operador, etc.
-    // (omito para no repetir, manten tu lógica actual)
-    // ...
-    
-    // ── CREACIÓN DE LA FILA ──────────────────────────────────────────
-    const fila = document.createElement("tr");
+    const plannedMs = infoextra.plannedTime || 0;
+    const horaPlan  = plannedMs
+      ? formatearTimestampHoraTele(plannedMs)
+      : "-";
+    let horaMostrada = horaPlan;
 
-    // — Celda Hora (countdown si <10 min) —
-    const tdHora = document.createElement("td");
-    let horaHTML = `<span class="scheduled">${scheduledStr}</span>`;
-    if (realTs && realTs - Date.now() <= 10*60*1000 && realTs > Date.now()) {
-      // menos de 10 min → countdown dinámico
-      horaHTML += `<br><span 
-                      class="countdown ${getColorClass(delaySec)}" 
-                      data-ts="${realTs}"
-                   ></span>`;
-    } else if (delaySec !== null && (delaySec >= 60 || delaySec < 0)) {
-      // retraso grande → hora real estática tachada
-      horaHTML += `<br><span class="hora-real ${getColorClass(delaySec)}">${realStr}</span>`;
+    // cálculo hora estimada (ms)
+    const horaEstimMs = plannedMs
+      ? plannedMs + delaySec * 1000
+      : null;
+
+    if (tacharHora) {
+      const horaEstimStr = calcularHoraRealTele(horaPlan, delaySec);
+      horaMostrada = `
+        <span style="text-decoration:line-through;color:gray;">${horaPlan}</span><br>
+        <span class="${getColorClass(delaySec)}">${horaEstimStr}</span>
+      `;
     }
-    tdHora.innerHTML = horaHTML;
+
+    // estación origen/destino
+    const oriCode = info.commercialOriginStationCode
+    const desCode = info.commercialDestinationStationCode
+    const origen  = oriCode
+      ? estaciones[oriCode.replace(/^0+/, '')] || oriCode
+      : "-";
+    const destino = desCode
+      ? estaciones[desCode.replace(/^0+/, '')] || desCode
+      : "-";
+
+    // pictograma de línea
+    const pictograma = obtenerRutaPictograma(info.line, info.core, info);
+
+    // operador
+    const opCode = info.opeProComPro?.operator || "";
+    const opName = traducirOperador(opCode);
+
+    // producto comercial / product
+    const commProd = info.opeProComPro?.commercialProduct?.trim() || "";
+    const prod    = info.opeProComPro?.product || "";
+
+    // número de tren
+    const numeroTren = info.commercialPathKey?.commercialCirculationKey?.commercialNumber || "-";
+
+    // vía
+    const via = infoextra.plannedPlatform || "-";
+
+    const tdHora = document.createElement("td");
+
+    // 1) siempre mostramos la hora programada en pequeño
+    const scheduled = `<span class="scheduled">${horaPlanificada}</span>`;
+
+    // 2) si faltan ≤10 min y ya ha pasado la hora programada…
+    let dynamic;
+    if (horaEstimMs && horaEstimMs > Date.now() && horaEstimMs - Date.now() <= 10*60*1000) {
+    // countdown dinámico
+    dynamic = `<br><span 
+                    class="countdown ${getColorClass(delaySec)}" 
+                    data-ts="${horaEstimMs}"
+                ></span>`;
+    } else if (tacharHora) {
+    // tu lógica de retraso “grande” (tachado o coloreado)
+    dynamic = `<br><span class="hora-real ${getColorClass(delaySec)}">${realStr}</span>`;
+    } else {
+    dynamic = "";
+    }
+
+    tdHora.innerHTML = scheduled + dynamic;
     fila.appendChild(tdHora);
 
     // — Celda Destino/Origen —
