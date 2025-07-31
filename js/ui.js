@@ -1127,7 +1127,7 @@ export function renderizarPanelTeleindicador(datos) {
     const tdHora = document.createElement("td");
     const diffMin = horaEstimMs ? (horaEstimMs - Date.now()) / 60000 : null;
 
-    if (diffMin !== null && diffMin >= 0 && diffMin < 10) {
+    if (diffMin !== null && diffMin >= -5 && diffMin <= 5) {
       // 1. Añadimos la clase para que parpadee
       tdHora.classList.add("parpadeante");
 
