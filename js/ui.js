@@ -1082,9 +1082,11 @@ export function renderizarPanelTeleindicador(datos) {
     const horaEstimMs = plannedMs
       ? plannedMs + delaySec * 1000
       : null;
+      
+    const horaEstimStr = calcularHoraRealTele(horaPlan, delaySec);
 
     if (tacharHora) {
-      const horaEstimStr = calcularHoraRealTele(horaPlan, delaySec);
+      
       horaMostrada = `
         <span style="text-decoration:line-through;color:gray;">${horaPlan}</span><br>
         <span class="${getColorClass(delaySec)}">${horaEstimStr}</span>
