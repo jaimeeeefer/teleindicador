@@ -231,7 +231,7 @@ function setupEventListeners() {
         mapTipo[tipoTren] || "ALL"
       );
       renderizarPanelTeleindicador(trenes);
-    } catch {
+    } catch(e) {
       console.error("Error en renderizarPanelTeleindicador:", e);
       tbody.innerHTML = `<tr><td colspan="7" style="text-align:center">
         Error al consultar.
