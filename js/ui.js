@@ -1132,7 +1132,7 @@ export function renderizarPanelTeleindicador(datos) {
       tdHora.classList.add("parpadeante");
     }
 
-    if (diffMin !== null && diffMin >= -5 && diffMin < 10) {
+    if (diffMin !== null && diffMin >= 0 && diffMin < 10) {
       // 2. Calculamos los minutos o segundos restantes UNA SOLA VEZ
       const tiempoRestanteStr = `${Math.floor(diffMin)} min`;
       
