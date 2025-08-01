@@ -1127,20 +1127,14 @@ export function renderizarPanelTeleindicador(datos) {
     const tdHora = document.createElement("td");
     const diffMin = horaEstimMs ? (horaEstimMs - Date.now()) / 60000 : null;
 
-    if (diffMin !== null && diffMin >= 0 && diffMin <= 5) {
+    if (diffMin !== null && diffMin >= -5 && diffMin <= 5) {
       // 1. Añadimos la clase para que parpadee
       tdHora.classList.add("parpadeante");
     }
 
-    if (diffMin !== null && diffMin >= 0 && diffMin < 10) {
+    if (diffMin !== null && diffMin >= -5 && diffMin < 10) {
       // 2. Calculamos los minutos o segundos restantes UNA SOLA VEZ
-      let tiempoRestanteStr;
-      if (diffMin < 1) {
-        const diffSec = Math.floor(diffMin * 60);
-        tiempoRestanteStr = `${diffSec} s`;
-      } else {
-        tiempoRestanteStr = `${Math.floor(diffMin)} min`;
-      }
+      const tiempoRestanteStr = `${Math.floor(diffMin)} min`;
       
       // 3. Creamos el HTML con el tiempo restante estático
       tdHora.innerHTML = `
