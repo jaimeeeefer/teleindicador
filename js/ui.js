@@ -1070,7 +1070,7 @@ export function renderizarPanelTeleindicador(datos) {
 
     const delaySec  = infoextra.forecastedOrAuditedDelay || 0;
     const tacharHora = delaySec !== null
-      && (delaySec > 60 || delaySec < 0)
+      && (delaySec >= 60 || delaySec < 0)
       && estadoTrad !== 'PENDIENTE DE CIRCULAR';
 
     const plannedMs = infoextra.plannedTime || 0;
