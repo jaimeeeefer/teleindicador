@@ -178,6 +178,7 @@ function setupEventListeners() {
     autocompletarEstacionesTele();
     mostrarFavoritoEstrellaTele();
   });
+  
   DOMElements.stationInputTele.addEventListener("focus", () => {
     actualizarControlesInput(
       DOMElements.stationInputTele,
@@ -187,6 +188,11 @@ function setupEventListeners() {
     autocompletarEstacionesTele();
     mostrarFavoritoEstrellaTele();
   });
+
+  DOMElements.stationInputTele.addEventListener('keyup', e => {
+      if (e.key === 'Enter') buscarTeleindicador();
+  });
+
   DOMElements.clearNumeroTele.addEventListener("click", () => {
     DOMElements.stationInputTele.value = "";
     DOMElements.stationInputTele.focus();
@@ -200,44 +206,46 @@ function setupEventListeners() {
     const codigo = DOMElements.stationInputTele.dataset.codigo;
     if (codigo) toggleFavoritoEstacion(codigo);
   });
-  DOMElements.buscarTeleButton.addEventListener("click", async () => {
-    const input     = DOMElements.stationInputTele;
-    const codigo    = input.dataset.codigo || "";
+
+  DOMElements.buscarTeleButton.addEventListener("click", buscarTeleindicador);
+
+  async function buscarTeleindicador() {
+    const input = DOMElements.stationInputTele;
+    let codigo = input.dataset.codigo || "";
+
+    if (!codigo && input.value) {
+        const estaciones = getEstaciones();
+        const inputNorm = input.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+        const foundCode = Object.keys(estaciones).find(c =>
+            estaciones[c].toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() === inputNorm
+        );
+        if (foundCode) {
+            codigo = foundCode; // Asigna el código encontrado
+        }
+    }
+
     const tipoPanel = document.getElementById("tipoPanelTele").textContent.toLowerCase();
-    const tipoTren  = document.getElementById("trainTypeTele").textContent;
-    const tbody     = document.getElementById("tablaTeleindicadorBody");
+    const tipoTren = document.getElementById("trainTypeTele").textContent;
+    const tbody = document.getElementById("tablaTeleindicadorBody");
 
     if (!codigo) {
-      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center">
-        Por favor, selecciona una estación válida.
-      </td></tr>`;
-      return;
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center">Por favor, selecciona una estación válida.</td></tr>`;
+        return;
     }
-    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center">
-      Cargando...
-    </td></tr>`;
+
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center">Cargando...</td></tr>`;
     try {
-      const mapTipo = {
-        Todos: "ALL",
-        Mercancías: "GOODS",
-        AVLDMD: "AVLDMD",
-        Cercanías: "CERCANIAS",
-        Viajeros: "TRAVELERS",
-        Otros: "OTHERS"
-      };
-      const trenes = await buscarEstacionPorCodigoParaTeleindicador(
-        codigo,
-        tipoPanel,
-        mapTipo[tipoTren] || "ALL"
-      );
-      renderizarPanelTeleindicador(trenes);
-    } catch(e) {
-      console.error("Error en renderizarPanelTeleindicador:", e);
-      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center">
-        Error al consultar.
-      </td></tr>`;
+        const mapTipo = {
+            Todos: "ALL", Mercancías: "GOODS", AVLDMD: "AVLDMD",
+            Cercanías: "CERCANIAS", Viajeros: "TRAVELERS", Otros: "OTHERS"
+        };
+        const trenes = await buscarEstacionPorCodigoParaTeleindicador(codigo, tipoPanel, mapTipo[tipoTren] || "ALL");
+        renderizarPanelTeleindicador(trenes);
+    } catch (e) {
+        console.error("Error en la búsqueda del teleindicador:", e);
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center">Error al consultar.</td></tr>`;
     }
-  });
+  }
 
   // — Pestañas
   DOMElements.tabButtons.forEach(btn => {
