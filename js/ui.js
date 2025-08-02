@@ -910,7 +910,6 @@ function obtenerRutaPictograma(linea, core, adif) {
         }
     }
 
-    // 4) Si nada coincide, devolvemos null
     return null;
 }
 
@@ -1087,7 +1086,6 @@ export function renderizarPanelTeleindicador(datos) {
     const horaEstimStr = calcularHoraRealTele(horaPlan, delaySec);
 
     if (tacharHora) {
-      
       horaMostrada = `
         <span style="text-decoration:line-through;color:gray;">${horaPlan}</span><br>
         <span class="${getColorClass(delaySec)}">${horaEstimStr}</span>
@@ -1158,16 +1156,34 @@ export function renderizarPanelTeleindicador(datos) {
     const tdDest = document.createElement("td");
     const wrapper = document.createElement("div");
     wrapper.className = "destino-con-pastilla";
+
+    // Pictograma de línea (ej: C-1)
     if (pictograma) {
-      const img = document.createElement("img");
-      img.src = pictograma;
-      img.alt = info.line || "";
-      img.className = "pastilla-linea";
-      wrapper.appendChild(img);
+        const img = document.createElement("img");
+        img.src = pictograma;
+        img.alt = info.line || "";
+        img.className = "pastilla-linea";
+        wrapper.appendChild(img);
     }
+
+    // Contenedor para el texto (destino y aviso de "sin parada")
+    const textWrapper = document.createElement("div");
+    textWrapper.className = "destino-texto-container";
+
+    // Nombre del destino/origen
     const spanDest = document.createElement("span");
     spanDest.textContent = tipo === 'llegadas' ? origen : destino;
-    wrapper.appendChild(spanDest);
+    textWrapper.appendChild(spanDest);
+
+    // Comprobación para añadir "Tren sin parada"
+    if (tren.passthroughStep?.stopType === "NO_STOP") {
+        const noStopSpan = document.createElement("span");
+        noStopSpan.textContent = "Tren sin parada";
+        noStopSpan.className = "sin-parada-texto";
+        textWrapper.appendChild(noStopSpan);
+    }
+
+    wrapper.appendChild(textWrapper);
     tdDest.appendChild(wrapper);
     fila.appendChild(tdDest);
 
