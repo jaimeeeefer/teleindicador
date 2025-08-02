@@ -877,10 +877,11 @@ function obtenerRutaPictograma(linea, core, adif) {
             T1: 'T1VERDE.svg'
         },
         SEVILLA: {
-            C1: 'C1ROJA.svg',
+            C1: 'C1AZUL.svg',
             C2: 'C2VERDE.svg',
-            C3: 'C3AZUL.svg',
-            C4: 'C4MORADO.svg'
+            C3: 'C3ROJA.svg',
+            C4: 'C4MORADO.svg',
+            C5: 'C5AZUL.svg'
         }
         // ... añade otros núcleos si los necesitas
     };
