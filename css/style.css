@@ -629,6 +629,20 @@ color: var(--button-hover-color);
   max-width: 4em;
 }
 
+.destino-texto-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Alinea el texto a la izquierda */
+  line-height: 1.2;
+}
+
+.sin-parada-texto {
+  font-size: 0.85em;
+  font-style: italic;
+  color: var(--input-placeholder); /* Un color más tenue */
+  margin-top: 2px;
+}
+
 .countdown-container {
   display: flex;
   flex-direction: column;
