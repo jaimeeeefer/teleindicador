@@ -950,7 +950,8 @@ function obtenerRutaIconoADIF(adif) {
         "RODALIES-RL4": 'RODCAT.png',
         "RODALIES-RG1": 'RODCAT.png',
         "RODALIES-RT1": 'RODCAT.png',
-        "RODALIES-RT2": 'RODCAT.png'
+        "RODALIES-RT2": 'RODCAT.png',
+        "COMBOIOS PORTUGAL": 'REGCP.png'
       },
       default: 'RENFE.png'
     },
