@@ -927,6 +927,7 @@ function obtenerRutaIconoADIF(adif) {
         "MD": 'MD.png',
         "PROXIMIDAD": 'PROXID.png',
         "REGIONAL": 'REG.png',
+        "INTERURBANO": 'REG.png',
         "REGIONAL EXPRES": 'REX.png',
         "INTERCITY": 'ICITY.png',
         "EUROMED": 'EUROMED.png',
