@@ -1146,9 +1146,6 @@ export function renderizarPanelTeleindicador(datos) {
     } else {
       // Lógica para trenes a más de 10 minutos (sin cambios)
       const tacharHora = delaySec !== 0 && estadoTrad !== 'PENDIENTE DE CIRCULAR';
-      const horaMostrada = tacharHora
-        ? `<span style="text-decoration:line-through;color:gray;">${horaPlan}</span><br><span class="${getColorClass(delaySec)}">${horaEstimStr}</span>`
-        : `<span>${horaPlan}</span>`;
       tdHora.innerHTML = horaMostrada;
     }
     fila.appendChild(tdHora);
