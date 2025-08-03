@@ -1,7 +1,7 @@
 // js/api.js
 
 import { getAuthHeader, procesarCSV, setEstaciones, getEstaciones } from './auth.js';
-import { mostrarPantalla, mostrarTren, mostrarEstacion, finCargarMas, clearLastDate } from './ui.js';
+import { mostrarPantalla, mostrarTren, mostrarEstacion, finCargarMas, clearLastDate, renderizarPanelTeleindicador } from './ui.js';
 
 const API_BASE_URL = "https://adif-api.onrender.com";
 let trenes = [];
@@ -83,6 +83,51 @@ export async function buscarEstacion(){
         }
     } catch (error) {
         resultadoEst.textContent = "Error: " + error.message;
+    }
+}
+
+export async function buscarTeleindicador() {
+    document.getElementById('sugerenciasTele').classList.remove('visible');
+
+    const input = document.getElementById("stationInputTele");
+    let codigo = input.dataset.codigo || "";
+
+    // Lógica de respaldo para encontrar el código a partir del texto
+    if (!codigo && input.value) {
+        const estaciones = getEstaciones();
+        const inputNorm = input.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+        const foundCode = Object.keys(estaciones).find(c =>
+            estaciones[c].toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() === inputNorm
+        );
+        if (foundCode) {
+            codigo = foundCode;
+        }
+    }
+
+    const tipoPanel = document.getElementById("tipoPanelTele").textContent.toLowerCase();
+    const tipoTren = document.getElementById("trainTypeTele").textContent;
+    const tbody = document.getElementById("tablaTeleindicadorBody");
+
+    // Validación
+    if (!codigo) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center">Por favor, selecciona una estación válida.</td></tr>`;
+        return;
+    }
+
+    // Estado de carga
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center">Cargando...</td></tr>`;
+
+    // Llamada a la API y renderizado
+    try {
+        const mapTipo = {
+            Todos: "ALL", Mercancías: "GOODS", AVLDMD: "AVLDMD",
+            Cercanías: "CERCANIAS", Viajeros: "TRAVELERS", Otros: "OTHERS"
+        };
+        const trenes = await buscarEstacionPorCodigoParaTeleindicador(codigo, tipoPanel, mapTipo[tipoTren] || "ALL");
+        renderizarPanelTeleindicador(trenes);
+    } catch (e) {
+        console.error("Error en la búsqueda del teleindicador:", e);
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center">Error al consultar.</td></tr>`;
     }
 }
 
