@@ -15,7 +15,7 @@ import {
   clearResultados,
   buscarEstacion,
   cargarMas,
-  buscarEstacionPorCodigoParaTeleindicador
+  buscarTeleindicador 
 } from './api.js';
 import {
   mostrarTrenAnterior,
@@ -27,8 +27,7 @@ import {
   toggleFavoritoTren,
   mostrarFavoritoEstrellaTren,
   mostrarFavoritosTren,
-  mostrarFavoritoEstrellaTele,
-  renderizarPanelTeleindicador
+  mostrarFavoritoEstrellaTele
 } from './ui.js';
 
 const DOMElements = {
@@ -208,44 +207,6 @@ function setupEventListeners() {
   });
 
   DOMElements.buscarTeleButton.addEventListener("click", buscarTeleindicador);
-
-  async function buscarTeleindicador() {
-    const input = DOMElements.stationInputTele;
-    let codigo = input.dataset.codigo || "";
-
-    if (!codigo && input.value) {
-        const estaciones = getEstaciones();
-        const inputNorm = input.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-        const foundCode = Object.keys(estaciones).find(c =>
-            estaciones[c].toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() === inputNorm
-        );
-        if (foundCode) {
-            codigo = foundCode; // Asigna el código encontrado
-        }
-    }
-
-    const tipoPanel = document.getElementById("tipoPanelTele").textContent.toLowerCase();
-    const tipoTren = document.getElementById("trainTypeTele").textContent;
-    const tbody = document.getElementById("tablaTeleindicadorBody");
-
-    if (!codigo) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center">Por favor, selecciona una estación válida.</td></tr>`;
-        return;
-    }
-
-    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center">Cargando...</td></tr>`;
-    try {
-        const mapTipo = {
-            Todos: "ALL", Mercancías: "GOODS", AVLDMD: "AVLDMD",
-            Cercanías: "CERCANIAS", Viajeros: "TRAVELERS", Otros: "OTHERS"
-        };
-        const trenes = await buscarEstacionPorCodigoParaTeleindicador(codigo, tipoPanel, mapTipo[tipoTren] || "ALL");
-        renderizarPanelTeleindicador(trenes);
-    } catch (e) {
-        console.error("Error en la búsqueda del teleindicador:", e);
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center">Error al consultar.</td></tr>`;
-    }
-  }
 
   // — Pestañas
   DOMElements.tabButtons.forEach(btn => {
