@@ -786,13 +786,13 @@ function obtenerRutaPictograma(linea, core, adif) {
             C2: 'C2VERDE.svg',
             C3: 'C3MORADO.svg',
             C4: 'C4AZUL.svg',
-            C4a: 'C4AAZUL.svg',
-            C4b: 'C4BAZUL.svg',
+            "C4a": 'C4AAZUL.svg',
+            "C4b": 'C4BAZUL.svg',
             C5: 'C5AMARILLO.svg',
             C7: 'C7ROJA.svg',
             C8: 'C8GRIS.svg',
-            C8a: 'C8AGRIS.svg',
-            C8b: 'C8BGRIS.svg',
+            "C8a": 'C8AGRIS.svg',
+            "C8b": 'C8BGRIS.svg',
             C9: 'C9NARANJA.svg',
             C10: 'C10VERDE.svg'
         },
@@ -873,7 +873,7 @@ function obtenerRutaPictograma(linea, core, adif) {
         },
         CADIZ: {
             C1: 'C1ROJA.svg',
-            C1a: 'C1AROJA.svg',
+            "C1a": 'C1AROJA.svg',
             T1: 'T1VERDE.svg'
         },
         SEVILLA: {
