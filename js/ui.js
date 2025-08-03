@@ -1069,6 +1069,8 @@ export function renderizarPanelTeleindicador(datos) {
       ? tren.passthroughStep?.arrivalPassthroughStepSides   || {}
       : tren.passthroughStep?.departurePassthroughStepSides || {};
     const estadoTrad = traducirEstado(infoextra.circulationState || "");
+    console.log("Tipo de panel:", tipo);
+    console.log("--> Objeto 'infoextra' seleccionado:", infoextra);
 
     const delaySec  = infoextra.forecastedOrAuditedDelay || 0;
     const tacharHora = delaySec !== null
