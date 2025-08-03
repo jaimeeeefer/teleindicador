@@ -1063,7 +1063,6 @@ export function renderizarPanelTeleindicador(datos) {
   }
 
   datos.forEach((tren) => {
-    // ── 1) Extraer info ───────────────────────────────────────────────────────────
     const info      = tren.commercialPathInfo || {};
     const infoextra = tipo === 'llegadas'
       ? tren.passthroughStep?.arrivalPassthroughStepSides   || {}
@@ -1096,8 +1095,8 @@ export function renderizarPanelTeleindicador(datos) {
     }
 
     // estación origen/destino
-    const oriCode = info.commercialOriginStationCode
-    const desCode = info.commercialDestinationStationCode
+    const oriCode = info.commercialPathKey?.originStationCode || "-";
+    const desCode = info.commercialPathKey?.destinationStationCode || "-";
     const origen  = oriCode
       ? estaciones[oriCode.replace(/^0+/, '')] || oriCode
       : "-";
@@ -1122,23 +1121,17 @@ export function renderizarPanelTeleindicador(datos) {
     // vía
     const via = infoextra.plannedPlatform || "-";
 
-    // ── 2) Crea la fila + celdas ─────────────────────────────────────────────────
-    const fila = document.createElement("tr");
-
     // — Celda Hora —
+    const fila = document.createElement("tr");
     const tdHora = document.createElement("td");
     const diffMin = horaEstimMs ? (horaEstimMs - Date.now()) / 60000 : null;
 
     if (diffMin !== null && diffMin >= -5 && diffMin <= 5) {
-      // 1. Añadimos la clase para que parpadee
       tdHora.classList.add("parpadeante");
     }
 
     if (diffMin !== null && diffMin >= 0 && diffMin < 10) {
-      // 2. Calculamos los minutos o segundos restantes UNA SOLA VEZ
       const tiempoRestanteStr = `${Math.floor(diffMin)} min`;
-      
-      // 3. Creamos el HTML con el tiempo restante estático
       tdHora.innerHTML = `
         <div class="countdown-container">
             <span">${tiempoRestanteStr}</span><br>
@@ -1146,7 +1139,6 @@ export function renderizarPanelTeleindicador(datos) {
         </div>
       `;
     } else {
-      // Lógica para trenes a más de 10 minutos (sin cambios)
       const tacharHora = delaySec !== 0 && estadoTrad !== 'PENDIENTE DE CIRCULAR';
       tdHora.innerHTML = horaMostrada;
     }
