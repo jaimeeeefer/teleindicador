@@ -56,6 +56,7 @@ const DOMElements = {
 
   // — Teleindicador
   stationInputTele:       document.getElementById("stationInputTele"),
+  sugerenciasTele:        document.getElementById("sugerenciasTele"),
   buscarTeleButton:       document.getElementById("buscarTeleButton"),
   clearNumeroTele:        document.getElementById("clearNumeroTele"),
   estrellaTeleBtn:        document.getElementById("estrellaFavoritoTele"),
@@ -248,6 +249,10 @@ function setupEventListeners() {
     if (!DOMElements.trenFavoritosDiv.contains(e.target) &&
         e.target !== DOMElements.trenInput) {
       DOMElements.trenFavoritosDiv.classList.remove('visible');
+    }
+    if (!DOMElements.sugerenciasTele.contains(e.target) &&
+        !DOMElements.stationInputTele.contains(e.target)) {
+      DOMElements.sugerenciasTele.classList.remove('visible');
     }
     DOMElements.customSelects.forEach(s => {
       if (!s.contains(e.target)) {
