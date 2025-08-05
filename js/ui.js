@@ -1044,6 +1044,24 @@ export function renderizarPanelTeleindicador(datos) {
   const tipoPanelSelect   = document.getElementById("tipoPanelTele");
   const tipo              = tipoPanelSelect?.textContent.toLowerCase();
 
+  // Función auxiliar para obtener el timestamp real (planificado + retraso)
+  datos.sort((a, b) => {
+    // Determinamos si usamos los datos de llegada o salida para cada tren
+    const pasoA = tipo === 'llegadas'
+      ? a.passthroughStep?.arrivalPassthroughStepSides
+      : a.passthroughStep?.departurePassthroughStepSides;
+    
+    const pasoB = tipo === 'llegadas'
+      ? b.passthroughStep?.arrivalPassthroughStepSides
+      : b.passthroughStep?.departurePassthroughStepSides;
+
+    // Usamos la función que ya existía
+    const timestampA = getTimestampReal(pasoA || {});
+    const timestampB = getTimestampReal(pasoB || {});
+    
+    return timestampA - timestampB;
+  });
+
   // Actualiza el título
   if (tipoPanelSelect) {
     const titulo = document.getElementById("titulo-cabecera-tele");
@@ -1136,10 +1154,6 @@ export function renderizarPanelTeleindicador(datos) {
             <span">${tiempoRestanteStr}</span><br>
             <span class="${getColorClass(delaySec)}">${horaEstimStr}</span>
         </div>
-      `;
-    } else if (estadoTrad !== 'PENDIENTE DE CIRCULAR' && delaySec >= 0 && delaySec <= 60) {
-      tdHora.innerHTML = `
-        <span class="${getColorClass(delaySec)}">${horaEstimStr}</span>
       `;
     } else {
         tdHora.innerHTML = horaMostrada;
