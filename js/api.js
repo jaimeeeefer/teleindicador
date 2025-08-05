@@ -33,7 +33,7 @@ export async function buscarTren() {
 
     try {
         if (!/^\d+$/.test(numero)) throw new Error("Introduce un número de tren válido.");
-        //numero = numero.padStart(5, '0');
+        numero = numero.padStart(5, '0');
         
         resultadoPre.textContent = "Consultando...";
         
