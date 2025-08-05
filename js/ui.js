@@ -1091,10 +1091,6 @@ export function renderizarPanelTeleindicador(datos) {
         <span style="text-decoration:line-through;color:gray;">${horaPlan}</span><br>
         <span class="${getColorClass(delaySec)}">${horaEstimStr}</span>
       `;
-    } else {
-      horaMostrada = `
-        <span class="${getColorClass(delaySec)}">${horaEstimStr}</span>
-      `;
     }
 
     // estación origen/destino
@@ -1141,9 +1137,12 @@ export function renderizarPanelTeleindicador(datos) {
             <span class="${getColorClass(delaySec)}">${horaEstimStr}</span>
         </div>
       `;
+    } else if (estadoTrad !== 'PENDIENTE DE CIRCULAR' && delaySec >= 0 && delaySec <= 60) {
+      tdHora.innerHTML = `
+        <span class="${getColorClass(delaySec)}">${horaEstimStr}</span>
+      `;
     } else {
-      const tacharHora = delaySec !== 0 && estadoTrad !== 'PENDIENTE DE CIRCULAR';
-      tdHora.innerHTML = horaMostrada;
+        tdHora.innerHTML = horaMostrada;
     }
     fila.appendChild(tdHora);
 
