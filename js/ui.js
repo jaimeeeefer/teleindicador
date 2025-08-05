@@ -1091,6 +1091,10 @@ export function renderizarPanelTeleindicador(datos) {
         <span style="text-decoration:line-through;color:gray;">${horaPlan}</span><br>
         <span class="${getColorClass(delaySec)}">${horaEstimStr}</span>
       `;
+    } else {
+      horaMostrada = `
+        <span class="${getColorClass(delaySec)}">${horaEstimStr}</span>
+      `;
     }
 
     // estación origen/destino
