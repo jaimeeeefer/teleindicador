@@ -682,12 +682,12 @@ color: var(--button-hover-color);
 @keyframes parpadeoAdif {
   /* El texto permanece totalmente visible durante el 80% del ciclo.
   */
-  0%, 30% {
+  0%, 20% {
     opacity: 1;
   }
   /* Luego, en un instante, baja su opacidad al 30% (no se apaga del todo).
   */
-  65% {
+  60% {
     opacity: 0.2;
   }
   /* Y finalmente, vuelve a estar totalmente visible para reiniciar el ciclo.
@@ -699,7 +699,7 @@ color: var(--button-hover-color);
 
 .parpadeante {
   /* Aplicamos la nueva animación con una duración de 1.5s para un ritmo más natural */
-  animation: parpadeoAdif 1.25s infinite;
+  animation: parpadeoAdif 1s infinite;
 }
 
 .custom-select {
