@@ -679,11 +679,27 @@ color: var(--button-hover-color);
   100% { opacity: 1; }
 }
 
+@keyframes parpadeoAdif {
+  /* El texto permanece totalmente visible durante el 80% del ciclo.
+  */
+  0%, 80% {
+    opacity: 1;
+  }
+  /* Luego, en un instante, baja su opacidad al 30% (no se apaga del todo).
+  */
+  90% {
+    opacity: 0.3;
+  }
+  /* Y finalmente, vuelve a estar totalmente visible para reiniciar el ciclo.
+  */
+  100% {
+    opacity: 1;
+  }
+}
+
 .parpadeante {
-  /* usa la animación con ease-in-out en lugar de step-start */
-  -webkit-animation: fadeBlink 1s ease-in-out infinite;
-     -moz-animation: fadeBlink 1s ease-in-out infinite;
-          animation: fadeBlink 1s ease-in-out infinite;
+  /* Aplicamos la nueva animación con una duración de 1.5s para un ritmo más natural */
+  animation: parpadeoAdif 1.5s infinite;
 }
 
 .custom-select {
