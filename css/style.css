@@ -682,12 +682,12 @@ color: var(--button-hover-color);
 @keyframes parpadeoAdif {
   /* El texto permanece totalmente visible durante el 80% del ciclo.
   */
-  0%, 40% {
+  0%, 30% {
     opacity: 1;
   }
   /* Luego, en un instante, baja su opacidad al 30% (no se apaga del todo).
   */
-  70% {
+  65% {
     opacity: 0.2;
   }
   /* Y finalmente, vuelve a estar totalmente visible para reiniciar el ciclo.
