@@ -1155,7 +1155,9 @@ export function renderizarPanelTeleindicador(datos) {
       tdHora.innerHTML = `
         <div class="countdown-container">
             <span">${tiempoRestanteStr}</span><br>
-            <span class="${getColorClass(delaySec)}">${horaEstimStr}</span>
+            <span class="${
+            estadoTrad !== 'PENDIENTE DE CIRCULAR' ? getColorClass(delaySec) : ''
+            }">${horaEstimStr}</span>
         </div>
       `;
     } else {
