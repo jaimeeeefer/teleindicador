@@ -1136,7 +1136,10 @@ export function renderizarPanelTeleindicador(datos) {
     const numeroTren = info.commercialPathKey?.commercialCirculationKey?.commercialNumber || "-";
 
     // vía
-    const via = infoextra.plannedPlatform || "-";
+    const llegada = tren.passthroughStep?.arrivalPassthroughStepSides;
+    const salida = tren.passthroughStep?.departurePassthroughStepSides;
+    const viaInfo = obtenerVia(salida, llegada); // Usamos la función existente
+    const via = viaInfo.plataforma || "-";      // Obtenemos la plataforma del resultado
 
     // — Celda Hora —
     const fila = document.createElement("tr");
