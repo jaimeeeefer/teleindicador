@@ -688,7 +688,7 @@ color: var(--button-hover-color);
   /* Luego, en un instante, baja su opacidad al 30% (no se apaga del todo).
   */
   70% {
-    opacity: 0.3;
+    opacity: 0.2;
   }
   /* Y finalmente, vuelve a estar totalmente visible para reiniciar el ciclo.
   */
