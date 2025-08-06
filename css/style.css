@@ -699,7 +699,7 @@ color: var(--button-hover-color);
 
 .parpadeante {
   /* Aplicamos la nueva animación con una duración de 1.5s para un ritmo más natural */
-  animation: parpadeoAdif 1.5s infinite;
+  animation: parpadeoAdif 1.25s infinite;
 }
 
 .custom-select {
