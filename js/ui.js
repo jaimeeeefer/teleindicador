@@ -969,6 +969,7 @@ function obtenerRutaIconoADIF(adif) {
         "AL": 'ALSA.png',
         "RX": 'ATHOS.png',
         "TR": 'TRACCION.png',
+        "FR": 'FERROVIAL.png',
         "EC": 'EC.png'
       },
       default: ''
@@ -1150,7 +1151,7 @@ export function renderizarPanelTeleindicador(datos) {
       tdHora.classList.add("parpadeante");
     }
 
-    if (diffMin !== null && diffMin >= 0 && diffMin < 10) {
+    if (diffMin !== null && diffMin > -1 && diffMin < 10) {
       const tiempoRestanteStr = `${Math.floor(diffMin)} min`;
       tdHora.innerHTML = `
         <div class="countdown-container">
