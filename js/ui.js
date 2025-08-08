@@ -1242,35 +1242,7 @@ function actualizarHoraCabeceraTele() {
     }
 }
 
-function actualizarContadores() {
-  const ahora = Date.now();
-  document.querySelectorAll('.countdown-timer').forEach(el => {
-    const tstamp = parseInt(el.dataset.tstamp, 10);
-    if (isNaN(tstamp)) return;
-
-    const diffSec = Math.round((tstamp - ahora) / 1000);
-
-    if (diffSec < 0) {
-      el.textContent = "0 s";
-      // Opcional: una vez llega a cero, podrías quitarle la clase para que no se actualice más
-      el.classList.remove('countdown-timer');
-      return;
-    }
-
-    const min = Math.floor(diffSec / 60);
-    const sec = diffSec % 60;
-
-    // Formato como en la foto: "X min" o "XX s"
-    if (min > 0) {
-      el.textContent = `${min} min`;
-    } else {
-      el.textContent = `${sec} s`;
-    }
-  });
-}
-
 setInterval(actualizarHoraCabeceraTele, 1000);
-setInterval(actualizarContadores, 1000);
 actualizarHoraCabeceraTele();
 
 export function autocompletarEstacionesTele() {
