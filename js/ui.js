@@ -919,8 +919,7 @@ function obtenerRutaIconoADIF(adif) {
       operator: {
         "FG": 'FGC.png',
         "CP": 'REGCP.png',
-        "SV": 'TEROCCITANIE.png',
-        "SF": 'FRET.png'
+        "SV": 'TEROCCITANIE.png'
       },
       commercialProduct: {
         "AVANT": 'AVANT.png',
@@ -972,7 +971,8 @@ function obtenerRutaIconoADIF(adif) {
         "RX": 'ATHOS.png',
         "TR": 'TRACCION.png',
         "FR": 'FERROVIAL.png',
-        "EC": 'EC.png'
+        "EC": 'EC.png',
+        "SF": 'FRET.png'
       },
       default: ''
     },
