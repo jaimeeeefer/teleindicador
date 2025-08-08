@@ -1152,7 +1152,8 @@ export function renderizarPanelTeleindicador(datos) {
     }
 
     if (diffMin !== null && diffMin > -1 && diffMin < 10) {
-      const tiempoRestanteStr = `${Math.floor(diffMin)} min`;
+      const minutosRestantes = Math.floor(diffMin);
+      const tiempoRestanteStr = `${Math.max(0, minutosRestantes)} min`;
       tdHora.innerHTML = `
         <div class="countdown-container">
             <span">${tiempoRestanteStr}</span><br>
