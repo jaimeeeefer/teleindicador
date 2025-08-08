@@ -1,0 +1,104 @@
+{
+    "MADRID": {
+        "C1": "C1AZUL.svg",
+        "C2": "C2VERDE.svg",
+        "C3": "C3MORADO.svg",
+        "C4": "C4AZUL.svg",
+        "C4a": "C4AAZUL.svg",
+        "C4b": "C4BAZUL.svg",
+        "C5": "C5AMARILLO.svg",
+        "C7": "C7ROJA.svg",
+        "C8": "C8GRIS.svg",
+        "C8a": "C8AGRIS.svg",
+        "C8b": "C8BGRIS.svg",
+        "C9": "C9NARANJA.svg",
+        "C10": "C10VERDE.svg"
+    },
+    "BARCELONA": {
+        "R1": "R1.svg",
+        "R2": "R2.svg",
+        "R2S": "R2SUD.svg",
+        "R2N": "R2NORD.svg",
+        "R3": "R3.svg",
+        "R4": "R4.svg",
+        "R7": "R7.svg",
+        "R8": "R8.svg"
+    },
+    "": {
+        "R11": "R11.svg",
+        "R12": "R12.svg",
+        "R13": "R13.svg",
+        "R14": "R14.svg",
+        "R15": "R15.svg",
+        "R16": "R16.svg",
+        "R17": "R17.svg",
+        "R18": "R18.svg",
+        "RG1": "RG1.svg",
+        "RT1": "RT1.svg",
+        "RT2": "RT2.svg",
+        "RL3": "RL3.svg",
+        "RL4": "RL4.svg"
+    },
+    "BILBAO": {
+        "C1": "C1ROJA.svg",
+        "C2": "C2VERDE.svg",
+        "C3": "C3AZUL.svg",
+        "C4": "C4MORADO.svg",
+        "C5": "C5AZUL.svg"
+    },
+    "SANTANDER": {
+        "C1": "C1ROJA.svg",
+        "C2": "C2VERDE.svg",
+        "C3": "C3AZULOSCURO.svg"
+    },
+    "ASTURIAS": {
+        "C1": "C1ROJA.svg",
+        "C2": "C2VERDE.svg",
+        "C3": "C3AZULOSCURO.svg",
+        "C4": "C4MORADO.svg",
+        "C5": "C5VERDE.svg",
+        "C6": "C6AZUL.svg",
+        "C7": "C7NARANJA.svg",
+        "C8": "C8AMARILLO.svg"
+    },
+    "SAN SEBASTIAN": {
+        "C1": "C1ROJA.svg"
+    },
+    "FERROL": {
+        "C1": "C1ROJA.svg"
+    },
+    "LEON": {
+        "C1": "C1ROJA.svg"
+    },
+    "ZARAGOZA": {
+        "C1": "C1ROJA.svg"
+    },
+    "VALENCIA": {
+        "C1": "C1AZUL.svg",
+        "C2": "C2AMARILLO.svg",
+        "C3": "C3MORADO.svg",
+        "C5": "C5VERDE.svg",
+        "C6": "C6AZULOSCURO.svg"
+    },
+    "MURCIA": {
+        "C1": "C1AZUL.svg",
+        "C2": "C2VERDE.svg",
+        "C3": "C3MORADO.svg"
+    },
+    "MALAGA": {
+        "C1": "C1AZUL.svg",
+        "C2": "C2VERDE.svg"
+    },
+    "CADIZ": {
+        "C1": "C1ROJA.svg",
+        "C1a": "C1AROJA.svg",
+        "T1": "T1VERDE.svg"
+    },
+    "SEVILLA": {
+        "C1": "C1AZUL.svg",
+        "C2": "C2VERDE.svg",
+        "C3": "C3ROJA.svg",
+        "C4": "C4MORADO.svg",
+        "C5": "C5AZUL.svg"
+    }
+}

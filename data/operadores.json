@@ -1,0 +1,22 @@
+{
+  "CM": "CAPTRAIN",
+  "RF": "RENFE VIAJEROS",
+  "MW": "MEDWAY",
+  "CF": "CEFSA",
+  "CT": "CONTINENTAL RAIL",
+  "RM": "RENFE MERCANCÍAS",
+  "AD": "ADIF",
+  "RI": "SNCF AV",
+  "IL": "IRYO",
+  "GT": "GO TRANSPORT",
+  "LC": "LOW COST RAIL",
+  "TT": "TRANSFESA",
+  "LG": "LOGITREN",
+  "AL": "ALSA RAIL",
+  "RX": "ATHOS RAIL",
+  "TR": "TRACCION RAIL",
+  "EC": "EURO CARGO RAIL",
+  "FR": "FERROVIAL",
+  "SF": "SNCF FRET",
+  "SV": "SNCF VOYAGEURS"
+}

@@ -1,0 +1,100 @@
+{
+  "AVLDMD": {
+    "operator": {
+      "FG": "FGC.png",
+      "CP": "REGCP.png",
+      "SV": "LIO.png"
+    },
+    "commercialProduct": {
+      "AVANT": "AVANT.png",
+      "AVANT-EXPRES": "AVANTEXP.png",
+      "ALVIA": "ALVIA.png",
+      "MD": "MD.png",
+      "PROXIMIDAD": "PROXID.png",
+      "REGIONAL": "REG.png",
+      "INTERURBANO": "REG.png",
+      "REGIONAL EXPRES": "REX.png",
+      "INTERCITY": "ICITY.png",
+      "EUROMED": "EUROMED.png",
+      "AVE": "AVE.png",
+      "AVLO": "AVLO.png",
+      "OUIGO": "OUIGO.png",
+      "IRYO": "IRYO.png",
+      "TGV INOUI": "TGV.png",
+      "Material Vacio": "SSERV.png",
+      "REGIONAL RAM": "FEVE.png",
+      "RODALIES-R17": "REGCAT.png",
+      "RODALIES-R16": "REGCAT.png",
+      "RODALIES-R15": "REGCAT.png",
+      "RODALIES-R14": "REGCAT.png",
+      "RODALIES-R13": "REGCAT.png",
+      "RODALIES-R12": "REGCAT.png",
+      "RODALIES-R11": "REGCAT.png",
+      "RODALIES-RL3": "RODCAT.png",
+      "RODALIES-RL4": "RODCAT.png",
+      "RODALIES-RG1": "RODCAT.png",
+      "RODALIES-RT1": "RODCAT.png",
+      "RODALIES-RT2": "RODCAT.png",
+      "COMBOIOS PORTUGAL": "REGCP.png"
+    },
+    "default": "RENFE.png"
+  },
+  "GOODS": {
+    "operator": {
+      "CM": "CAPTRAIN.png",
+      "MW": "MEDWAY.png",
+      "CF": "CEFSA.png",
+      "CT": "CONTI.png",
+      "RM": "RM.png",
+      "AD": "ADIF.png",
+      "GT": "GO.png",
+      "LC": "LCR.png",
+      "TT": "TRANSFESA.png",
+      "LG": "LOGITREN2.png",
+      "AL": "ALSA.png",
+      "RX": "ATHOS.png",
+      "TR": "TRACCION.png",
+      "EC": "EC.png",
+      "FR": "FERROVIAL.png",
+      "SF": "FRET.png"
+    },
+    "default": ""
+  },
+  "CERCANIAS": {
+    "commercialProduct": {
+      "CERCANIAS": "CERCAN.png",
+      "CERCANIAS RAM": "FEVE.png",
+      "RODALIES": "RODCAT.png",
+      "Material Vacio": "SSERV.png",
+      "Servicio Interno": "SSERV.png"
+    },
+    "default": "CERCAN.png"
+  },
+  "OTHER": {
+    "commercialProduct": {
+      "Material Vacio": "SSERV.png",
+      "Servicio Interno": "SSERV.png"
+    },
+    "operator": {
+      "CM": "CAPTRAIN.png",
+      "MW": "MEDWAY.png",
+      "CF": "CEFSA.png",
+      "CT": "CONTI.png",
+      "RM": "RM.png",
+      "RF": "RENFE.png",
+      "AD": "ADIF.png",
+      "GT": "GO.png",
+      "LC": "LCR.png",
+      "TT": "TRANSFESA.png",
+      "LG": "LOGITREN2.png",
+      "AL": "ALSA.png",
+      "RX": "ATHOS.png",
+      "TR": "TRACCION.png",
+      "EC": "EC.png",
+      "FR": "FERROVIAL.png",
+      "SF": "FRET.png",
+      "SV": "LIO.png"
+    },
+    "default": "SSERV.png"
+  }
+}
