@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark"> <head>
+  <script>
+    (function() {
+      try {
+        const savedTheme = localStorage.getItem('tema');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const theme = savedTheme || (prefersDark ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
+  <meta charset="UTF-8" />
+  <link rel="manifest" href="./manifest.json" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="white">
+  <meta property="og:title" content="Magallanes II" />
+  <meta property="og:description" content="🤨🤨" />
+  <meta property="og:image" content="https://anderibarraa.github.io/magallanes/img/banner.png" />
+  <meta property="og:url" content="" id="og-url" />
+  <meta property="og:type" content="website" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Magallanes II</title>
+  <link rel="icon" href="img/favicon.png" type="image/png" />
+  <link rel="apple-touch-icon" href="img/icon-192.png" />
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Arvo:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.min.js"></script>
+</head>
+<body>
+
+  <div id="cargando" class="pantalla">
+    <div class="cargando-contenido">
+      <div class="spinner"></div>
+      <div id="verifyInfo">Verificando sesión...</div>
+    </div>
+  </div>
+
+  <div id="titulo" class="pantalla">
+    <h2 class="titulo-magallanes">
+      <img src="img/feve.svg" alt="Logo Feve" class="icono-magallanes">
+      <img src="img/renfe.svg" alt="Logo Renfe" class="icono-magallanes">
+      <span style="white-space: nowrap; flex-shrink: 1;">
+        Magallanes 
+        <span style="font-family: 'Arvo', serif; font-weight:500;">II</span>
+      </span>
+    </h2>
+  </div>
+
+  <div id="login" class="pantalla login-container">
+    <h1 class="login-title">Iniciar sesión</h1>
+    <input type="text" id="usuario" placeholder="Usuario" autocomplete="off"/>
+    <input type="password" id="clave" placeholder="Contraseña" autocomplete="off"/>
+    <div class="checkbox-group">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="recordarme" />
+        <span class="checkmark"></span>
+        Recordarme
+      </label>
+    </div>
+    <button id="loginButton">Entrar</button>
+    <p id="loginError" class="login-feedback"></p>
+    <p id="loginInfo" class="login-feedback"></p>
+  </div>
+
+  <div id="tabs" class="pantalla">
+    <div class="tabs">
+      <button class="tab-button active" id="marchasButton" data-target="consulta">Marchas</button>
+      <button class="tab-button" id="estacionesButton" data-target="estacion">Estaciones</button>
+    </div>
+  </div>
+
+  <div id="consulta" class="pantalla">
+    <div class="consulta-container">
+      <div class="form-row barraBusqueda">
+        <button type="button" id="estrellaFavoritoNumero" class="estrella-favorito" title="Añadir/Quitar favorito" tabindex="-1">★</button>
+        <div class="input-sugerencias-wrapper">
+          <input type="text" id="numeroTren" inputmode="numeric" placeholder="Número de tren" autocomplete="off"/>
+          <button type="button" id="clearNumeroTren" class="clear-input-btn" aria-label="Borrar">×</button>
+          <div id="favoritos"></div>
+        </div>
+        <button id="buscarTrenButton" style="margin-right: 0.5em;">Buscar</button>
+      </div>
+      <div class="resultado-header">Resultado:</div>
+      <pre id="resultado">Esperando consulta...</pre>
+    </div>
+
+    <div id="resultadoTren" class="hidden">
+      <div class="texto-datos">
+        <div id="navegacionTrenes">
+          <button id="btnAnterior">Anterior</button>
+          <span id="contadorTren"></span>
+          <button id="btnSiguiente">Siguiente</button>
+        </div>
+        <h1>Datos del Tren</h1>
+        <div class="header-tabla" id="infoTren"></div>
+      </div>
+
+      <h2 class="table-title">Pasos por Estación</h2>
+      <div class="table-wrapper">
+        <table id="tablaPasos">
+          <thead>
+            <tr>
+              <th>Estación</th>
+              <th>Tipo Parada</th>
+              <th>Llegada Teórica</th>
+              <th>Llegada Real</th>
+              <th>Retraso Llegada</th>
+              <th>Salida Teórica</th>
+              <th>Salida Real</th>
+              <th>Retraso Salida</th>
+              <th>Vía</th>
+              <th>Info vía</th>
+              <th>Entrada/Salida</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="estacion" class="pantalla">
+    <div class="consulta-container">
+      <div class="form-row barraBusqueda">
+        <button type="button" id="estrellaFavoritoEst" class="estrella-favorito" title="Añadir/Quitar favorito" tabindex="-1">★</button>
+        <div class="input-sugerencias-wrapper">
+          <input type="text" id="numeroEst" placeholder="Estación" autocomplete="off"/>
+          <button type="button" id="clearNumeroEst" class="clear-input-btn" aria-label="Borrar">×</button>
+          <div id="sugerencias"></div>
+        </div>
+        <button id="buscarEstButton" style="margin-right: 0.5em;">Buscar</button>
+      </div>
+      <div class="sugerenciasContainer">
+        <div id="sugerencias"></div>
+      </div>
+      <div class="toggle-slider-container-bg">
+        <div class="form-row toggle-slider">
+          <div class="toggle-slider-container" style="width:100%;">
+            <span class="toggle-slider-title">Vista:</span>
+            <label class="toggle-slider-switch" style="width:100%;">
+              <span class="toggle-label toggle-label-left">Detallado</span>
+              <input type="checkbox" id="toggleVistaEstacion" />
+              <span class="slider-switch"></span>
+              <span class="toggle-label toggle-label-right">Teleindicador</span>
+            </label>
+          </div>
+        </div>
+      </div>
+      <div id="parametrosEstacion">
+        <div class="form-row">
+          <span style="font-family: 'AdifHaussM';">Mostrar:</span>
+          <div class="custom-select" id="customTipoPanel">
+            <div class="custom-select-selected">Salidas</div>
+            <div class="custom-select-options">
+              <div data-value="salidas">Salidas</div>
+              <div data-value="llegadas">Llegadas</div>
+            </div>
+            <input type="hidden" name="tipoPanel" id="tipoPanelCustom" value="salidas">
+          </div>
+        </div>
+        <div class="form-row">
+          <span style="font-family: 'AdifHaussM';">Tipo:</span>
+          <div class="custom-select" id="customTipoTren">
+            <div class="custom-select-selected">Todos</div>
+            <div class="custom-select-options">
+              <div data-value="ALL">Todos</div>
+              <div data-value="GOODS">Mercancías</div>
+              <div data-value="AVLDMD">AVLDMD</div>
+              <div data-value="CERCANIAS">Cercanías</div>
+              <div data-value="TRAVELERS">Viajeros</div>
+              <div data-value="OTHERS">Otros</div>
+            </div>
+            <input type="hidden" name="tipoTren" id="tipoTrenCustom" value="ALL">
+          </div>
+        </div>
+      </div>
+      <div class="resultado-header">Resultado:</div>
+      <pre id="resultadoEst">Esperando consulta...</pre>
+    </div>
+
+    <div id="resultadoEstacion" class="hidden">
+      <div class="header-tabla" id="infoEstacion"></div>
+      <h2 id="salidasLlegadasHeader" class="table-title">Salidas</h2>
+      <div class="table-wrapper">
+        <table id="tablaPanel">
+          <thead>
+            <tr>
+              <th>Hora</th>
+              <th>Retraso</th>
+              <th>Destino/Origen</th>
+              <th>Número</th>
+              <th>Operador</th>
+              <th>Vía</th>
+              <th>Estado</th>
+              <th>Parada</th>
+            </tr>
+          </thead>
+          <tbody id="tablaEstBody"></tbody>
+        </table>
+      </div>
+      <div class="botones-centro">
+        <div class="botonesCentro2">
+          <button id="cargarMas">Cargar más</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="fullscreen-btn-container" id="fullscreenBtnContainer">
+      <button id="btnFullScreenTele" class="btn-fullscreen hidden">Pantalla completa</button>
+    </div>
+    <div id="teleindicadorFullContainer">
+      <div class="table-wrapper teleindicador-wrapper">
+        <table id="tablaTeleindicador" class="panel-tele hidden">
+          <thead id="cabeceraTeleindicador">
+            <tr>
+              <th colspan="7" class="noBottomMargin">
+                <div id="header-teleindicador" style="display: flex; align-items: center; justify-content: space-between; gap: 0.5em">
+                  <div style="display: flex; align-items: center; gap: 1em;">
+                    <img src="img/adifsumma.svg" alt="ADIF" style="height: 1.5em;">
+                    <span id="titulo-cabecera-tele" style="font-weight: bold; padding-bottom: 0.5rem;">Salidas</span>
+                  </div>
+                  <span id="hora-cabecera-tele" style="font-size: 1.9em; font-family: 'AdifHaussM'; font-weight: lighter;"></span>
+                </div>
+              </th>
+            </tr>
+            <tr class="header-tabla-tele">
+              <th>Hora</th>
+              <th>Destino/Origen</th>
+              <th>Operador</th>
+              <th>Nº</th>
+              <th>Vía</th>
+            </tr>
+          </thead>
+          <tbody id="tablaTeleindicadorBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="botonesCentro" class="pantalla botones-centro">
+    <div class="botonesCentro2">
+      <button id="clearResultadosButton">Limpiar</button>
+      <button id="toggleThemeBtn">🌙</button>
+      <button id="cerrarSesionButton">Cerrar sesión</button>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
