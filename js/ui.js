@@ -918,7 +918,8 @@ function obtenerRutaIconoADIF(adif) {
     AVLDMD: {
       operator: {
         "FG": 'FGC.png',
-        "CP": 'REGCP.png'
+        "CP": 'REGCP.png',
+        "SV": 'TEROCCITANIE.png'
       },
       commercialProduct: {
         "AVANT": 'AVANT.png',
