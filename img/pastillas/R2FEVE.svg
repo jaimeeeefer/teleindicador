@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 357 197" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(4.95047,0,0,4.95047,-4044.28,-3000.26)">
+        <g>
+            <g transform="matrix(0.894737,0,0,1,86.2105,0)">
+                <path d="M895,613.788C895,611.913 894.167,610.115 892.686,608.789C891.204,607.463 889.194,606.718 887.098,606.718L826.902,606.718C824.806,606.718 822.796,607.463 821.314,608.789C819.833,610.115 819,611.913 819,613.788L819,637.981C819,639.856 819.833,641.655 821.314,642.981C822.796,644.306 824.806,645.051 826.902,645.051L887.098,645.051C889.194,645.051 891.204,644.306 892.686,642.981C894.167,641.655 895,639.856 895,637.981L895,613.788Z" style="fill:rgb(221,80,0);"/>
+            </g>
+            <g transform="matrix(1,0,0,1,-6.20833,1.78046)">
+                <g transform="matrix(41.6667,0,0,41.6667,890,638)">
+                </g>
+                <text x="828px" y="638px" style="font-family:'RenfeVialog-Bold', 'Renfe Vialog Bold';font-size:41.667px;fill:white;">R<tspan x="852.333px 866.5px " y="638px 638px ">-2</tspan></text>
+            </g>
+        </g>
+    </g>
+</svg>
