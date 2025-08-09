@@ -7,6 +7,7 @@ let lastDate = null;
 let pictogramasCercanias = {};
 let pictosPorProducto = {};
 let reglas = {};
+let pictosPorNumero = {};
 
 export async function cargarPictogramas() {
     try {
@@ -29,6 +30,13 @@ export async function cargarPictogramas() {
     } catch (e) {
         console.error("Error cargando reglas.json", e);
         reglas = {};
+    }
+    try {
+        const res = await fetch('data/pictosPorNumero.json');
+        pictosPorNumero = await res.json();
+    } catch (e) {
+        console.error("Error cargando pictosPorNumero.json", e);
+        pictosPorNumero = {};
     }
 }
 
@@ -824,6 +832,11 @@ function obtenerRutaPictograma(linea, core, adif) {
         if (pictosPorProducto[prod]) {
         return `img/pastillas/${pictosPorProducto[prod]}`;
         }
+    }
+
+    const numeroTren = adif?.commercialPathKey?.commercialCirculationKey?.commercialNumber;
+    if (numeroTren && pictosPorNumero[numeroTren]) {
+      return `img/pastillas/${pictosPorNumero[numeroTren]}`;
     }
 
     return null;
