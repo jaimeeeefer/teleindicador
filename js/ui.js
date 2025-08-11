@@ -117,6 +117,66 @@ export function setVerifyingState(isVerifying, message = "Verificando sesión...
     }
 }
 
+export function descargarMarchaCSV() {
+    const trenes = getTrenes();
+    const trenActual = getTrenActual();
+    const tren = trenes[trenActual];
+
+    if (!tren) {
+        alert("No hay datos de marcha para descargar.");
+        return;
+    }
+
+    const estaciones = getEstaciones();
+    const numeroTren = tren.commercialPathInfo.commercialPathKey.commercialCirculationKey.commercialNumber;
+
+    // 1. Define las cabeceras del CSV
+    const cabeceras = [
+        "Estacion", "Tipo Parada", "Llegada Planificada", "Llegada Real",
+        "Retraso Llegada (s)", "Salida Planificada", "Salida Real",
+        "Retraso Salida (s)", "Via", "Info Via"
+    ];
+
+    // 2. Prepara las filas con los datos de cada paso
+    const filas = tren.passthroughSteps.map(paso => {
+        const llegada = paso.arrivalPassthroughStepSides;
+        const salida = paso.departurePassthroughStepSides;
+        const viaInfo = obtenerVia(salida, llegada);
+        const nombreEstacion = estaciones[paso.stationCode.replace(/^0+/, '')] || paso.stationCode;
+
+        return [
+            nombreEstacion,
+            traducirParada(paso.stopType),
+            llegada ? formatearTimestampHora(llegada.plannedTime) : '',
+            llegada ? calcularHoraReal(formatearTimestampHora(llegada.plannedTime), llegada.forecastedOrAuditedDelay) : '',
+            llegada ? llegada.forecastedOrAuditedDelay || '0' : '',
+            salida ? formatearTimestampHora(salida.plannedTime) : '',
+            salida ? calcularHoraReal(formatearTimestampHora(salida.plannedTime), salida.forecastedOrAuditedDelay) : '',
+            salida ? salida.forecastedOrAuditedDelay || '0' : '',
+            viaInfo.plataforma,
+            traducirVia(viaInfo.estado) || ''
+        ].map(valor => `"${String(valor).replace(/"/g, '""')}"`); // Escapa las comillas dobles
+    });
+
+    // 3. Une todo en un solo string CSV
+    const contenidoCSV = [
+        cabeceras.join(','),
+        ...filas.map(fila => fila.join(','))
+    ].join('\n');
+
+    // 4. Crea y dispara la descarga del archivo
+    const blob = new Blob(["\uFEFF" + contenidoCSV], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute("href", url);
+    link.setAttribute("download", `marcha_tren_${numeroTren}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
 // --- FUNCIONES DE NÚMERO DE TREN ---
 
 export function mostrarTren() {
@@ -136,6 +196,7 @@ export function mostrarTren() {
     renderizarTablaPasos(path);
     
     uiElements.resultadoTrenDiv.classList.remove("hidden");
+    document.getElementById('descargarMarchaBtn').classList.remove('hidden');
 }
 
 function renderizarInfoTren(path) {
@@ -1267,3 +1328,4 @@ export function limpiarIntervalosUI() {
         horaCabeceraTeleIntervalId = null;
     }
 }
+
