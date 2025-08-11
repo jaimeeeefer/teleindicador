@@ -3,6 +3,7 @@
     "operator": {
       "FG": "FGC.png",
       "CP": "REGCP.png",
+      "ET": "EUSKOTREN.png",
       "SV": "LIO.png"
     },
     "commercialProduct": {
@@ -23,6 +24,7 @@
       "TGV INOUI": "TGV.png",
       "Material Vacio": "SSERV.png",
       "REGIONAL RAM": "FEVE.png",
+      "VIAJEROS RAM": "FEVE.png",
       "RODALIES-R17": "REGCAT.png",
       "RODALIES-R16": "REGCAT.png",
       "RODALIES-R15": "REGCAT.png",
@@ -42,6 +44,7 @@
   "GOODS": {
     "operator": {
       "CM": "CAPTRAIN.png",
+      "TK": "CAPTRAIN.png",
       "MW": "MEDWAY.png",
       "CF": "CEFSA.png",
       "CT": "CONTI.png",
@@ -56,7 +59,16 @@
       "TR": "TRACCION.png",
       "EC": "EC.png",
       "FR": "FERROVIAL.png",
-      "SF": "FRET.png"
+      "FC": "FERROVIALC.png",
+      "SF": "FRET.png",
+      "AC": "ACCIONA.png",
+      "TS": "TRANSITIA.png",
+      "ET": "EUSKOTREN.png",
+      "VC": "VIAS.png",
+      "EL": "ELECTREN.png",
+      "GU": "GUINO.png",
+      "CV": "CONVENSA.png",
+      "RD": "RD.png"
     },
     "default": ""
   },
@@ -68,6 +80,10 @@
       "Material Vacio": "SSERV.png",
       "Servicio Interno": "SSERV.png"
     },
+    "core":{
+      "BILBAO": "ALDIRIAK.png",
+      "SAN SEBASTIAN": "ALDIRIAK.png"
+    },
     "default": "CERCAN.png"
   },
   "OTHER": {
@@ -77,6 +93,7 @@
     },
     "operator": {
       "CM": "CAPTRAIN.png",
+      "TK": "CAPTRAIN.png",
       "MW": "MEDWAY.png",
       "CF": "CEFSA.png",
       "CT": "CONTI.png",
@@ -92,7 +109,16 @@
       "TR": "TRACCION.png",
       "EC": "EC.png",
       "FR": "FERROVIAL.png",
+      "FC": "FERROVIALC.png",
       "SF": "FRET.png",
+      "AC": "ACCIONA.png",
+      "TS": "TRANSITIA.png",
+      "ET": "EUSKOTREN.png",
+      "VC": "VIAS.png",
+      "EL": "ELECTREN.png",
+      "GU": "GUINO.png",
+      "CV": "CONVENSA.png",
+      "RD": "RD.png",
       "SV": "LIO.png"
     },
     "default": "SSERV.png"
