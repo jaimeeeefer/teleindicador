@@ -22,8 +22,7 @@ import {
   mostrarFavoritoEstrellaTren,
   mostrarFavoritosTren,
   iniciarIntervalosUI,
-  limpiarIntervalosUI,
-  descargarMarchaCSV
+  limpiarIntervalosUI
 } from './ui.js';
 
 const DOMElements = {
@@ -41,7 +40,6 @@ const DOMElements = {
   trenFavoritosDiv:       document.getElementById("favoritos"),
   btnAnterior:            document.getElementById("btnAnterior"),
   btnSiguiente:           document.getElementById("btnSiguiente"),
-  descargarMarchaBtn:     document.getElementById("descargarMarchaBtn"), // <-- AÑADE ESTA LÍNEA
 
   // — Estación
   estacionInput:          document.getElementById("numeroEst"),
@@ -138,7 +136,6 @@ function setupEventListeners() {
   });
   DOMElements.btnAnterior.addEventListener('click', mostrarTrenAnterior);
   DOMElements.btnSiguiente.addEventListener('click', mostrarTrenSiguiente);
-  DOMElements.descargarMarchaBtn.addEventListener('click', descargarMarchaCSV); // <-- AÑADE ESTA LÍNEA
 
   // — Estación
   DOMElements.btnFullScreenTele.addEventListener('click', function() {
