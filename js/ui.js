@@ -1,13 +1,27 @@
 // js/ui.js
 
-import { getTrenActual, getTrenes, setTrenActual , getProximosTrenes, getPaginaActual, setPaginaActual, getTipoPanel } from './api.js';
+import { getTrenActual, getTrenes, setTrenActual , getProximosTrenes, getPaginaActual, setPaginaActual, getTipoPanel, buscarTren, buscarEstacion } from './api.js';
 import { getEstaciones, getOperadores } from './auth.js';
+import { actualizarControlesInput } from './main.js';
+
+let horaCabeceraTeleIntervalId = null;
 
 let lastDate = null;
 let pictogramasCercanias = {};
 let pictosPorProducto = {};
 let reglas = {};
 let pictosPorNumero = {};
+let productoPorNumero = {};
+
+let fechaConcreta = null;
+
+const rutasOperadorFeve = [
+    "img/operadores/FEVE.png",
+    "img/operadores/FEVE2.png",
+    "img/operadores/FEVE3.png",
+    "img/operadores/FEVE4.png",
+    "img/operadores/FEVE5.png"
+];
 
 export async function cargarPictogramas() {
     try {
@@ -37,6 +51,13 @@ export async function cargarPictogramas() {
     } catch (e) {
         console.error("Error cargando pictosPorNumero.json", e);
         pictosPorNumero = {};
+    }
+    try {
+        const res = await fetch('data/productoPorNumero.json');
+        productoPorNumero = await res.json();
+    } catch (e) {
+        console.error("Error cargando productoPorNumero.json", e);
+        productoPorNumero = {};
     }
 }
 
@@ -191,22 +212,34 @@ function renderizarTablaPasos(path) {
           <td>${traducirParada(paso.stopType)}</td>
           <td>${llegada ? formatearTimestampHora(llegada.plannedTime) : ''}</td>
           <td>${llegada ? `<span class="${getColorClass(llegada.forecastedOrAuditedDelay)}">${calcularHoraReal(formatearTimestampHora(llegada.plannedTime), llegada.forecastedOrAuditedDelay)}</span>` : ''}</td>
-          <td>${llegada ? `<span class="${getColorClass(llegada.forecastedOrAuditedDelay)}">${formatoRetraso(llegada.forecastedOrAuditedDelay)}</span>` : ''}</td>
+          <td>${llegada ? `<span class="${getColorClass(llegada.forecastedOrAuditedDelay)} noDividir">${formatoRetraso(llegada.forecastedOrAuditedDelay)}</span>` : ''}</td>
           <td>${salida ? formatearTimestampHora(salida.plannedTime) : ''}</td>
           <td>${salida ? `<span class="${getColorClass(salida.forecastedOrAuditedDelay)}">${calcularHoraReal(formatearTimestampHora(salida.plannedTime), salida.forecastedOrAuditedDelay)}</span>` : ''}</td>
-          <td>${salida ? `<span class="${getColorClass(salida.forecastedOrAuditedDelay)}">${formatoRetraso(salida.forecastedOrAuditedDelay)}</span>` : ''}</td>
+          <td>${salida ? `<span class="${getColorClass(salida.forecastedOrAuditedDelay)} noDividir">${formatoRetraso(salida.forecastedOrAuditedDelay)}</span>` : ''}</td>
           <td>${viaInfo.plataforma}</td>
           <td>${traducirVia(viaInfo.estado) || ''}</td>
           <td>${estadoPaso.texto}</td>
         `;
         uiElements.tablaPasosBody.appendChild(fila);
-        if(paso.departurePassthroughStepSides?.supressed || paso.arrivalPassthroughStepSides?.supressed){
+        if(paso.departurePassthroughStepSides?.supressed){
             fila.classList.add('estado-sup');
+            fila.cells[6].textContent = '';
+            fila.cells[7].textContent = '';
+        }
+        if (paso.arrivalPassthroughStepSides?.supressed) {
+            fila.classList.add('estado-sup');
+            fila.cells[3].textContent = '';
+            fila.cells[4].textContent = '';
         }
     });
     
     if (estadoCirculacion === 'PENDIENTE DE CIRCULAR') {
-        ajustarFilasParaEstado(estadoCirculacion);
+        ajustarFilasParaEstado();
+    }
+
+    if (fechaConcreta){
+        irAFechaConcreta(fechaConcreta);
+        fechaConcreta = null;
     }
 }
 
@@ -261,6 +294,19 @@ function actualizarNavegacion(indice, total) {
     uiElements.btnAnterior.disabled = indice === 0;
     uiElements.btnSiguiente.disabled = indice === total - 1;
     uiElements.contadorTrenSpan.innerHTML = `Tren <strong>${indice + 1}</strong> de <strong>${total}</strong>`;
+}
+
+function irAFechaConcreta(fecha) {
+    const trenes = getTrenes();
+    const trenActual = getTrenActual();
+    let tren = trenes[trenActual];
+    while (tren && getTrenActual() < trenes.length - 1) {
+        if (tren.commercialPathInfo.commercialPathKey.commercialCirculationKey.launchingDate < fecha) {
+            mostrarTrenSiguiente();
+        }
+        else break;
+        tren = trenes[getTrenActual()];
+    }
 }
 
 // --- FUNCIONES AUXILIARES DE UI Y FORMATO ---
@@ -362,12 +408,18 @@ export function autocompletarEstaciones() {
     const palabras = estacionInput.split(/[\s-]+/).filter(p => p.length > 0);
 
     // Si el input es numérico, buscar también por código
-    const esNumerico = /^\d+$/.test(estacionInput);
+    const esNumerico = /^\d{1,5}$/.test(estacionInput);
+    const esAlfaNumerico = /^[BCZbcz]\d{1,4}$/.test(estacionInput);
 
     const coincidencias = estacionesArray.filter(([codigo, nombre]) => {
         const nombreLower = nombre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         const coincideNombre = palabras.every(palabra => nombreLower.includes(palabra));
-        const coincideCodigo = esNumerico && codigo.padStart(5, '0').includes(estacionInput);
+        let coincideCodigo = false;
+        if (esNumerico) {
+            coincideCodigo = codigo.padStart(5, '0').includes(estacionInput);
+        } else if (esAlfaNumerico) {
+            coincideCodigo = codigo.padStart(5, '0').includes(estacionInput.toUpperCase());
+        }
         return coincideNombre || coincideCodigo;
     });
 
@@ -402,7 +454,7 @@ export function autocompletarEstaciones() {
     }
 }
 
-export function mostrarEstacion() {
+export function mostrarEstacion(tipo) {
     const trenes = getProximosTrenes();
     const paginaActual = getPaginaActual();
 
@@ -411,12 +463,21 @@ export function mostrarEstacion() {
         return;
     }
 
-    renderizarPanel(trenes);
-    uiElements.resultadoEstacionDiv.classList.remove("hidden");
-    document.getElementById("salidasLlegadasHeader").textContent = "Próximas "+getTipoPanel()+":";
+    if (trenes.length > 0) {
+        if (tipo === "detallado") {
+            uiElements.tablaPanelBody.innerHTML = "";
+            renderizarPanel(trenes);
+            uiElements.resultadoEstacionDiv.classList.remove("hidden");
+            document.getElementById("salidasLlegadasHeader").textContent = "Próximas "+getTipoPanel()+":";
+        } else if (tipo === "teleindicador") {
+            renderizarPanelTeleindicador(trenes);
+        }
+    }
+
 }
 
 function renderizarPanel(trenes) {
+    lastDate = null;
     const estaciones = getEstaciones();
 
     // Ordenar trenes por fecha y hora real (timestamp)
@@ -485,6 +546,7 @@ function renderizarPanel(trenes) {
         }
 
         const numeroTren = tren.commercialPathInfo.commercialPathKey.commercialCirculationKey.commercialNumber || '';
+        const fechaInicio = tren.commercialPathInfo.commercialPathKey.commercialCirculationKey.launchingDate || '';
 
         fila.innerHTML = `
         <td>
@@ -492,13 +554,13 @@ function renderizarPanel(trenes) {
             ${mostrarHoraReal ? `<span class="hora-real ${getColorClass(paso.forecastedOrAuditedDelay)}">${horaReal}</span>` : ''}
         </td>
         <td>
-            ${mostrarHoraReal ? `<span class="${getColorClass(paso.forecastedOrAuditedDelay)}">${formatoRetraso(paso.forecastedOrAuditedDelay)}</span>` : ''}
+            ${mostrarHoraReal ? `<span class="${getColorClass(paso.forecastedOrAuditedDelay)} noDividir">${formatoRetraso(paso.forecastedOrAuditedDelay)}</span>` : ''}
         </td>
         <td>
             ${celdaDestinoOrigen}
         </td>
         <td>
-            <span class="numero-tren-clicable" style="cursor:pointer;" onclick="buscarTrenClick('${numeroTren}')" title="Ver marcha">
+            <span class="numero-tren-clicable" style="cursor:pointer;" onclick="buscarTrenClick('${numeroTren}', '${fechaInicio}')" title="Ver marcha">
                 ${numeroTren}
             </span>
         </td>
@@ -539,17 +601,24 @@ function ajustarFilasParaEstadoEstacion() {
     const filas = Array.from(uiElements.tablaPanelBody.querySelectorAll('tr'));
     for (let i = filas.length - 1; i >= 0; i--) {
         const fila = filas[i];
-        const estadoCirculacion = fila.cells[8]?.textContent.trim()
+        const estadoCirculacion = fila.cells[6]?.textContent.trim()
         if (estadoCirculacion === 'SUPRIMIDO') fila.classList.add('estado-sup');
-        else if (estadoCirculacion === 'PENDIENTE DE CIRCULAR') fila.classList.add('estado-e');
+        else if (estadoCirculacion === 'PENDIENTE DE CIRCULAR'){
+            fila.classList.add('estado-pend');
+        }
+        else if (estadoCirculacion === 'SEGUIMIENTO PERDIDO'){
+            fila.classList.add('estado-segPerd');
+        }
+        else if (estadoCirculacion === 'DETENIDO'){
+            fila.classList.add('estado-det');
+        }
         if (estadoCirculacion === 'SUPRIMIDO' || estadoCirculacion === 'PENDIENTE DE CIRCULAR'){
             fila.cells[1].textContent = '';
-            fila.cells[2].textContent = '';
         }
     }
 }
 
-function buscarTrenClick(numero) {
+function buscarTrenClick(numero, fecha) {
     if (document.fullscreenElement) {
         document.exitFullscreen();
     }
@@ -558,9 +627,11 @@ function buscarTrenClick(numero) {
     // Cambiar texto barra de búsqueda
     const barraBusqueda = document.getElementById("numeroTren");
     barraBusqueda.value = numero;
+    actualizarControlesInput(barraBusqueda, document.getElementById("clearNumeroTren"), document.getElementById("estrellaFavoritoNumero"));
+    mostrarFavoritoEstrellaTren();
 
-    // Simular pulsación de Enter en el input
-    document.getElementById("buscarTrenButton").click();
+    fechaConcreta = fecha;
+    buscarTren();
 }
 window.buscarTrenClick = buscarTrenClick;
 
@@ -569,6 +640,7 @@ function buscarEstacionClick(codigo, nombre) {
     const inputEst = document.getElementById("numeroEst");
     inputEst.value = nombre;
     inputEst.setAttribute('data-codigo', codigo);
+    actualizarControlesInput(inputEst, document.getElementById("clearNumeroEst"), document.getElementById("estrellaFavoritoEst"));
     mostrarFavoritoEstrella();
     document.getElementById("buscarEstButton").click();
 }
@@ -763,28 +835,43 @@ function getColorClass(delay) {
     return 'rojo';
 }
 
-function upperCamelCase(texto) {
+export function upperCamelCase(texto) {
     const excluir = ['de', 'y', 'o', 'en', 'del', 'por', 'con', 'sin'];
-    // Para tratar los puntos y barras como separadores pero sin añadir espacios
+    // Para tratar puntos, barras, guiones y apóstrofes como separadores pero sin añadir espacios
     let textoMod = texto.toLowerCase().replace(/-/g, ' - ');
-    // Divide en palabras, pero también separa por puntos, barras y espacios sin perderlos
-    let palabras = textoMod.split(/([./\s]+)/).filter(Boolean);
+    // Divide en palabras, pero también separa por puntos, barras, apóstrofes y espacios sin perderlos
+    let palabras = textoMod.split(/([./'\s]+)/).filter(Boolean);
     palabras = palabras.map((palabra, i) => {
-        if (palabra === '-' || palabra === '.' || palabra === '/' || palabra.match(/^\s+$/)) return palabra;
+        if (
+            palabra === '-' ||
+            palabra === '.' ||
+            palabra === '/' ||
+            palabra === "'" ||
+            palabra.match(/^\s+$/)
+        ) return palabra;
         if (excluir.includes(palabra.trim()) && i !== 0) {
             return palabra;
         }
-        // Si la palabra anterior es una barra, punto o guion, poner mayúscula
-        if (i > 0 && (palabras[i-1] === '/' || palabras[i-1] === '.' || palabras[i-1] === '-')) {
+        // Si la palabra anterior es una barra, punto, guion o apóstrofe, poner mayúscula
+        if (
+            i > 0 &&
+            (
+                palabras[i-1] === '/' ||
+                palabras[i-1] === '.' ||
+                palabras[i-1] === '-' ||
+                palabras[i-1] === "'"
+            )
+        ) {
             return palabra.charAt(0).toUpperCase() + palabra.slice(1);
         }
         return palabra.charAt(0).toUpperCase() + palabra.slice(1);
     });
-    // Une todo, pero elimina espacios alrededor de los puntos, barras y guiones
+    // Une todo, pero elimina espacios alrededor de los puntos, barras, guiones y apóstrofes
     return palabras.join('')
         .replace(/\s*\.\s*/g, '.')
         .replace(/\s*-\s*/g, '-')
-        .replace(/\s*\/\s*/g, '/');
+        .replace(/\s*\/\s*/g, '/')
+        .replace(/\s*'\s*/g, "'");
 }
 
 // --- DICCIONARIOS DE TRADUCCIÓN ---
@@ -845,7 +932,7 @@ function obtenerRutaPictograma(linea, core, adif) {
 function obtenerRutaIconoADIF(adif) {
   const { trafficType, opeProComPro = {} } = adif;
   const regla = reglas[trafficType];
-  if (!regla) return '';  // sin regla → nada
+  if (!regla) return '';  // sin regla: nada
 
   // 1) operator si existe en la regla
   if (regla.operator) {
@@ -855,7 +942,15 @@ function obtenerRutaIconoADIF(adif) {
     }
   }
 
-  // 2) commercialProduct si existe en la regla
+  // 2) Núcleo específico
+  if (regla.core) {
+    const core = adif.core;
+    if (core && regla.core[core] && !opeProComPro.commercialProduct.includes("RAM")) {
+      return `img/operadores/${regla.core[core]}`;
+    }
+  }
+
+  // 3) commercialProduct si existe en la regla
   if (regla.commercialProduct) {
     const prod = opeProComPro.commercialProduct;
     if (prod && regla.commercialProduct[prod]) {
@@ -863,21 +958,32 @@ function obtenerRutaIconoADIF(adif) {
     }
   }
 
-  // 3) default de este trafficType, si lo hay
+  // 4) turisticos y trenes concretos
+  const numeroTren = adif?.commercialPathKey?.commercialCirculationKey?.commercialNumber;
+  if (numeroTren && productoPorNumero[numeroTren]) {
+    return `img/operadores/${productoPorNumero[numeroTren]}`;
+  }
+
+  // 5) default de este trafficType, si lo hay
   if (regla.default) {
     return `img/operadores/${regla.default}`;
   }
 
-  // 4) sin default → nada
+  // 6) sin default: nada
   return '';
 }
 
 // TELEINDICADOR
 
 export function renderizarPanelTeleindicador(datos) {
+  datos = datos.slice(0, 25); //MOSTRAR SOLO PRIMEROS 25
+
   const tbody             = document.getElementById("tablaTeleindicadorBody");
   const estaciones        = getEstaciones();
   const tipo              = getTipoPanel();
+
+  document.getElementById("tablaTeleindicador").classList.remove("hidden");
+  document.getElementById("btnFullScreenTele").classList.remove("hidden");
 
   // Función auxiliar para obtener el timestamp real (planificado + retraso)
   datos.sort((a, b) => {
@@ -896,12 +1002,6 @@ export function renderizarPanelTeleindicador(datos) {
     
     return timestampA - timestampB;
   });
-
-  // Actualiza el título
-  if (tipo) {
-    const titulo = document.getElementById("titulo-cabecera-tele");
-    if (titulo) titulo.textContent = upperCamelCase(tipo);
-  }
 
   if (!tbody) {
     console.error("No se encontró el tbody de la tabla del teleindicador");
@@ -982,12 +1082,13 @@ export function renderizarPanelTeleindicador(datos) {
     tdHora.classList.add("hora-teleindicador");
     const diffMin = horaEstimMs ? (horaEstimMs - Date.now()) / 60000 : null;
 
-    if (diffMin !== null && diffMin >= -5 && diffMin < 4) {
+    if (diffMin !== null && diffMin >= -5 && diffMin < 4 && estadoTrad !== 'SEGUIMIENTO PERDIDO') {
       tdHora.classList.add("parpadeante");
     }
 
-    if (diffMin !== null && diffMin >= 0 && diffMin < 10) {
-      const tiempoRestanteStr = `${Math.floor(diffMin)} min`;
+    if (diffMin !== null && diffMin >= -1 && diffMin < 10 && estadoTrad !== 'SEGUIMIENTO PERDIDO') {
+      const minutosRestantes = Math.floor(diffMin);
+      const tiempoRestanteStr = `${Math.max(0, minutosRestantes)} min`;
       tdHora.innerHTML = `
         <div class="countdown-container">
             <span">${tiempoRestanteStr}</span><br>
@@ -999,6 +1100,32 @@ export function renderizarPanelTeleindicador(datos) {
     } else {
         tdHora.innerHTML = horaMostrada;
     }
+
+    // Comprobación si el tren es de mañana
+    if (horaEstimMs) {
+        const fechaTren = new Date(horaEstimMs);
+        const hoy = new Date();
+        hoy.setHours(0,0,0,0);
+        const manana = new Date(hoy);
+        manana.setDate(hoy.getDate() + 1);
+        const pasado = new Date(hoy);
+        pasado.setDate(hoy.getDate() + 2);
+
+        if (
+            fechaTren.getFullYear() === manana.getFullYear() &&
+            fechaTren.getMonth() === manana.getMonth() &&
+            fechaTren.getDate() === manana.getDate()
+        ) {
+            tdHora.innerHTML += `<br><span class="sin-parada-texto">Mañana</span>`;
+        } else if (
+            fechaTren.getFullYear() === pasado.getFullYear() &&
+            fechaTren.getMonth() === pasado.getMonth() &&
+            fechaTren.getDate() === pasado.getDate()
+        ) {
+            tdHora.innerHTML += `<br><span class="sin-parada-texto">Pasado</span>`;
+        }
+    }
+
     fila.appendChild(tdHora);
 
     // — Celda Destino/Origen —
@@ -1039,8 +1166,13 @@ export function renderizarPanelTeleindicador(datos) {
     fila.appendChild(tdDest);
 
     // — Celda Operador —
+    let feveIcon = Number(localStorage.getItem('feveIcon')) || 0;
+
     const tdOp = document.createElement("td");
-    const rutaOp = obtenerRutaIconoADIF(info);
+    let rutaOp = obtenerRutaIconoADIF(info);
+    if (rutaOp === 'img/operadores/FEVE.png') {
+        rutaOp = rutasOperadorFeve[feveIcon];
+    }
     if (rutaOp) {
       const spanOp = document.createElement("span");
       spanOp.innerHTML = `
@@ -1048,6 +1180,39 @@ export function renderizarPanelTeleindicador(datos) {
              alt="${commProd || opCode}" 
              class="icono-operador" />
       `;
+
+        //CAMBIAR LOGO FEVE AL HACER CLIC
+        spanOp.querySelector("img.icono-operador").addEventListener("click", function () {
+            if (/FEVE\d*\.png$/.test(this.src)) {
+                feveIcon = (feveIcon + 1) % rutasOperadorFeve.length;
+                localStorage.setItem('feveIcon', feveIcon);
+
+                // Precargar la nueva imagen
+                const nuevaSrc = rutasOperadorFeve[feveIcon];
+                const imgPreload = new Image();
+                imgPreload.src = nuevaSrc;
+                imgPreload.onload = () => {
+                    // Animación flip solo cuando la imagen está lista
+                    this.classList.add('flip');
+                    setTimeout(() => {
+                        this.src = nuevaSrc;
+                        this.classList.remove('flip');
+                    }, 200);
+
+                    // Actualiza todos los FEVE*.png
+                    document.querySelectorAll('img.icono-operador').forEach(img => {
+                        if (img !== this && /FEVE\d*\.png$/.test(img.src)) {
+                            img.classList.add('flip');
+                            setTimeout(() => {
+                                img.src = nuevaSrc;
+                                img.classList.remove('flip');
+                            }, 200);
+                        }
+                    });
+                };
+            }
+        });
+
       tdOp.appendChild(spanOp);
     }
     fila.appendChild(tdOp);
@@ -1058,7 +1223,8 @@ export function renderizarPanelTeleindicador(datos) {
     spanNum.className = "numero-tren-clicable";
     spanNum.style = "font-size: 1.1em";
     spanNum.textContent = numeroTren;
-    spanNum.setAttribute("onclick", `buscarTrenClick('${numeroTren}')`);
+    const fechaInicio = tren.commercialPathInfo.commercialPathKey.commercialCirculationKey.launchingDate || '';
+    spanNum.setAttribute("onclick", `buscarTrenClick('${numeroTren}', '${fechaInicio}')`);
     tdNum.appendChild(spanNum);
     fila.appendChild(tdNum);
 
@@ -1088,33 +1254,16 @@ function actualizarHoraCabeceraTele() {
     }
 }
 
-function actualizarContadores() {
-  const ahora = Date.now();
-  document.querySelectorAll('.countdown-timer').forEach(el => {
-    const tstamp = parseInt(el.dataset.tstamp, 10);
-    if (isNaN(tstamp)) return;
-
-    const diffSec = Math.round((tstamp - ahora) / 1000);
-
-    if (diffSec < 0) {
-      el.textContent = "0 s";
-      // Opcional: una vez llega a cero, podrías quitarle la clase para que no se actualice más
-      el.classList.remove('countdown-timer');
-      return;
+export function iniciarIntervalosUI() {
+    if (!horaCabeceraTeleIntervalId) {
+        horaCabeceraTeleIntervalId = setInterval(actualizarHoraCabeceraTele, 1000);
     }
-
-    const min = Math.floor(diffSec / 60);
-    const sec = diffSec % 60;
-
-    // Formato como en la foto: "X min" o "XX s"
-    if (min > 0) {
-      el.textContent = `${min} min`;
-    } else {
-      el.textContent = `${sec} s`;
-    }
-  });
+    actualizarHoraCabeceraTele();
 }
 
-setInterval(actualizarHoraCabeceraTele, 1000);
-setInterval(actualizarContadores, 1000);
-actualizarHoraCabeceraTele();
+export function limpiarIntervalosUI() {
+    if (horaCabeceraTeleIntervalId) {
+        clearInterval(horaCabeceraTeleIntervalId);
+        horaCabeceraTeleIntervalId = null;
+    }
+}
