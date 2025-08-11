@@ -76,6 +76,7 @@ const uiElements = {
     resultadoPre: document.getElementById("resultado"),
     btnAnterior: document.getElementById("btnAnterior"),
     btnSiguiente: document.getElementById("btnSiguiente"),
+    btnDescargarMarcha: document.getElementById("descargarMarchaBtn"),
     contadorTrenSpan: document.getElementById("contadorTren"),
     clearResultadosButton: document.getElementById("clearResultadosButton"),
     cerrarSesionButton: document.getElementById("cerrarSesionButton"),
@@ -119,6 +120,73 @@ export function setVerifyingState(isVerifying, message = "Verificando sesión...
 
 // --- FUNCIONES DE NÚMERO DE TREN ---
 
+export function descargarMarchaCSV() {
+    const trenes = getTrenes();
+    const trenActual = getTrenActual();
+    const tren = trenes[trenActual];
+
+    if (!tren) {
+        alert("No hay datos de marcha para descargar.");
+        return;
+    }
+
+    const estaciones = getEstaciones();
+    const numeroTren = tren.commercialPathInfo.commercialPathKey.commercialCirculationKey.commercialNumber;
+
+    // 1. Define las cabeceras del CSV
+    const cabeceras = [
+        "Estacion", "Tipo Parada", "Llegada Planificada", "Llegada Real",
+        "Retraso Llegada (s)", "Salida Planificada", "Salida Real",
+        "Retraso Salida (s)", "Via", "Info Via"
+    ];
+
+    // 2. Prepara las filas con los datos de cada paso
+    const filas = tren.passthroughSteps.map(paso => {
+        const llegada = paso.arrivalPassthroughStepSides;
+        const salida = paso.departurePassthroughStepSides;
+        const viaInfo = obtenerVia(salida, llegada);
+        const nombreEstacion = estaciones[paso.stationCode.replace(/^0+/, '')] || paso.stationCode;
+
+        return [
+            nombreEstacion,
+            traducirParada(paso.stopType),
+            llegada ? formatearTimestampHora(llegada.plannedTime) : '',
+            llegada ? calcularHoraReal(formatearTimestampHora(llegada.plannedTime), llegada.forecastedOrAuditedDelay) : '',
+            llegada ? llegada.forecastedOrAuditedDelay || '0' : '',
+            salida ? formatearTimestampHora(salida.plannedTime) : '',
+            salida ? calcularHoraReal(formatearTimestampHora(salida.plannedTime), salida.forecastedOrAuditedDelay) : '',
+            salida ? salida.forecastedOrAuditedDelay || '0' : '',
+            viaInfo.plataforma,
+            traducirVia(viaInfo.estado) || ''
+        ];
+    });
+
+    // 3. Crea la hoja de trabajo (workbook) y la hoja (worksheet)
+    const ws_data = [cabeceras, ...filas];
+    const ws = XLSX.utils.aoa_to_sheet(ws_data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Marcha del Tren");
+
+    // Opcional: ajustar el ancho de las columnas
+    const wscols = [
+        { wch: 30 }, // Estacion
+        { wch: 15 }, // Tipo Parada
+        { wch: 20 }, // Llegada Planificada
+        { wch: 15 }, // Llegada Real
+        { wch: 20 }, // Retraso Llegada (s)
+        { wch: 20 }, // Salida Planificada
+        { wch: 15 }, // Salida Real
+        { wch: 20 }, // Retraso Salida (s)
+        { wch: 5 },  // Via
+        { wch: 25 }  // Info Via
+    ];
+    ws['!cols'] = wscols;
+
+    // 4. Guarda el archivo .xlsx
+    XLSX.writeFile(wb, `marcha_tren_${numeroTren}.xlsx`);
+}
+
+
 export function mostrarTren() {
     const trenes = getTrenes();
     const trenActual = getTrenActual();
@@ -136,6 +204,7 @@ export function mostrarTren() {
     renderizarTablaPasos(path);
     
     uiElements.resultadoTrenDiv.classList.remove("hidden");
+    uiElements.btnDescargarMarcha.classList.remove('hidden');
 }
 
 function renderizarInfoTren(path) {

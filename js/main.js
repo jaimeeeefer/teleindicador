@@ -22,7 +22,8 @@ import {
   mostrarFavoritoEstrellaTren,
   mostrarFavoritosTren,
   iniciarIntervalosUI,
-  limpiarIntervalosUI
+  limpiarIntervalosUI,
+  descargarMarchaCSV
 } from './ui.js';
 
 const DOMElements = {
@@ -136,6 +137,7 @@ function setupEventListeners() {
   });
   DOMElements.btnAnterior.addEventListener('click', mostrarTrenAnterior);
   DOMElements.btnSiguiente.addEventListener('click', mostrarTrenSiguiente);
+  DOMElements.descargarMarchaBtn.addEventListener('click', descargarMarchaCSV);
 
   // — Estación
   DOMElements.btnFullScreenTele.addEventListener('click', function() {
