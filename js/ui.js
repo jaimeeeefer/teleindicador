@@ -76,6 +76,7 @@ const uiElements = {
     resultadoPre: document.getElementById("resultado"),
     btnAnterior: document.getElementById("btnAnterior"),
     btnSiguiente: document.getElementById("btnSiguiente"),
+    btnDescargarMarcha: document.getElementById("descargarMarchaBtn"),
     contadorTrenSpan: document.getElementById("contadorTren"),
     clearResultadosButton: document.getElementById("clearResultadosButton"),
     cerrarSesionButton: document.getElementById("cerrarSesionButton"),
@@ -202,7 +203,7 @@ export function mostrarTren() {
     renderizarTablaPasos(path);
     
     uiElements.resultadoTrenDiv.classList.remove("hidden");
-    document.getElementById('descargarMarchaBtn').classList.remove('hidden');
+    uiElements.btnDescargarMarcha.classList.remove('hidden');
 }
 
 function renderizarInfoTren(path) {
@@ -1334,5 +1335,4 @@ export function limpiarIntervalosUI() {
         horaCabeceraTeleIntervalId = null;
     }
 }
-
 
