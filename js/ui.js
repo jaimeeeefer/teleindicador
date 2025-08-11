@@ -155,26 +155,32 @@ export function descargarMarchaCSV() {
             salida ? salida.forecastedOrAuditedDelay || '0' : '',
             viaInfo.plataforma,
             traducirVia(viaInfo.estado) || ''
-        ].map(valor => `"${String(valor).replace(/"/g, '""')}"`); // Escapa las comillas dobles
+        ];
     });
 
-    // 3. Une todo en un solo string CSV
-    const contenidoCSV = [
-        cabeceras.join(','),
-        ...filas.map(fila => fila.join(','))
-    ].join('\n');
+    // 3. Crea la hoja de trabajo (workbook) y la hoja (worksheet)
+    const ws_data = [cabeceras, ...filas];
+    const ws = XLSX.utils.aoa_to_sheet(ws_data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Marcha del Tren");
 
-    // 4. Crea y dispara la descarga del archivo
-    const blob = new Blob(["\uFEFF" + contenidoCSV], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    
-    link.setAttribute("href", url);
-    link.setAttribute("download", `marcha_tren_${numeroTren}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // Opcional: ajustar el ancho de las columnas
+    const wscols = [
+        { wch: 25 }, // Estacion
+        { wch: 15 }, // Tipo Parada
+        { wch: 20 }, // Llegada Planificada
+        { wch: 15 }, // Llegada Real
+        { wch: 20 }, // Retraso Llegada (s)
+        { wch: 20 }, // Salida Planificada
+        { wch: 15 }, // Salida Real
+        { wch: 20 }, // Retraso Salida (s)
+        { wch: 5 },  // Via
+        { wch: 20 }  // Info Via
+    ];
+    ws['!cols'] = wscols;
+
+    // 4. Guarda el archivo .xlsx
+    XLSX.writeFile(wb, `marcha_tren_${numeroTren}.xlsx`);
 }
 
 // --- FUNCIONES DE NÚMERO DE TREN ---
@@ -1328,4 +1334,5 @@ export function limpiarIntervalosUI() {
         horaCabeceraTeleIntervalId = null;
     }
 }
+
 
