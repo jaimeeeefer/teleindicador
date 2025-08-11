@@ -10,18 +10,19 @@ import {
   clearResultados,
   buscarEstacion,
   cargarMas,
-  buscarTeleindicador,
-  buscarTeleindicadorSilent
 } from './api.js';
 import {
   mostrarTrenAnterior,
   mostrarTrenSiguiente,
+  mostrarEstacion,
   autocompletarEstaciones,
   toggleFavoritoEstacion,
   mostrarFavoritoEstrella,
   toggleFavoritoTren,
   mostrarFavoritoEstrellaTren,
   mostrarFavoritosTren,
+  iniciarIntervalosUI,
+  limpiarIntervalosUI
 } from './ui.js';
 
 const DOMElements = {
@@ -47,6 +48,11 @@ const DOMElements = {
   clearEstBtn:            document.getElementById("clearNumeroEst"),
   estrellaEstBtn:         document.getElementById("estrellaFavoritoEst"),
   cargarMas:              document.getElementById("cargarMas"),
+  toggle:                 document.getElementById('toggleVistaEstacion'),
+  resultadoEstacion:      document.getElementById("resultadoEstacion"),
+  horaCabeceraTele:       document.getElementById("hora-cabecera-tele"),
+  tablaTeleindicador:     document.getElementById("tablaTeleindicador"),
+  btnFullScreenTele:      document.getElementById("btnFullScreenTele"),
 
   // — Teleindicador
   stationInputTele:       document.getElementById("stationInputTele"),
@@ -54,6 +60,7 @@ const DOMElements = {
   buscarTeleButton:       document.getElementById("buscarTeleButton"),
   clearNumeroTele:        document.getElementById("clearNumeroTele"),
   estrellaTeleBtn:        document.getElementById("estrellaFavoritoTele"),
+  teleindicadorFullContainer: document.getElementById("teleindicadorFullContainer"),
 
   // — Pestañas
   tabButtons:             document.querySelectorAll(".tab-button"),
@@ -68,7 +75,7 @@ const DOMElements = {
 let teleindicadorInterval = null;
 
 document.addEventListener('DOMContentLoaded', () => {
-    const toggle = document.getElementById('toggleVistaEstacion');
+    const toggle = DOMElements.toggle;
     if (!toggle) return;
     const saved = localStorage.getItem('vistaEstacion');
     if (saved !== null) {
@@ -76,18 +83,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-function actualizarControlesInput(input, clearBtn, favBtn) {
+export function actualizarControlesInput(input, clearBtn, favBtn) {
   const hay = !!input.value;
   clearBtn.classList.toggle('visible', hay);
-  favBtn .classList.toggle('visible', hay);
-  input .classList.toggle('input-con-x', hay);
+  favBtn.classList.toggle('visible', hay);
+  input.classList.toggle('input-con-x', hay);
 }
 
 function setupEventListeners() {
 
   // — Theme & Auth
   DOMElements.toggleThemeBtn.addEventListener("click", toggleTheme);
-  DOMElements.loginButton      .addEventListener("click", login);
+  DOMElements.loginButton.addEventListener("click", login);
   DOMElements.cerrarSesionButton.addEventListener("click", cerrarSesion);
 
     // — Clear resultados (Tren)  
@@ -131,8 +138,8 @@ function setupEventListeners() {
   DOMElements.btnSiguiente.addEventListener('click', mostrarTrenSiguiente);
 
   // — Estación
-  document.getElementById('btnFullScreenTele').addEventListener('click', function() {
-    const tabla = document.getElementById('teleindicadorFullContainer');
+  DOMElements.btnFullScreenTele.addEventListener('click', function() {
+    const tabla = DOMElements.teleindicadorFullContainer;
     if (tabla.requestFullscreen) {
       tabla.requestFullscreen();
     } else if (tabla.webkitRequestFullscreen) { // Safari
@@ -161,7 +168,12 @@ function setupEventListeners() {
     mostrarFavoritoEstrella();
   });
   DOMElements.estacionInput.addEventListener('keyup', e => {
-    if (e.key === 'Enter') buscarEstacion();
+    const esTeleindicador = DOMElements.toggle.checked;
+    if (esTeleindicador) {
+      if (e.key === 'Enter') buscarEstacion("teleindicador", true);
+    } else {
+      if (e.key === 'Enter') buscarEstacion("detallado", true);
+    }
   });
   DOMElements.clearEstBtn.addEventListener('click', e => {
     stopActualizar();
@@ -178,18 +190,20 @@ function setupEventListeners() {
   });
   DOMElements.buscarEstButton.addEventListener("click", () => {
     stopActualizar();
-    document.getElementById("hora-cabecera-tele").classList.remove("parpadeante");
-    const esTeleindicador = document.getElementById("toggleVistaEstacion").checked;
-    document.getElementById("resultadoEstacion").classList.add("hidden");
-    document.getElementById("tablaTeleindicador").classList.add("hidden");
-    document.getElementById("btnFullScreenTele").classList.add("hidden");
+    DOMElements.horaCabeceraTele.classList.remove("parpadeante");
+    const esTeleindicador = DOMElements.toggle.checked;
+    DOMElements.resultadoEstacion.classList.add("hidden");
+    DOMElements.tablaTeleindicador.classList.add("hidden");
+    DOMElements.btnFullScreenTele.classList.add("hidden");
     if (esTeleindicador) {
-      buscarTeleindicador();
-      document.getElementById("tablaTeleindicador").classList.remove("hidden");
-      document.getElementById("btnFullScreenTele").classList.remove("hidden");
-      teleindicadorInterval = setInterval(buscarTeleindicadorSilent, 30000);
+      clearResultados();
+      buscarEstacion("teleindicador", true);
+      iniciarIntervalosUI();
+      DOMElements.tablaTeleindicador.classList.remove("hidden");
+      DOMElements.btnFullScreenTele.classList.remove("hidden");
+      teleindicadorInterval = setInterval(() => buscarEstacion("teleindicador", false), 30000);
     } else {
-      buscarEstacion();
+      buscarEstacion("detallado", true);
     }
   });
   DOMElements.estrellaEstBtn.addEventListener('click', () => {
@@ -253,20 +267,38 @@ function setupEventListeners() {
   });
 }
 
-const toggle = document.getElementById('toggleVistaEstacion');
-if (toggle) {
-    toggle.addEventListener('change', () => {
-        localStorage.setItem('vistaEstacion', toggle.checked ? 'teleindicador' : 'detallado');
-        stopActualizar();
+if (DOMElements.toggle) {
+    DOMElements.toggle.addEventListener('change', () => {
+        localStorage.setItem('vistaEstacion', DOMElements.toggle.checked ? 'teleindicador' : 'detallado');
+
+        if (DOMElements.toggle.checked) {
+          if (!DOMElements.resultadoEstacion.classList.contains("hidden")) {
+            DOMElements.resultadoEstacion.classList.add("hidden");
+            DOMElements.horaCabeceraTele.classList.remove("parpadeante");
+            iniciarIntervalosUI();
+            teleindicadorInterval = setInterval(() => buscarEstacion("teleindicador", false), 30000);
+          }
+        } else {
+          DOMElements.tablaTeleindicador.classList.add("hidden");
+          DOMElements.btnFullScreenTele.classList.add("hidden");
+          stopActualizar();
+        }
+
+        mostrarEstacion(DOMElements.toggle.checked ? 'teleindicador' : 'detallado');
+
+        if (DOMElements.toggle.checked && !DOMElements.tablaTeleindicador.classList.contains("hidden")) {
+            buscarEstacion("teleindicador", false);
+        }
     });
 }
 
-function stopActualizar(){
+export function stopActualizar(){
   if (teleindicadorInterval) {
     clearInterval(teleindicadorInterval);
     teleindicadorInterval = null;
-    document.getElementById("hora-cabecera-tele").classList.add("parpadeante");
+    DOMElements.horaCabeceraTele.classList.add("parpadeante");
   }
+  limpiarIntervalosUI();
 }
 
 async function init() {
