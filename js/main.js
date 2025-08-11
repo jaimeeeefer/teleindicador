@@ -41,6 +41,7 @@ const DOMElements = {
   trenFavoritosDiv:       document.getElementById("favoritos"),
   btnAnterior:            document.getElementById("btnAnterior"),
   btnSiguiente:           document.getElementById("btnSiguiente"),
+  descargarMarchaBtn:     document.getElementById("descargarMarchaBtn"),
 
   // — Estación
   estacionInput:          document.getElementById("numeroEst"),
