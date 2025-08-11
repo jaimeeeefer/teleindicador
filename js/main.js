@@ -138,6 +138,7 @@ function setupEventListeners() {
   });
   DOMElements.btnAnterior.addEventListener('click', mostrarTrenAnterior);
   DOMElements.btnSiguiente.addEventListener('click', mostrarTrenSiguiente);
+  DOMElements.descargarMarchaBtn.addEventListener('click', descargarMarchaCSV); // <-- AÑADE ESTA LÍNEA
 
   // — Estación
   DOMElements.btnFullScreenTele.addEventListener('click', function() {
