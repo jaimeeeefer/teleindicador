@@ -13,6 +13,10 @@ let reglas = {};
 let pictosPorNumero = {};
 let productoPorNumero = {};
 
+let trenesAnunciados = {}; // Para no repetir anuncios
+let colaDeAnuncios = []; // Para poner en cola los anuncios si ya hay uno sonando
+let estaReproduciendo = false; // Para saber si el "altavoz" está ocupado
+
 let fechaConcreta = null;
 
 const rutasOperadorFeve = [
@@ -116,6 +120,118 @@ export function setVerifyingState(isVerifying, message = "Verificando sesión...
         mostrarPantalla("cargando");
         uiElements.verifyInfo.textContent = message;
     }
+}
+
+// --- FUNCIONES MEGAFONIA ---
+
+// Función para limpiar los anuncios al hacer una nueva búsqueda
+export function limpiarAnuncios() {
+    trenesAnunciados = {};
+}
+
+// Procesa la cola de anuncios
+function procesarColaDeAnuncios() {
+    if (estaReproduciendo || colaDeAnuncios.length === 0) {
+        return; // Si ya está sonando algo o no hay nada que anunciar, no hace nada
+    }
+    estaReproduciendo = true;
+    const secuencia = colaDeAnuncios.shift(); // Coge el primer anuncio de la cola
+    reproducirSecuencia(secuencia);
+}
+
+// Reproduce una secuencia de archivos de audio uno tras otro
+function reproducirSecuencia(archivos, index = 0) {
+    if (index >= archivos.length) {
+        estaReproduciendo = false; // Se ha terminado la secuencia
+        setTimeout(procesarColaDeAnuncios, 1000); // Espera 1 segundo y mira si hay más en la cola
+        return;
+    }
+
+    const audio = new Audio(archivos[index]);
+    audio.play().catch(e => console.error("Error al reproducir audio:", e));
+
+    audio.onended = () => {
+        reproducirSecuencia(archivos, index + 1); // Llama a esta misma función para el siguiente audio
+    };
+
+    audio.onerror = () => {
+        console.warn(`No se encontró el archivo de audio: ${archivos[index]}`);
+        reproducirSecuencia(archivos, index + 1); // Si un archivo falla, salta al siguiente
+    };
+}
+
+// Función principal que se llamará para crear y encolar un nuevo anuncio
+function anunciarMegafonia(tren, tipoPanel, tipoAnuncio) {
+    // La primera parte para obtener los datos es igual...
+    const info = tren.commercialPathInfo || {};
+    const infoextra = tipoPanel === 'llegadas'
+        ? tren.passthroughStep?.arrivalPassthroughStepSides || {}
+        : tren.passthroughStep?.departurePassthroughStepSides || {};
+    const stopType = tren.passthroughStep?.stopType || '';
+
+    const producto = info.opeProComPro?.commercialProduct?.trim().toUpperCase() || 'TREN';
+    const estaciones = getEstaciones();
+    const codigoDestino = tipoPanel === 'llegadas' 
+        ? info.commercialPathKey?.originStationCode 
+        : info.commercialPathKey?.destinationStationCode;
+    const destino = estaciones[codigoDestino?.replace(/^0+/, '')] || codigoDestino;
+    const horaEstimMs = infoextra.plannedTime + (infoextra.forecastedOrAuditedDelay || 0) * 1000;
+    const fecha = new Date(horaEstimMs);
+    const horas = fecha.getHours();
+    const minutos = fecha.getMinutes();
+    const via = obtenerVia(tren.passthroughStep?.departurePassthroughStepSides, tren.passthroughStep?.arrivalPassthroughStepSides).plataforma;
+
+    const normalizar = (texto) => {
+        if (!texto) return '';
+        return texto.toString().toUpperCase().replace(/[\s\/-]+/g, ''); // Elimina espacios, guiones y barras
+    };
+
+    // --- LÓGICA AÑADIDA PARA FORMATEAR NÚMEROS ---
+    const horasFormateadas = String(horas).padStart(2, '0');
+    const minutosFormateados = String(minutos).padStart(2, '0');
+    // Solo añade el cero a la vía si es un número de una sola cifra
+    const viaFormateada = /^\d$/.test(via) ? String(via).padStart(2, '0') : via;
+    // --- FIN DE LA LÓGICA AÑADIDA ---
+
+    // --- LÓGICA MODIFICADA PARA CONSTRUIR EL ANUNCIO ---
+    let secuenciaDeAudios = [];
+    if (stopType === 'NO_STOP' && via) {
+        // Anuncio para tren sin parada
+        secuenciaDeAudios = [
+            'mgf/frases/Atención, atención, tren sin parada por.wav',
+            `mgf/vías/VIA ${viaFormateada}.wav`,
+            'mgf/frases/Rogamos no se acerquen a la vía.wav'
+        ];
+    } else {
+        // Lógica original para trenes con parada
+        const introAnuncio = [
+            `mgf/trenes/${normalizar(producto)}.wav`,
+            `mgf/frases/destino.wav`,
+            `mgf/estaciones/${normalizar(destino)}.wav`
+        ];
+
+        if (tipoAnuncio === 'salidaInminente') {
+            // Anuncio para cuando falta 1 minuto
+            secuenciaDeAudios = [
+                ...introAnuncio,
+                `mgf/vías/VIA ${viaFormateada}.wav`,
+                `mgf/frases/va a efectuar su salida.wav`
+            ];
+        } else {
+            // Anuncio normal para 10 y 5 minutos
+            secuenciaDeAudios = [
+                ...introAnuncio,
+                `mgf/frases/con salida a las.wav`,
+                `mgf/horas/${horasFormateadas} horas.wav`,
+                `mgf/motivos/MSG000 Y.wav`,
+                `mgf/minutos/${minutosFormateados} minutos.wav`,
+                `mgf/vías/VIA ${viaFormateada}.wav`
+            ];
+        }
+    }
+
+    colaDeAnuncios.push(secuenciaDeAudios);
+    procesarColaDeAnuncios();
 }
 
 // --- FUNCIONES DE NÚMERO DE TREN ---
@@ -1654,6 +1770,37 @@ export function renderizarPanelTeleindicador(datos) {
         } else {
             tdHora.innerHTML = horaMostrada;
         }
+
+        // --- LÓGICA DE MEGAFONÍA MODIFICADA ---
+        const megafoniaActivada = document.getElementById('toggleMegafonia')?.checked;
+        if (megafoniaActivada && numeroTren) {
+            // Si es la primera vez que vemos este tren, inicializamos su historial de anuncios
+            if (!trenesAnunciados[numeroTren]) {
+                trenesAnunciados[numeroTren] = { min10: false, min5: false, min1: false };
+            }
+
+            const estadoAnuncio = trenesAnunciados[numeroTren];
+            const minutosReales = diffMin !== null ? Math.floor(diffMin) : -1;
+
+            // Comprobación para el anuncio de 10 minutos
+            if (minutosReales === 9 && !estadoAnuncio.min10) { // Se anuncia al pasar de 10 a 9
+                estadoAnuncio.min10 = true;
+                anunciarMegafonia(tren, tipo, 'normal');
+            }
+
+            // Comprobación para el anuncio de 5 minutos
+            if (minutosReales === 4 && !estadoAnuncio.min5) { // Se anuncia al pasar de 5 a 4
+                estadoAnuncio.min5 = true;
+                anunciarMegafonia(tren, tipo, 'normal');
+            }
+
+            // Comprobación para el anuncio de 1 minuto
+            if (minutosReales === 0 && !estadoAnuncio.min1) { // Se anuncia al pasar de 1 a 0
+                estadoAnuncio.min1 = true;
+                anunciarMegafonia(tren, tipo, 'salidaInminente');
+            }
+        }
+        // --- FIN DE LA LÓGICA MODIFICADA ---
 
         // Comprobación si el tren es de mañana
         if (horaEstimMs) {

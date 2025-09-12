@@ -22,7 +22,7 @@
       "OUIGO": "OUIGO.png",
       "IRYO": "IRYO.png",
       "TGV INOUI": "TGV.png",
-      "Material Vacio": "SSERV.png",
+      "MATERIAL VACIO": "SSERV.png",
       "REGIONAL RAM": "FEVE.png",
       "VIAJEROS RAM": "FEVE.png",
       "RODALIES-R17": "REGCAT.png",
@@ -77,8 +77,8 @@
       "CERCANIAS": "CERCAN.png",
       "CERCANIAS RAM": "FEVE.png",
       "RODALIES": "RODCAT.png",
-      "Material Vacio": "SSERV.png",
-      "Servicio Interno": "SSERV.png"
+      "MATERIAL VACIO": "SSERV.png",
+      "SERVICIO INTERNO": "SSERV.png"
     },
     "core":{
       "BILBAO": "ALDIRIAK.png",
@@ -88,8 +88,8 @@
   },
   "OTHER": {
     "commercialProduct": {
-      "Material Vacio": "SSERV.png",
-      "Servicio Interno": "SSERV.png"
+      "MATERIAL VACIO": "SSERV.png",
+      "SERVICIO INTERNO": "SSERV.png"
     },
     "operator": {
       "CM": "CAPTRAIN.png",

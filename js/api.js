@@ -2,7 +2,7 @@
 
 import { stopActualizar } from './main.js';
 import { getAuthHeader, procesarCSV, setEstaciones, getEstaciones } from './auth.js';
-import { mostrarPantalla, mostrarTren, mostrarEstacion, finCargarMas, clearLastDate, upperCamelCase, addTrenBuscado, toggleFavoritoTren } from './ui.js';
+import { mostrarPantalla, mostrarTren, mostrarEstacion, finCargarMas, clearLastDate, upperCamelCase, addTrenBuscado, toggleFavoritoTren, limpiarAnuncios } from './ui.js';
 
 const API_BASE_URL = "https://adif-api.onrender.com";
 const operadoresViajeros = ["RF", "RI", "IL", "SV", "FG", "CP"];
@@ -109,6 +109,7 @@ export async function buscarEstacion(tipo, nuevaBusqueda = true) {
         tipoTren = document.getElementById('tipoTrenCustom').value;
         tipoPanel = document.getElementById('tipoPanelCustom').value;
         operador = document.getElementById('operadorCustom').value;
+        limpiarAnuncios();
     }
 
     const operadorSeleccionado = operador;

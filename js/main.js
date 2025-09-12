@@ -60,6 +60,7 @@ const DOMElements = {
   estrellaEstBtn: document.getElementById("estrellaFavoritoEst"),
   cargarMas: document.getElementById("cargarMas"),
   toggle: document.getElementById('toggleVistaEstacion'),
+  toggleMegafonia: document.getElementById('toggleMegafonia'),
   resultadoEstacion: document.getElementById("resultadoEstacion"),
   horaCabeceraTele: document.getElementById("hora-cabecera-tele"),
   tablaTeleindicador: document.getElementById("tablaTeleindicador"),
@@ -321,6 +322,12 @@ function setupEventListeners() {
       }
     });
   });
+
+  if (DOMElements.toggleMegafonia) {
+      DOMElements.toggleMegafonia.addEventListener('change', () => {
+          localStorage.setItem('megafoniaActivada', DOMElements.toggleMegafonia.checked);
+      });
+  }
 }
 
 if (DOMElements.toggle) {
@@ -373,6 +380,11 @@ async function init() {
   }
   setupEventListeners();
   await verificarSesionGuardada();
+
+  const megafoniaGuardada = localStorage.getItem('megafoniaActivada') === 'true';
+  if (DOMElements.toggleMegafonia) {
+    DOMElements.toggleMegafonia.checked = megafoniaGuardada;
+  }
 }
 
 function obtenerOrigenDestino(numero) {
