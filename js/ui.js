@@ -183,7 +183,7 @@ function anunciarMegafonia(tren, tipoPanel, tipoAnuncio) {
 
     const normalizar = (texto) => {
         if (!texto) return '';
-        return texto.toString().toUpperCase().replace(/[\s\/-]+/g, ''); // Elimina espacios, guiones y barras
+        return texto.toString().toUpperCase().replace(/[\s\/]+/g,''); // Elimina espacios, guiones y barras
     };
 
     // --- LÓGICA AÑADIDA PARA FORMATEAR NÚMEROS ---
