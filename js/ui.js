@@ -160,8 +160,112 @@ function reproducirSecuencia(archivos, index = 0) {
     };
 }
 
+// Normalizacion para los audios de estaciones
+
+function normalizeKey(text) {
+  if (!text) return "";
+  return text
+    .toString()
+    // quita acentos
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    // homogeneiza guiones (cubre hyphen, non-breaking hyphen, en/em dash, minus, figure dash, soft hyphen, etc.)
+    .replace(/[\u00AD\u2010-\u2015\u2212\uFE58\uFE63\uFF0D-]/g, " ")
+    // otros signos → espacio
+    .replace(/[.,;:(){}\[\]/\\]/g, " ")
+    // & → Y
+    .replace(/&/g, " Y ")
+    // colapsa espacios
+    .replace(/\s+/g, " ")
+    .trim()
+    .toUpperCase();
+}
+
+// ===== Genera prefijos progresivos y versiones sin stopwords =====
+const STOPWORDS = new Set(["DE","DEL","LA","LAS","LO","LOS","EL","SAN","SANTA","Y"]);
+
+function generatePrefixVariants(rawName) {
+  const full = normalizeKey(rawName);             // "MADRID CHAMARTIN CLARA CAMPOAMOR"
+  if (!full) return [];
+  const tokens = full.split(" ");
+
+  const variants = new Set();
+
+  // 1) Prefijos completos: n, n-1, ..., 1
+  for (let k = tokens.length; k >= 1; k--) {
+    variants.add(tokens.slice(0, k).join(" "));
+  }
+
+  // 2) Para cada prefijo, añade versión sin stopwords (si queda algo)
+  for (let k = tokens.length; k >= 1; k--) {
+    const pref = tokens.slice(0, k);
+    const noStops = pref.filter(t => !STOPWORDS.has(t));
+    if (noStops.length) variants.add(noStops.join(" "));
+  }
+
+  // 3) Añade también la versión “pegada” del full (por si el fichero está sin espacios)
+  variants.add(full.replace(/\s+/g, ""));
+
+  return Array.from(variants).filter(Boolean);
+}
+
+// ===== Candidatos de nombre de archivo para un texto normalizado =====
+function buildFileNameCandidates(norm) {
+  return [
+    norm,                             // "MADRID CHAMARTIN"
+    norm.replace(/\s+/g, "-"),        // "MADRID-CHAMARTIN"
+    norm.replace(/\s+/g, "_"),        // "MADRID_CHAMARTIN"
+    norm.replace(/\s+/g, ""),         // "MADRIDCHAMARTIN"
+  ];
+}
+
+// ===== Comprobación de existencia =====
+async function fileExists(url) {
+  try {
+    const h = await fetch(url, { method: "HEAD", cache: "no-store" });
+    if (h.ok) return true;
+  } catch (_) {}
+  try {
+    const r = await fetch(url, { method: "GET", cache: "no-store" });
+    if (r.ok) return true;
+  } catch (_) {}
+  return false;
+}
+
+// ===== Cache en memoria para resoluciones previas =====
+const AUDIO_RESOLVE_CACHE = new Map();
+
+// ===== Resolver ruta real del audio de estación SIN índices fijos =====
+async function getStationAudioPath(nombreEstacion) {
+  if (!nombreEstacion) return null;
+
+  // Cache hit
+  if (AUDIO_RESOLVE_CACHE.has(nombreEstacion)) {
+    return AUDIO_RESOLVE_CACHE.get(nombreEstacion);
+  }
+
+  // 1) Genera prefijos decrecientes y derivados
+  const variants = generatePrefixVariants(nombreEstacion);
+
+  // 2) Prueba cada variante con múltiples formatos de nombre
+  for (const v of variants) {
+    for (const base of buildFileNameCandidates(v)) {
+      const url = `mgf/estaciones/${base}.wav`;
+      // eslint-disable-next-line no-await-in-loop
+      if (await fileExists(url)) {
+        AUDIO_RESOLVE_CACHE.set(nombreEstacion, url);
+        return url;
+      }
+    }
+  }
+
+  // 3) Fallback: usa el normalizado completo con guiones (algo razonable)
+  const fallback = `mgf/estaciones/${normalizeKey(nombreEstacion).replace(/\s+/g, "-")}.wav`;
+  AUDIO_RESOLVE_CACHE.set(nombreEstacion, fallback);
+  return fallback;
+}
+
 // Función principal que se llamará para crear y encolar un nuevo anuncio
-function anunciarMegafonia(tren, tipoPanel, tipoAnuncio) {
+async function anunciarMegafonia(tren, tipoPanel, tipoAnuncio) {
     // La primera parte para obtener los datos es igual...
     const info = tren.commercialPathInfo || {};
     const infoextra = tipoPanel === 'llegadas'
@@ -183,7 +287,7 @@ function anunciarMegafonia(tren, tipoPanel, tipoAnuncio) {
 
     const normalizar = (texto) => {
         if (!texto) return '';
-        return texto.toString().toUpperCase().replace(/[\s\/]+/g,''); // Elimina espacios, guiones y barras
+        return texto.toString().toUpperCase().replace(/[\/]+/g, ''); // Elimina espacios, guiones y barras
     };
 
     // --- LÓGICA AÑADIDA PARA FORMATEAR NÚMEROS ---
@@ -192,6 +296,8 @@ function anunciarMegafonia(tren, tipoPanel, tipoAnuncio) {
     // Solo añade el cero a la vía si es un número de una sola cifra
     const viaFormateada = /^\d$/.test(via) ? String(via).padStart(2, '0') : via;
     // --- FIN DE LA LÓGICA AÑADIDA ---
+
+    const estacionAudioPath = await getStationAudioPath(destino);
 
     // --- LÓGICA MODIFICADA PARA CONSTRUIR EL ANUNCIO ---
     let secuenciaDeAudios = [];
@@ -207,7 +313,7 @@ function anunciarMegafonia(tren, tipoPanel, tipoAnuncio) {
         const introAnuncio = [
             `mgf/trenes/${normalizar(producto)}.wav`,
             `mgf/frases/destino.wav`,
-            `mgf/estaciones/${normalizar(destino)}.wav`
+            estacionAudioPath
         ];
 
         if (tipoAnuncio === 'salidaInminente') {
