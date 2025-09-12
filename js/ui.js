@@ -1,6 +1,6 @@
 // js/ui.js
 
-import { getTrenActual, getTrenes, setTrenActual , getProximosTrenes, getPaginaActual, setPaginaActual, getTipoPanel, buscarTren, buscarEstacion } from './api.js';
+import { getTrenActual, getTrenes, setTrenActual, getProximosTrenes, getPaginaActual, setPaginaActual, getTipoPanel, buscarTren, buscarEstacion } from './api.js';
 import { getEstaciones, getOperadores } from './auth.js';
 import { actualizarControlesInput } from './main.js';
 
@@ -76,12 +76,12 @@ const uiElements = {
     resultadoPre: document.getElementById("resultado"),
     btnAnterior: document.getElementById("btnAnterior"),
     btnSiguiente: document.getElementById("btnSiguiente"),
-    btnDescargarMarcha: document.getElementById("descargarMarchaBtn"),
     contadorTrenSpan: document.getElementById("contadorTren"),
     clearResultadosButton: document.getElementById("clearResultadosButton"),
     cerrarSesionButton: document.getElementById("cerrarSesionButton"),
     sugerencias: document.getElementById('sugerencias'),
-    cargarMas: document.getElementById("cargarMas")
+    cargarMas: document.getElementById("cargarMas"),
+    btnDescargarMarcha: document.getElementById("descargarMarchaBtn")
 };
 
 export function clearLastDate() {
@@ -92,17 +92,17 @@ export function clearLastDate() {
 
 export function mostrarPantalla(id) {
     document.querySelectorAll('.pantalla').forEach(p => {
-        if(p.id !== id) p.classList.remove('visible');
+        if (p.id !== id) p.classList.remove('visible');
     });
     const destino = document.getElementById(id);
     if (destino) destino.classList.add('visible');
-    if (destino.id  === 'login') {
+    if (destino.id === 'login') {
         titulo.classList.add('visible');
         botonesCentro.classList.add('visible');
         uiElements.clearResultadosButton.style.display = 'none';
         uiElements.cerrarSesionButton.style.display = 'none';
     }
-    else if (destino.id === 'consulta'){
+    else if (destino.id === 'consulta') {
         titulo.classList.add('visible');
         botonesCentro.classList.add('visible');
         tabs.classList.add('visible');
@@ -120,89 +120,22 @@ export function setVerifyingState(isVerifying, message = "Verificando sesión...
 
 // --- FUNCIONES DE NÚMERO DE TREN ---
 
-export function descargarMarchaCSV() {
-    const trenes = getTrenes();
-    const trenActual = getTrenActual();
-    const tren = trenes[trenActual];
-
-    if (!tren) {
-        alert("No hay datos de marcha para descargar.");
-        return;
-    }
-
-    const estaciones = getEstaciones();
-    const numeroTren = tren.commercialPathInfo.commercialPathKey.commercialCirculationKey.commercialNumber;
-
-    // 1. Define las cabeceras del CSV
-    const cabeceras = [
-        "Estacion", "Tipo Parada", "Llegada Planificada", "Llegada Real",
-        "Retraso Llegada (s)", "Salida Planificada", "Salida Real",
-        "Retraso Salida (s)", "Via", "Info Via"
-    ];
-
-    // 2. Prepara las filas con los datos de cada paso
-    const filas = tren.passthroughSteps.map(paso => {
-        const llegada = paso.arrivalPassthroughStepSides;
-        const salida = paso.departurePassthroughStepSides;
-        const viaInfo = obtenerVia(salida, llegada);
-        const nombreEstacion = estaciones[paso.stationCode.replace(/^0+/, '')] || paso.stationCode;
-
-        return [
-            nombreEstacion,
-            traducirParada(paso.stopType),
-            llegada ? formatearTimestampHora(llegada.plannedTime) : '',
-            llegada ? calcularHoraReal(formatearTimestampHora(llegada.plannedTime), llegada.forecastedOrAuditedDelay) : '',
-            llegada ? llegada.forecastedOrAuditedDelay || '0' : '',
-            salida ? formatearTimestampHora(salida.plannedTime) : '',
-            salida ? calcularHoraReal(formatearTimestampHora(salida.plannedTime), salida.forecastedOrAuditedDelay) : '',
-            salida ? salida.forecastedOrAuditedDelay || '0' : '',
-            viaInfo.plataforma,
-            traducirVia(viaInfo.estado) || ''
-        ];
-    });
-
-    // 3. Crea la hoja de trabajo (workbook) y la hoja (worksheet)
-    const ws_data = [cabeceras, ...filas];
-    const ws = XLSX.utils.aoa_to_sheet(ws_data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Marcha del Tren");
-
-    // Opcional: ajustar el ancho de las columnas
-    const wscols = [
-        { wch: 30 }, // Estacion
-        { wch: 15 }, // Tipo Parada
-        { wch: 20 }, // Llegada Planificada
-        { wch: 15 }, // Llegada Real
-        { wch: 20 }, // Retraso Llegada (s)
-        { wch: 20 }, // Salida Planificada
-        { wch: 15 }, // Salida Real
-        { wch: 20 }, // Retraso Salida (s)
-        { wch: 5 },  // Via
-        { wch: 25 }  // Info Via
-    ];
-    ws['!cols'] = wscols;
-
-    // 4. Guarda el archivo .xlsx
-    XLSX.writeFile(wb, `marcha_tren_${numeroTren}.xlsx`);
-}
-
-
 export function mostrarTren() {
     const trenes = getTrenes();
     const trenActual = getTrenActual();
-    
+
     if (trenActual < 0 || trenActual >= trenes.length || !trenes[trenActual]) {
         console.error("Índice de tren inválido o tren no encontrado.");
         return;
     }
-    
+
     const path = trenes[trenActual];
     if (!path) return;
-    
+
     actualizarNavegacion(trenActual, trenes.length);
     renderizarInfoTren(path);
     renderizarTablaPasos(path);
-    
+
     uiElements.resultadoTrenDiv.classList.remove("hidden");
     uiElements.btnDescargarMarcha.classList.remove('hidden');
 }
@@ -210,7 +143,7 @@ export function mostrarTren() {
 function renderizarInfoTren(path) {
     const info = path.commercialPathInfo;
     const estaciones = getEstaciones();
-    
+
     let { ultimaEstacion, esUltimaEstacion, retUltimaEstacion, estadoUltimaEstacion } = getUltimaSituacion(path.passthroughSteps);
     estadoUltimaEstacion = traducirEstado(estadoUltimaEstacion);
     ultimaEstacion = estaciones[ultimaEstacion.replace(/^0+/, '')] || ultimaEstacion;
@@ -222,18 +155,17 @@ function renderizarInfoTren(path) {
           <div class= "infoTablaColumna">
               <div><strong class="blanco">Número:</strong><br>${info.commercialPathKey.commercialCirculationKey.commercialNumber}</div>
               <div><strong class="blanco">Fecha:</strong><br>${formatearTimestampFecha(info.commercialPathKey.commercialCirculationKey.launchingDate)}</div>
-              <div><strong class="blanco">Origen:</strong><br>${estaciones[info.commercialPathKey.originStationCode.replace(/^0+/, '')] || info.commercialPathKey.commercialCirculationKey.originStationCode}</div>
-              <div><strong class="blanco">Destino:</strong><br>${estaciones[info.commercialPathKey.destinationStationCode.replace(/^0+/, '')] || info.commercialPathKey.commercialCirculationKey.destinationStationCode}</div>
+              <div><strong class="blanco">Origen:</strong><br><div class="dividirBarra">${estaciones[info.commercialPathKey.originStationCode.replace(/^0+/, '')] || info.commercialPathKey.commercialCirculationKey.originStationCode}</div></div>
+              <div><strong class="blanco">Destino:</strong><br><div class="dividirBarra">${estaciones[info.commercialPathKey.destinationStationCode.replace(/^0+/, '')] || info.commercialPathKey.commercialCirculationKey.destinationStationCode}</div></div>
           </div>
           <div class= "infoTablaColumna">
               <div><strong class="blanco">Tipo:</strong><br>${info.trafficType}</div>
               <div><strong class="blanco">Operador:</strong><br>
                     ${info.opeProComPro?.operator || ''}
-                    ${
-                        traducirOperador(info.opeProComPro?.operator)
-                            ? ' - ' + traducirOperador(info.opeProComPro?.operator)
-                            : ''
-                    }
+                    ${traducirOperador(info.opeProComPro?.operator)
+            ? ' - ' + traducirOperador(info.opeProComPro?.operator)
+            : ''
+        }
                 </div>
               <div><strong class="blanco">Producto:</strong><br>${info.opeProComPro?.product || ''}${info.opeProComPro?.commercialProduct?.trim() ? ' - ' : ''}${info.opeProComPro?.commercialProduct?.trim() || ''}</div>
               ${info?.line ? `<div><strong class="blanco">Línea/Núcleo:</strong><br>${info.line} - ${info.core}</div>` : ''}
@@ -250,6 +182,10 @@ function renderizarInfoTren(path) {
             </div>
         </div>
     `;
+    //PARA QUE SE DIVIDAN LAS BARRAS
+    document.querySelectorAll('.dividirBarra').forEach(el => {
+        el.innerHTML = el.textContent.replace(/([\/\-])/g, '$1\u200B');
+    });
 }
 
 function renderizarTablaPasos(path) {
@@ -266,7 +202,7 @@ function renderizarTablaPasos(path) {
         if (paso.stopType === "COMMERCIAL" || paso.stopType === "TECHNICAL") {
             fila.classList.add('fila-negrita');
         }
-        
+
         if (estadoPaso.clase) fila.classList.add(estadoPaso.clase);
 
         const viaInfo = obtenerVia(salida, llegada);
@@ -274,7 +210,7 @@ function renderizarTablaPasos(path) {
         const codigoEstacion = paso.stationCode.replace(/^0+/, '');
         const nombreEstacion = estaciones[codigoEstacion] || paso.stationCode;
         const celdaEstacion = document.createElement('td');
-        celdaEstacion.innerHTML = `<span class="estacion-clicable numero-tren-clicable" title="Ver salidas" onclick="buscarEstacionClick('${codigoEstacion}', '${nombreEstacion.replace(/'/g, "\\'")}')">${nombreEstacion}</span>`;
+        celdaEstacion.innerHTML = `<span class="estacion-clicable numero-tren-clicable dividirBarra" title="Ver salidas" onclick="buscarEstacionClick('${codigoEstacion}', '${nombreEstacion.replace(/'/g, "\\'")}')">${nombreEstacion}</span>`;
 
         fila.appendChild(celdaEstacion);
         fila.innerHTML += `
@@ -290,7 +226,7 @@ function renderizarTablaPasos(path) {
           <td>${estadoPaso.texto}</td>
         `;
         uiElements.tablaPasosBody.appendChild(fila);
-        if(paso.departurePassthroughStepSides?.supressed){
+        if (paso.departurePassthroughStepSides?.supressed) {
             fila.classList.add('estado-sup');
             fila.cells[6].textContent = '';
             fila.cells[7].textContent = '';
@@ -300,16 +236,24 @@ function renderizarTablaPasos(path) {
             fila.cells[3].textContent = '';
             fila.cells[4].textContent = '';
         }
+        if (viaInfo.estado === "SITRA" && !estadoPaso.clase) {
+            fila.classList.add('estado-sitra');
+        }
     });
-    
+
     if (estadoCirculacion === 'PENDIENTE DE CIRCULAR') {
         ajustarFilasParaEstado();
     }
 
-    if (fechaConcreta){
+    if (fechaConcreta) {
         irAFechaConcreta(fechaConcreta);
         fechaConcreta = null;
     }
+
+    //PARA QUE SE DIVIDAN LAS BARRAS
+    document.querySelectorAll('.dividirBarra').forEach(el => {
+        el.innerHTML = el.textContent.replace(/([\/\-])/g, '$1\u200B');
+    });
 }
 
 function obtenerVia(salida, llegada) {
@@ -328,16 +272,217 @@ function obtenerVia(salida, llegada) {
         (['PLANNED', 'RELIABLE_PLANNED'].includes(salida?.resultantPlatform) || !salida?.resultantPlatform) &&
         (['PLANNED', 'RELIABLE_PLANNED'].includes(llegada?.resultantPlatform) || !llegada?.resultantPlatform)
     ) {
-        return { 
-            plataforma: salida?.plannedPlatform || llegada?.plannedPlatform || '', 
-            estado: salida?.resultantPlatform || llegada?.resultantPlatform || '' 
+        return {
+            plataforma: salida?.plannedPlatform || llegada?.plannedPlatform || '',
+            estado: salida?.resultantPlatform || llegada?.resultantPlatform || ''
         };
     }
     // Si solo uno es PLANNED/RELIABLE_PLANNED y el otro es null, mostrar plannedPlatform
-    return { 
-        plataforma: salida?.plannedPlatform || llegada?.plannedPlatform || '', 
-        estado: salida?.resultantPlatform || llegada?.resultantPlatform || '' 
+    return {
+        plataforma: salida?.plannedPlatform || llegada?.plannedPlatform || '',
+        estado: salida?.resultantPlatform || llegada?.resultantPlatform || ''
     };
+}
+
+export function descargarMarchaXLSX() {
+    const trenes = getTrenes();
+    const trenActual = getTrenActual();
+    const tren = trenes[trenActual];
+
+    if (!tren) {
+        alert("No hay datos de marcha para descargar.");
+        return;
+    }
+
+    const estaciones = getEstaciones();
+    const numeroTren = tren.commercialPathInfo.commercialPathKey.commercialCirculationKey.commercialNumber;
+
+    const cabeceras = [
+        "Estacion", "Tipo Parada", "Llegada Planificada", "Llegada Real",
+        "Retraso Llegada (s)", "Salida Planificada", "Salida Real",
+        "Retraso Salida (s)", "Via", "Info Via", "E/S"
+    ];
+
+    const filas = tren.passthroughSteps.map(paso => {
+        const llegada = paso.arrivalPassthroughStepSides;
+        const salida = paso.departurePassthroughStepSides;
+        const viaInfo = obtenerVia(salida, llegada);
+        const nombreEstacion = estaciones[paso.stationCode.replace(/^0+/, '')] || paso.stationCode;
+        const estadoPaso = getEstadoPaso(llegada, salida);
+
+        return [
+            nombreEstacion,
+            traducirParada(paso.stopType),
+            llegada ? formatearTimestampHora(llegada.plannedTime) : '',
+            llegada ? calcularHoraReal(formatearTimestampHora(llegada.plannedTime), llegada.forecastedOrAuditedDelay) : '',
+            llegada ? formatoRetraso(llegada.forecastedOrAuditedDelay) || '0' : '',
+            salida ? formatearTimestampHora(salida.plannedTime) : '',
+            salida ? calcularHoraReal(formatearTimestampHora(salida.plannedTime), salida.forecastedOrAuditedDelay) : '',
+            salida ? formatoRetraso(salida.forecastedOrAuditedDelay) || '0' : '',
+            viaInfo.plataforma,
+            traducirVia(viaInfo.estado) || '',
+            estadoPaso.texto || ''
+        ];
+    });
+
+    // Crear hoja de trabajo (workbook) y hoja (worksheet)
+    const ws_data = [cabeceras, ...filas];
+    const ws = XLSX.utils.aoa_to_sheet(ws_data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Marcha del Tren");
+
+    // Ajustar el ancho de las columnas
+    const wscols = [
+        { wch: 30 }, // Estacion
+        { wch: 15 }, // Tipo Parada
+        { wch: 20 }, // Llegada Planificada
+        { wch: 15 }, // Llegada Real
+        { wch: 20 }, // Retraso Llegada (s)
+        { wch: 20 }, // Salida Planificada
+        { wch: 15 }, // Salida Real
+        { wch: 20 }, // Retraso Salida (s)
+        { wch: 5 },  // Via
+        { wch: 25 }, // Info Via
+        { wch: 10 }  // Estado
+    ];
+    ws['!cols'] = wscols;
+
+    // Guardar archivo
+    XLSX.writeFile(wb, `marcha_tren_${numeroTren}.xlsx`);
+}
+
+export function descargarMarchaPDF() {
+    const trenes = getTrenes();
+    const trenActual = getTrenActual();
+    const tren = trenes[trenActual];
+
+    if (!tren) {
+        alert("No hay datos de marcha para descargar.");
+        return;
+    }
+
+    const estaciones = getEstaciones();
+    const numeroTren = tren.commercialPathInfo.commercialPathKey.commercialCirculationKey.commercialNumber;
+    const fechaTren = formatearTimestampFecha(tren.commercialPathInfo.commercialPathKey.commercialCirculationKey.launchingDate);
+
+    // Extraer datos para columnas
+    const info = tren.commercialPathInfo;
+    const { ultimaEstacion, esUltimaEstacion, retUltimaEstacion, estadoUltimaEstacion } = getUltimaSituacion(tren.passthroughSteps);
+    const estadoTraducido = traducirEstado(estadoUltimaEstacion);
+    const claseEstado = estadoTraducido;
+    const nombreUltimaEstacion = estaciones[ultimaEstacion?.replace(/^0+/, '')] || ultimaEstacion;
+
+    // Columnas
+    const col1 = [
+        { label: "Número", value: info.commercialPathKey.commercialCirculationKey.commercialNumber },
+        { label: "Fecha", value: formatearTimestampFecha(info.commercialPathKey.commercialCirculationKey.launchingDate) },
+        { label: "Origen", value: estaciones[info.commercialPathKey.originStationCode.replace(/^0+/, '')] || info.commercialPathKey.commercialCirculationKey.originStationCode },
+        { label: "Destino", value: estaciones[info.commercialPathKey.destinationStationCode.replace(/^0+/, '')] || info.commercialPathKey.commercialCirculationKey.destinationStationCode }
+    ];
+    const col2 = [
+        { label: "Tipo", value: info.trafficType },
+        { label: "Operador", value: (info.opeProComPro?.operator || '') + (traducirOperador(info.opeProComPro?.operator) ? ' - ' + traducirOperador(info.opeProComPro?.operator) : '') },
+        { label: "Producto", value: (info.opeProComPro?.product || '') + (info.opeProComPro?.commercialProduct?.trim() ? ' - ' : '') + (info.opeProComPro?.commercialProduct?.trim() || '') },
+        ...(info?.line ? [{ label: "Línea/Núcleo", value: `${info.line} - ${info.core}` }] : [])
+    ];
+    const col3 = [
+        { label: "Estado", value: estadoTraducido },
+        ...(nombreUltimaEstacion ? [{ label: "Última situación", value: nombreUltimaEstacion + (esUltimaEstacion ? ` (${esUltimaEstacion})` : '') }] : []),
+        ...(nombreUltimaEstacion ? [{ label: "Retraso", value: formatoRetraso(retUltimaEstacion) }] : [])
+    ];
+    const colObs = info?.observation ? [{ label: "Observaciones", value: info.observation }] : [];
+
+    // Crear PDF usando jsPDF
+    const doc = new window.jspdf.jsPDF({ orientation: 'landscape' });
+    doc.setFontSize(16);
+    doc.text(`Marcha del Tren ${numeroTren} para el ${fechaTren}`, 14, 18);
+    doc.setFontSize(13);
+    doc.text(`(actualizado ${new Date().toLocaleString()})`, 14, 25);
+
+    // Imprimir columnas
+    doc.setFontSize(11);
+    let y = 35;
+    const x1 = 14, x2 = 110, x3 = 200;
+    let yActual = y;
+    col1.forEach((item, i) => {
+        if (item.label) {
+            doc.text(`${item.label}:`, x1, yActual);
+            let opciones = {};
+            if (item.label === "Origen" || item.label === "Destino") {
+                opciones = { maxWidth: 60 };
+            }
+            doc.text(String(item.value), x1 + 18, yActual, opciones);
+
+            // Si es Origen o Destino, calcular altura ocupada y sumar a yActual
+            if (item.label === "Origen" || item.label === "Destino") {
+                const dims = doc.getTextDimensions(String(item.value), opciones);
+                yActual += Math.max(7, dims.h); // 7 es el salto normal, dims.h es la altura real
+            } else {
+                yActual += 7;
+            }
+        } else {
+            doc.text(" ", x1, yActual);
+            yActual += 7;
+        }
+    });
+    col2.forEach((item, i) => {
+        doc.text(`${item.label}:`, x2, y + i * 7);
+        doc.text(String(item.value), x2 + 28, y + i * 7);
+    });
+    col3.forEach((item, i) => {
+        doc.text(`${item.label}:`, x3, y + i * 7);
+        doc.text(String(item.value), x3 + 32, y + i * 7);
+    });
+    if (colObs.length) {
+        doc.text(`${colObs[0].label}:`, x1, y + 30);
+        doc.text(String(colObs[0].value), x1 + 30, y + 30, { maxWidth: 250 });
+    }
+
+    // Añadir tabla (usando autoTable)
+    const cabeceras = [
+        "Estación", "Tipo Parada", "Llegada Planificada", "Llegada Real",
+        "Retraso Llegada", "Salida Planificada", "Salida Real",
+        "Retraso Salida", "Vía", "Info Vía", "E/S"
+    ];
+    const filas = tren.passthroughSteps.map(paso => {
+        const llegada = paso.arrivalPassthroughStepSides;
+        const salida = paso.departurePassthroughStepSides;
+        const viaInfo = obtenerVia(salida, llegada);
+        const nombreEstacion = estaciones[paso.stationCode.replace(/^0+/, '')] || paso.stationCode;
+        const estadoPaso = getEstadoPaso(llegada, salida);
+
+        return [
+            nombreEstacion,
+            traducirParada(paso.stopType) === "↓" ? "" : traducirParada(paso.stopType),
+            llegada ? formatearTimestampHora(llegada.plannedTime) : '',
+            llegada ? calcularHoraReal(formatearTimestampHora(llegada.plannedTime), llegada.forecastedOrAuditedDelay) : '',
+            llegada ? formatoRetraso(llegada.forecastedOrAuditedDelay) || '0' : '',
+            salida ? formatearTimestampHora(salida.plannedTime) : '',
+            salida ? calcularHoraReal(formatearTimestampHora(salida.plannedTime), salida.forecastedOrAuditedDelay) : '',
+            salida ? formatoRetraso(salida.forecastedOrAuditedDelay) || '0' : '',
+            viaInfo.plataforma,
+            traducirVia(viaInfo.estado) || '',
+            estadoPaso.texto || ''
+        ];
+    });
+
+    doc.autoTable({
+        head: [cabeceras],
+        body: filas,
+        startY: y + 40,
+        styles: { fontSize: 10 },
+        headStyles: {
+            fillColor: '#1A3254',
+            textColor: '#afc1d9',
+            fontStyle: 'bold',
+            halign: 'left',
+            valign: 'middle',
+        }
+    });
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+
+    doc.save(`marcha_tren_${numeroTren}.pdf`);
 }
 
 // --- NAVEGACIÓN ENTRE TRENES ---
@@ -424,7 +569,7 @@ function ajustarFilasParaEstado() {
 
 // FUNCIONES ESTACIÓN
 
-export function finCargarMas(){
+export function finCargarMas() {
     uiElements.cargarMas.classList.add("hidden");
 }
 
@@ -478,7 +623,7 @@ export function autocompletarEstaciones() {
 
     // Si el input es numérico, buscar también por código
     const esNumerico = /^\d{1,5}$/.test(estacionInput);
-    const esAlfaNumerico = /^[BCZbcz]\d{1,4}$/.test(estacionInput);
+    const esAlfaNumerico = /^[ABCZabcz]\d{1,4}$/.test(estacionInput);
 
     const coincidencias = estacionesArray.filter(([codigo, nombre]) => {
         const nombreLower = nombre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -537,7 +682,7 @@ export function mostrarEstacion(tipo) {
             uiElements.tablaPanelBody.innerHTML = "";
             renderizarPanel(trenes);
             uiElements.resultadoEstacionDiv.classList.remove("hidden");
-            document.getElementById("salidasLlegadasHeader").textContent = "Próximas "+getTipoPanel()+":";
+            document.getElementById("salidasLlegadasHeader").textContent = "Próximas " + getTipoPanel() + ":";
         } else if (tipo === "teleindicador") {
             renderizarPanelTeleindicador(trenes);
         }
@@ -564,6 +709,7 @@ function renderizarPanel(trenes) {
     //document.getElementById("infoEstacion").innerHTML = ``;
 
     trenes.forEach(tren => {
+        const numeroTren = tren.commercialPathInfo.commercialPathKey.commercialCirculationKey.commercialNumber || '';
         const paso = tren.passthroughStep.departurePassthroughStepSides || tren.passthroughStep.arrivalPassthroughStepSides;
         const timestampReal = getTimestampReal(paso);
         const fecha = timestampReal ? new Date(timestampReal) : null;
@@ -602,19 +748,18 @@ function renderizarPanel(trenes) {
         let celdaDestinoOrigen = '';
         if (getTipoPanel() === 'salidas') {
             celdaDestinoOrigen = `
-                <span>${destino}</span>
+                <span class="noDividir">${destino}</span>
                 <br>
                 <span class="origen-difuminado">ORIGEN: ${origen}</span>
             `;
         } else {
             celdaDestinoOrigen = `
-                <span>${origen}</span>
+                <span class="noDividir">${origen}</span>
                 <br>
                 <span class="origen-difuminado">DESTINO: ${destino}</span>
             `;
         }
 
-        const numeroTren = tren.commercialPathInfo.commercialPathKey.commercialCirculationKey.commercialNumber || '';
         const fechaInicio = tren.commercialPathInfo.commercialPathKey.commercialCirculationKey.launchingDate || '';
 
         fila.innerHTML = `
@@ -634,23 +779,23 @@ function renderizarPanel(trenes) {
             </span>
         </td>
         <td>
-            ${tren.commercialPathInfo.opeProComPro?.operator || ''}
-            ${
-                traducirOperador(tren.commercialPathInfo.opeProComPro?.operator)
-                    ? ' - ' + traducirOperador(tren.commercialPathInfo.opeProComPro?.operator)
-                    : ''
+            <span class="noDividir">
+                ${tren.commercialPathInfo.opeProComPro?.operator || ''}
+                ${traducirOperador(tren.commercialPathInfo.opeProComPro?.operator)
+                ? ' - ' + traducirOperador(tren.commercialPathInfo.opeProComPro?.operator)
+                : ''
             }
+            </span>
             <br>
             <span class="origen-difuminado">
                 ${tren.commercialPathInfo.opeProComPro?.product || ''}
-                ${
-                    tren.commercialPathInfo.opeProComPro?.commercialProduct.trim()
-                        ? ' - ' + tren.commercialPathInfo.opeProComPro?.commercialProduct
-                        : ''
-                }
+                ${tren.commercialPathInfo.opeProComPro?.commercialProduct.trim()
+                ? ' - ' + tren.commercialPathInfo.opeProComPro?.commercialProduct
+                : ''
+            }
             </span>
         </td>
-        <td>${obtenerVia(paso,paso).plataforma || ''}</td>
+        <td>${obtenerVia(paso, paso).plataforma || ''}</td>
         <td><span class="${claseEstado}">${estadoTraducido || ''}</span></td>
         <td>${traducirParada(tren.passthroughStep.stopType)}</td>
         `;
@@ -672,19 +817,256 @@ function ajustarFilasParaEstadoEstacion() {
         const fila = filas[i];
         const estadoCirculacion = fila.cells[6]?.textContent.trim()
         if (estadoCirculacion === 'SUPRIMIDO') fila.classList.add('estado-sup');
-        else if (estadoCirculacion === 'PENDIENTE DE CIRCULAR'){
+        else if (estadoCirculacion === 'PENDIENTE DE CIRCULAR') {
             fila.classList.add('estado-pend');
         }
-        else if (estadoCirculacion === 'SEGUIMIENTO PERDIDO'){
+        else if (estadoCirculacion === 'SEGUIMIENTO PERDIDO' || estadoCirculacion === 'DESCONOCIDO') {
             fila.classList.add('estado-segPerd');
         }
-        else if (estadoCirculacion === 'DETENIDO'){
+        else if (estadoCirculacion === 'DETENIDO') {
             fila.classList.add('estado-det');
         }
-        if (estadoCirculacion === 'SUPRIMIDO' || estadoCirculacion === 'PENDIENTE DE CIRCULAR'){
+        if (estadoCirculacion === 'SUPRIMIDO' || estadoCirculacion === 'PENDIENTE DE CIRCULAR') {
             fila.cells[1].textContent = '';
         }
     }
+}
+
+export function descargarPanelXLSX() {
+    const trenes = getProximosTrenes();
+    if (!trenes || trenes.length === 0) {
+        alert("No hay datos de salidas para descargar.");
+        return;
+    }
+    const estaciones = getEstaciones();
+    const tipoPanel = getTipoPanel(); // "salidas" o "llegadas"
+    const nombreEstacion = (() => {
+        const paso = trenes[0]?.passthroughStep;
+        if (!paso) return "";
+        const codigo = paso.stationCode;
+        return estaciones[codigo?.replace(/^0+/, '')] || codigo || "";
+    })();
+
+    // Cabeceras de la tabla
+    const cabeceras = [
+        "Hora", "Retraso", tipoPanel === "salidas" ? "Destino" : "Origen",
+        "Nº Tren", "Operador", "Vía", "Estado", "Tipo Parada"
+    ];
+
+    // Ordenar trenes por fecha real
+    trenes.sort((a, b) => {
+        const pasoA = a.passthroughStep.departurePassthroughStepSides || a.passthroughStep.arrivalPassthroughStepSides;
+        const pasoB = b.passthroughStep.departurePassthroughStepSides || b.passthroughStep.arrivalPassthroughStepSides;
+        return getTimestampReal(pasoA) - getTimestampReal(pasoB);
+    });
+
+    // Fecha de hoy a las 00:00:00
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+
+    let filas = [];
+    let lastDate = null;
+
+    trenes.forEach(tren => {
+        const paso = tren.passthroughStep.departurePassthroughStepSides || tren.passthroughStep.arrivalPassthroughStepSides;
+        const timestampReal = getTimestampReal(paso);
+        const fecha = timestampReal ? new Date(timestampReal) : null;
+
+        if (fecha) {
+            fecha.setHours(0, 0, 0, 0);
+            // Si la fecha es distinta a la anterior y no es hoy, añade separador
+            if ((!lastDate || fecha.getTime() !== lastDate.getTime()) && fecha.getTime() !== hoy.getTime()) {
+                filas.push([
+                    `Trenes para el ${fecha.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })}:`,
+                    '', '', '', '', '', '', ''
+                ]);
+                lastDate = fecha;
+            }
+        }
+
+        const estadoTraducido = traducirEstado(paso.circulationState);
+        const horaPlanificada = formatearTimestampHora(paso.plannedTime);
+        const horaReal = calcularHoraReal(horaPlanificada, paso.forecastedOrAuditedDelay);
+        const mostrarHoraReal = (
+            estadoTraducido !== 'SUPRIMIDO' &&
+            estadoTraducido !== 'PENDIENTE DE CIRCULAR' &&
+            horaReal
+        );
+        const origen = estaciones[tren.commercialPathInfo.commercialPathKey.originStationCode.replace(/^0+/, '')] || tren.commercialPathInfo.commercialPathKey.originStationCode;
+        const destino = estaciones[tren.commercialPathInfo.commercialPathKey.destinationStationCode.replace(/^0+/, '')] || tren.commercialPathInfo.commercialPathKey.destinationStationCode;
+        const numeroTren = tren.commercialPathInfo.commercialPathKey.commercialCirculationKey.commercialNumber || '';
+        const operador = (tren.commercialPathInfo.opeProComPro?.operator || '') +
+            (traducirOperador(tren.commercialPathInfo.opeProComPro?.operator)
+                ? ' - ' + traducirOperador(tren.commercialPathInfo.opeProComPro?.operator)
+                : '');
+        const producto = (tren.commercialPathInfo.opeProComPro?.product || '') +
+            (tren.commercialPathInfo.opeProComPro?.commercialProduct?.trim()
+                ? ' - ' + tren.commercialPathInfo.opeProComPro?.commercialProduct
+                : '');
+        const via = obtenerVia(paso, paso).plataforma || '';
+        const tipoParada = traducirParada(tren.passthroughStep.stopType) === "↓" ? "" : traducirParada(tren.passthroughStep.stopType);
+
+        filas.push([
+            horaPlanificada + (mostrarHoraReal ? ` (${horaReal})` : ''),
+            mostrarHoraReal ? formatoRetraso(paso.forecastedOrAuditedDelay) : '',
+            tipoPanel === "salidas" ? destino : origen,
+            numeroTren,
+            operador + (producto ? `\n${producto}` : ''),
+            via,
+            estadoTraducido,
+            tipoParada
+        ]);
+    });
+
+    // Crear hoja de trabajo (workbook) y hoja (worksheet)
+    const ws_data = [cabeceras, ...filas];
+    const ws = XLSX.utils.aoa_to_sheet(ws_data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Panel");
+
+    // Ajustar el ancho de las columnas
+    const wscols = [
+        { wch: 15 }, // Hora
+        { wch: 12 }, // Retraso
+        { wch: 30 }, // Destino/Origen
+        { wch: 10 }, // Nº Tren
+        { wch: 30 }, // Operador
+        { wch: 6 },  // Vía
+        { wch: 18 }, // Estado
+        { wch: 15 }  // Tipo Parada
+    ];
+    ws['!cols'] = wscols;
+
+    // Guardar archivo
+    XLSX.writeFile(wb, `panel_${tipoPanel}_${nombreEstacion.replace(/\s+/g, "_")}.xlsx`);
+}
+
+export function descargarPanelPDF() {
+    const trenes = getProximosTrenes();
+    if (!trenes || trenes.length === 0) {
+        alert("No hay datos de salidas para descargar.");
+        return;
+    }
+    const estaciones = getEstaciones();
+    const tipoPanel = getTipoPanel(); // "salidas" o "llegadas"
+    const nombreEstacion = (() => {
+        const paso = trenes[0]?.passthroughStep;
+        if (!paso) return "";
+        const codigo = paso.stationCode;
+        return estaciones[codigo?.replace(/^0+/, '')] || codigo || "";
+    })();
+
+    // Cabeceras de la tabla
+    const cabeceras = [
+        "Hora", "Retraso", tipoPanel === "salidas" ? "Destino" : "Origen",
+        "Nº Tren", "Operador", "Vía", "Estado", "Tipo Parada"
+    ];
+
+    // Ordenar trenes por fecha real
+    trenes.sort((a, b) => {
+        const pasoA = a.passthroughStep.departurePassthroughStepSides || a.passthroughStep.arrivalPassthroughStepSides;
+        const pasoB = b.passthroughStep.departurePassthroughStepSides || b.passthroughStep.arrivalPassthroughStepSides;
+        return getTimestampReal(pasoA) - getTimestampReal(pasoB);
+    });
+
+    // Fecha de hoy a las 00:00:00
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+
+    let filas = [];
+    let lastDate = null;
+
+    trenes.forEach(tren => {
+        const paso = tren.passthroughStep.departurePassthroughStepSides || tren.passthroughStep.arrivalPassthroughStepSides;
+        const timestampReal = getTimestampReal(paso);
+        const fecha = timestampReal ? new Date(timestampReal) : null;
+
+        if (fecha) {
+            fecha.setHours(0, 0, 0, 0);
+            // Si la fecha es distinta a la anterior y no es hoy, añade separador
+            if ((!lastDate || fecha.getTime() !== lastDate.getTime()) && fecha.getTime() !== hoy.getTime()) {
+                filas.push([
+                    `Trenes para el ${fecha.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })}:`,
+                    '', '', '', '', '', '', ''
+                ]);
+                lastDate = fecha;
+            }
+        }
+
+        const estadoTraducido = traducirEstado(paso.circulationState);
+        const horaPlanificada = formatearTimestampHora(paso.plannedTime);
+        const horaReal = calcularHoraReal(horaPlanificada, paso.forecastedOrAuditedDelay);
+        const mostrarHoraReal = (
+            estadoTraducido !== 'SUPRIMIDO' &&
+            estadoTraducido !== 'PENDIENTE DE CIRCULAR' &&
+            horaReal
+        );
+        const origen = estaciones[tren.commercialPathInfo.commercialPathKey.originStationCode.replace(/^0+/, '')] || tren.commercialPathInfo.commercialPathKey.originStationCode;
+        const destino = estaciones[tren.commercialPathInfo.commercialPathKey.destinationStationCode.replace(/^0+/, '')] || tren.commercialPathInfo.commercialPathKey.destinationStationCode;
+        const numeroTren = tren.commercialPathInfo.commercialPathKey.commercialCirculationKey.commercialNumber || '';
+        const operador = (tren.commercialPathInfo.opeProComPro?.operator || '') +
+            (traducirOperador(tren.commercialPathInfo.opeProComPro?.operator)
+                ? ' - ' + traducirOperador(tren.commercialPathInfo.opeProComPro?.operator)
+                : '');
+        const producto = (tren.commercialPathInfo.opeProComPro?.product || '') +
+            (tren.commercialPathInfo.opeProComPro?.commercialProduct?.trim()
+                ? ' - ' + tren.commercialPathInfo.opeProComPro?.commercialProduct
+                : '');
+        const via = obtenerVia(paso, paso).plataforma || '';
+        const tipoParada = traducirParada(tren.passthroughStep.stopType) === "↓" ? "" : traducirParada(tren.passthroughStep.stopType);
+
+        filas.push([
+            horaPlanificada + (mostrarHoraReal ? ` (${horaReal})` : ''),
+            mostrarHoraReal ? formatoRetraso(paso.forecastedOrAuditedDelay) : '',
+            tipoPanel === "salidas" ? destino : origen,
+            numeroTren,
+            operador + (producto ? `\n${producto}` : ''),
+            via,
+            estadoTraducido,
+            tipoParada
+        ]);
+    });
+
+    // Crear PDF usando jsPDF
+    const doc = new window.jspdf.jsPDF({ orientation: 'landscape' });
+    doc.setFontSize(16);
+    doc.text(
+        `${tipoPanel === "salidas" ? "Salidas" : "Llegadas"} - ${nombreEstacion}`,
+        14, 18
+    );
+    doc.setFontSize(13);
+    doc.text(`(actualizado ${new Date().toLocaleString()})`, 14, 25);
+
+    // Añadir tabla (usando autoTable)
+    doc.autoTable({
+        head: [cabeceras],
+        body: filas,
+        startY: 35,
+        styles: { fontSize: 10 },
+        headStyles: {
+            fillColor: '#1A3254',
+            textColor: '#afc1d9',
+            fontStyle: 'bold',
+            halign: 'left',
+            valign: 'middle',
+        },
+        // Estilo especial para filas de separador
+        didParseCell: function (data) {
+            if (
+                data.row.raw &&
+                typeof data.row.raw[0] === "string" &&
+                data.row.raw[0].startsWith("Trenes para el")
+            ) {
+                data.cell.styles.fontStyle = 'bold';
+                data.cell.styles.fillColor = [220, 230, 240];
+                data.cell.styles.textColor = [30, 50, 84];
+                data.cell.colSpan = 8;
+                if (data.column.index > 0) data.cell.text = '';
+            }
+        }
+    });
+
+    doc.save(`${tipoPanel}_${nombreEstacion.replace(/\s+/g, "_")}.pdf`);
 }
 
 function buscarTrenClick(numero, fecha) {
@@ -703,7 +1085,6 @@ function buscarTrenClick(numero, fecha) {
     buscarTren();
 }
 window.buscarTrenClick = buscarTrenClick;
-
 function buscarEstacionClick(codigo, nombre) {
     document.getElementById("estacionesButton").click();
     const inputEst = document.getElementById("numeroEst");
@@ -715,7 +1096,7 @@ function buscarEstacionClick(codigo, nombre) {
 }
 window.buscarEstacionClick = buscarEstacionClick;
 
-// FAVORITOS
+// FAVORITOS ESTACION
 function getFavoritosEstaciones() {
     return JSON.parse(localStorage.getItem('favoritosEstaciones') || '[]');
 }
@@ -736,56 +1117,93 @@ export function toggleFavoritoEstacion(codigo) {
 }
 
 export function mostrarFavoritoEstrella() {
-  const estacionInput = document.getElementById("numeroEst");
-  const estrella = document.getElementById("estrellaFavoritoEst");
-  const estaciones = getEstaciones();
-  let codigo = null;
-  const inputNorm = estacionInput.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/-/g, " ").replace(/\s+/g, " ").trim();
+    const estacionInput = document.getElementById("numeroEst");
+    const estrella = document.getElementById("estrellaFavoritoEst");
+    const estaciones = getEstaciones();
+    let codigo = null;
+    const inputNorm = estacionInput.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/-/g, " ").replace(/\s+/g, " ").trim();
 
-  // Si el input es numérico, buscar por código también
-  const esNumerico = /^\d+$/.test(estacionInput.value.trim());
+    // Si el input es numérico, buscar por código también
+    const esNumerico = /^\d+$/.test(estacionInput.value.trim());
 
-  for (const [cod, nombre] of Object.entries(estaciones)) {
-    const nombreNorm = nombre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/-/g, " ").replace(/\s+/g, " ").trim();
+    for (const [cod, nombre] of Object.entries(estaciones)) {
+        const nombreNorm = nombre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/-/g, " ").replace(/\s+/g, " ").trim();
 
-    // Coincidencia por nombre normalizado
-    if (nombreNorm === inputNorm) {
-      codigo = cod;
-      break;
+        // Coincidencia por nombre normalizado
+        if (nombreNorm === inputNorm) {
+            codigo = cod;
+            break;
+        }
+
+        // Coincidencia por código (rellenado a 5 dígitos)
+        if (esNumerico && (cod === estacionInput.value.trim() || cod.padStart(5, '0') === estacionInput.value.trim())) {
+            codigo = cod;
+            break;
+        }
     }
 
-    // Coincidencia por código (rellenado a 5 dígitos)
-    if (esNumerico && (cod === estacionInput.value.trim() || cod.padStart(5, '0') === estacionInput.value.trim())) {
-      codigo = cod;
-      break;
+    if (!codigo) {
+        estrella.classList.remove('favorito-activo');
+        return;
     }
-  }
-
-  if (!codigo) {
-    estrella.classList.remove('favorito-activo');
-    return;
-  }
-  const favs = getFavoritosEstaciones();
-  if (favs.includes(codigo)) {
-    estrella.classList.add('favorito-activo');
-  } else {
-    estrella.classList.remove('favorito-activo');
-  }
+    const favs = getFavoritosEstaciones();
+    if (favs.includes(codigo)) {
+        estrella.classList.add('favorito-activo');
+    } else {
+        estrella.classList.remove('favorito-activo');
+    }
 }
 
 // FAVORITOS TRENES
+function normalizarOrigenDestino(origenDestino) {
+    const regex = /^(.+?) - (.+?)(&nbsp;){8}/;
+    const match = origenDestino.match(regex);
+    if (match) {
+        return origenDestino.slice(0, match[0].length);
+    }
+    const partes = origenDestino.split(' - ');
+    if (partes.length >= 2) {
+        return `${partes[0]} - ${partes[1]}${'&nbsp;'.repeat(8)}`;
+    }
+    return '';
+}
 function getFavoritosTrenes() {
     return JSON.parse(localStorage.getItem('favoritosTrenes') || '[]');
 }
 function setFavoritosTrenes(favs) {
     localStorage.setItem('favoritosTrenes', JSON.stringify(favs));
 }
-export function toggleFavoritoTren(numero) {
+export function toggleFavoritoTren(numero, origenDestino) {
     let favs = getFavoritosTrenes();
-    if (favs.includes(numero)) {
-        favs = favs.filter(n => n !== numero);
+    // Buscar si existe el favorito en cualquier formato
+    const idx = favs.findIndex(f => {
+        if (typeof f === 'object' && f !== null) {
+            return f.numero === numero;
+        }
+        return f === numero || f === Number(numero);
+    });
+
+    if (idx !== -1) {
+        // Si es objeto y falta origenDestino, actualizarlo
+        if (typeof favs[idx] === 'object' && favs[idx] !== null) {
+            if (!favs[idx].origenDestino && origenDestino) {
+                favs[idx].origenDestino = origenDestino;
+                setFavoritosTrenes(favs);
+                mostrarFavoritoEstrellaTren();
+                return;
+            }
+        }
+        // Si es solo número, actualizar al nuevo formato
+        if (typeof favs[idx] !== 'object') {
+            favs[idx] = { numero, origenDestino };
+            setFavoritosTrenes(favs);
+            mostrarFavoritoEstrellaTren();
+            return;
+        }
+        // Si ya existe y tiene origenDestino, quitar de favoritos
+        favs.splice(idx, 1);
     } else {
-        favs.push(numero);
+        favs.push({ numero, origenDestino });
     }
     setFavoritosTrenes(favs);
     mostrarFavoritoEstrellaTren();
@@ -795,7 +1213,7 @@ export function mostrarFavoritoEstrellaTren() {
     const estrella = document.getElementById("estrellaFavoritoNumero");
     const numero = input.value.trim();
     const favs = getFavoritosTrenes();
-    if (favs.includes(numero)) {
+    if (favs.some(f => f.numero === numero)) {
         estrella.classList.add('favorito-activo');
     } else {
         estrella.classList.remove('favorito-activo');
@@ -806,29 +1224,84 @@ export function mostrarFavoritosTren() {
     const favoritosDiv = document.getElementById("favoritos");
     favoritosDiv.innerHTML = '';
 
+    // Obtener trenes cargados para buscar origen/destino
+    const trenes = getTrenes();
+    const estaciones = getEstaciones();
+
     if (input.value.trim().length < 2) {
         const favs = getFavoritosTrenes();
-        const titulo = document.createElement('div');
-        titulo.textContent = "Favoritos";
-        titulo.classList.add("sugerencias-titulo");
-        favoritosDiv.appendChild(titulo);
+        const recientes = getUltimosTrenesBuscados().filter(
+            obj => !favs.some(f => f.numero === obj.numero)
+        );
+        let hayContenido = false;
 
+        // Título y favoritos
         if (favs.length > 0) {
-            favs.forEach(numero => {
+            const titulo = document.createElement('div');
+            titulo.textContent = "Favoritos";
+            titulo.classList.add("sugerencias-titulo");
+            favoritosDiv.appendChild(titulo);
+
+            favs.forEach(obj => {
                 const item = document.createElement('div');
-                item.textContent = numero;
-                item.classList.add("sugerencia");
+                item.classList.add("sugerencia", "numtren-container");
+                item.innerHTML = `
+                    <span>${obj.numero || obj}</span>
+                    <span class="origenDestino"><span class="origenDestino-texto">${normalizarOrigenDestino(obj.origenDestino).repeat(4) || ''}</span></span>
+                `;
                 item.addEventListener('click', () => {
-                    input.value = numero;
+                    input.value = obj.numero || obj;
                     favoritosDiv.innerHTML = '';
                     mostrarFavoritoEstrellaTren();
-                    // Mostrar la X y la estrella aunque se pierda el foco
                     document.getElementById('clearNumeroTren').classList.add('visible');
                     document.getElementById('estrellaFavoritoNumero').classList.add('visible');
                     input.classList.add('input-con-x');
                 });
                 favoritosDiv.appendChild(item);
+                const origenDestinoSpan = item.querySelector('.origenDestino-texto');
+                const origenDestinoCont = item.querySelector('.origenDestino');
+                if (origenDestinoSpan && origenDestinoCont &&
+                    origenDestinoSpan.scrollWidth > origenDestinoCont.clientWidth) {
+                    origenDestinoSpan.classList.add('desplazamiento-derecha');
+                }
             });
+            hayContenido = true;
+        }
+
+        // Título y recientes (solo si hay recientes)
+        if (recientes.length > 0) {
+            const tituloRecientes = document.createElement('div');
+            tituloRecientes.textContent = "Recientes";
+            tituloRecientes.classList.add("sugerencias-titulo");
+            favoritosDiv.appendChild(tituloRecientes);
+
+            recientes.forEach(obj => {
+                const item = document.createElement('div');
+                item.classList.add("sugerencia", "reciente", "numtren-container");
+                item.innerHTML = `
+                    <span>${obj.numero || obj}</span>
+                    <span class="origenDestino"><span class="origenDestino-texto">${normalizarOrigenDestino(obj.origenDestino).repeat(4) || ''}</span></span>
+                `;
+                item.addEventListener('click', () => {
+                    input.value = obj.numero || obj;
+                    favoritosDiv.innerHTML = '';
+                    mostrarFavoritoEstrellaTren();
+                    document.getElementById('clearNumeroTren').classList.add('visible');
+                    document.getElementById('estrellaFavoritoNumero').classList.add('visible');
+                    input.classList.add('input-con-x');
+                });
+                favoritosDiv.appendChild(item);
+                const origenDestinoSpan = item.querySelector('.origenDestino-texto');
+                const origenDestinoCont = item.querySelector('.origenDestino');
+                if (origenDestinoSpan && origenDestinoCont &&
+                    origenDestinoSpan.scrollWidth > origenDestinoCont.clientWidth) {
+                    origenDestinoSpan.classList.add('desplazamiento-derecha');
+                }
+            });
+            hayContenido = true;
+        }
+
+        if (hayContenido) {
             favoritosDiv.classList.add('visible');
         } else {
             favoritosDiv.classList.remove('visible');
@@ -838,14 +1311,25 @@ export function mostrarFavoritosTren() {
         favoritosDiv.innerHTML = '';
     }
 }
+function getUltimosTrenesBuscados() {
+    return JSON.parse(localStorage.getItem('ultimosTrenesBuscados') || '[]');
+}
+export function addTrenBuscado(numero, origenDestino) {
+    console.log(origenDestino);
+    if (!numero) return;
+    let ultimos = getUltimosTrenesBuscados();
+    ultimos = ultimos.filter(t => t.numero !== numero); // Eliminar si ya existe
+    ultimos.unshift({ numero, origenDestino }); // Añadir al principio
+    if (ultimos.length > 5) ultimos = ultimos.slice(0, 5);
+    localStorage.setItem('ultimosTrenesBuscados', JSON.stringify(ultimos));
+}
 
-// FUNCIONES GENERALES
+// --- FUNCIONES GENERALES ---
 
 function formatearTimestampFecha(ms) {
     if (!ms) return '';
     return new Date(ms).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
-
 function formatearTimestampHora(ms) {
     if (!ms) return '';
     return new Date(ms).toLocaleTimeString('es-ES');
@@ -862,7 +1346,7 @@ function calcularHoraReal(horaTeoricaStr, retrasoSegundos) {
     const [horas, minutos, segundos] = horaTeoricaStr.split(':').map(Number);
     let totalSegundos = horas * 3600 + minutos * 60 + segundos + retrasoSegundos;
     totalSegundos = ((totalSegundos % 86400) + 86400) % 86400; // Manejar días y negativos
-    
+
     const h = Math.floor(totalSegundos / 3600).toString().padStart(2, '0');
     const m = Math.floor((totalSegundos % 3600) / 60).toString().padStart(2, '0');
     const s = (totalSegundos % 60).toString().padStart(2, '0');
@@ -876,7 +1360,7 @@ function calcularHoraRealTele(horaTeoricaStr, retrasoSegundos) {
     if (segundos === undefined || isNaN(segundos)) segundos = 0;
     let totalSegundos = horas * 3600 + minutos * 60 + segundos + retrasoSegundos;
     totalSegundos = ((totalSegundos % 86400) + 86400) % 86400; // Manejar días y negativos
-    
+
     const h = Math.floor(totalSegundos / 3600).toString().padStart(2, '0');
     const m = Math.floor((totalSegundos % 3600) / 60).toString().padStart(2, '0');
     const s = (totalSegundos % 60).toString().padStart(2, '0');
@@ -890,7 +1374,7 @@ function formatoRetraso(segundosTotales) {
     const h = Math.floor(absSegundos / 3600);
     const m = Math.floor((absSegundos % 3600) / 60);
     const s = absSegundos % 60;
-    
+
     if (h > 0) return `${negativo}${h}h ${m}m ${s}s`;
     if (m > 0) return `${negativo}${m}m ${s}s`;
     return `${negativo}${s}s`;
@@ -909,14 +1393,14 @@ export function upperCamelCase(texto) {
     // Para tratar puntos, barras, guiones y apóstrofes como separadores pero sin añadir espacios
     let textoMod = texto.toLowerCase().replace(/-/g, ' - ');
     // Divide en palabras, pero también separa por puntos, barras, apóstrofes y espacios sin perderlos
-    let palabras = textoMod.split(/([./'\s]+)/).filter(Boolean);
+    let palabras = textoMod.split(/([./('\s]+)/).filter(Boolean);
     palabras = palabras.map((palabra, i) => {
         if (
             palabra === '-' ||
             palabra === '.' ||
             palabra === '/' ||
             palabra === "'" ||
-            palabra.match(/^\s+$/)
+            palabra === "("
         ) return palabra;
         if (excluir.includes(palabra.trim()) && i !== 0) {
             return palabra;
@@ -925,10 +1409,11 @@ export function upperCamelCase(texto) {
         if (
             i > 0 &&
             (
-                palabras[i-1] === '/' ||
-                palabras[i-1] === '.' ||
-                palabras[i-1] === '-' ||
-                palabras[i-1] === "'"
+                palabras[i - 1] === '/' ||
+                palabras[i - 1] === '.' ||
+                palabras[i - 1] === '-' ||
+                palabras[i - 1] === "'" ||
+                palabras[i - 1] === "("
             )
         ) {
             return palabra.charAt(0).toUpperCase() + palabra.slice(1);
@@ -940,6 +1425,7 @@ export function upperCamelCase(texto) {
         .replace(/\s*\.\s*/g, '.')
         .replace(/\s*-\s*/g, '-')
         .replace(/\s*\/\s*/g, '/')
+        .replace(/\s*\(\s*/g, ' (')
         .replace(/\s*'\s*/g, "'");
 }
 
@@ -972,9 +1458,8 @@ function traducirOperador(operador) {
     return operadores[operador] || '';
 }
 
-
 function obtenerRutaPictograma(linea, core, adif) {
-    const coreKey  = (core || "").toUpperCase();
+    const coreKey = (core || "").toUpperCase();
     const imgsNucleo = pictogramasCercanias[coreKey];
     if (linea && imgsNucleo && imgsNucleo[linea]) {
         return `img/pastillas/${imgsNucleo[linea]}`;
@@ -986,330 +1471,330 @@ function obtenerRutaPictograma(linea, core, adif) {
             return `img/pastillas/${imgsNucleo[prod]}`;
         }
         if (pictosPorProducto[prod]) {
-        return `img/pastillas/${pictosPorProducto[prod]}`;
+            return `img/pastillas/${pictosPorProducto[prod]}`;
         }
     }
 
     const numeroTren = adif?.commercialPathKey?.commercialCirculationKey?.commercialNumber;
     if (numeroTren && pictosPorNumero[numeroTren]) {
-      return `img/pastillas/${pictosPorNumero[numeroTren]}`;
+        return `img/pastillas/${pictosPorNumero[numeroTren]}`;
     }
 
     return null;
 }
 
 function obtenerRutaIconoADIF(adif) {
-  const { trafficType, opeProComPro = {} } = adif;
-  const regla = reglas[trafficType];
-  if (!regla) return '';  // sin regla: nada
+    const { trafficType, opeProComPro = {} } = adif;
+    const regla = reglas[trafficType?.toUpperCase()];
+    if (!regla) return '';  // sin regla: nada
 
-  // 1) operator si existe en la regla
-  if (regla.operator) {
-    const op = opeProComPro.operator;
-    if (op && regla.operator[op]) {
-      return `img/operadores/${regla.operator[op]}`;
+    // 1) turisticos y trenes concretos
+    const numeroTren = adif?.commercialPathKey?.commercialCirculationKey?.commercialNumber;
+    if (numeroTren && productoPorNumero[numeroTren]) {
+        return `img/operadores/${productoPorNumero[numeroTren]}`;
     }
-  }
 
-  // 2) Núcleo específico
-  if (regla.core) {
-    const core = adif.core;
-    if (core && regla.core[core] && !opeProComPro.commercialProduct.includes("RAM")) {
-      return `img/operadores/${regla.core[core]}`;
+    // 2) operator si existe en la regla
+    if (regla.operator) {
+        const op = opeProComPro.operator?.toUpperCase();
+        if (op && regla.operator[op]) {
+            return `img/operadores/${regla.operator[op]}`;
+        }
     }
-  }
 
-  // 3) commercialProduct si existe en la regla
-  if (regla.commercialProduct) {
-    const prod = opeProComPro.commercialProduct;
-    if (prod && regla.commercialProduct[prod]) {
-      return `img/operadores/${regla.commercialProduct[prod]}`;
+    // 3) Núcleo específico
+    if (regla.core) {
+        const core = adif.core?.toUpperCase();
+        if (core && regla.core[core] && !opeProComPro.commercialProduct.includes("RAM")) {
+            return `img/operadores/${regla.core[core]}`;
+        }
     }
-  }
 
-  // 4) turisticos y trenes concretos
-  const numeroTren = adif?.commercialPathKey?.commercialCirculationKey?.commercialNumber;
-  if (numeroTren && productoPorNumero[numeroTren]) {
-    return `img/operadores/${productoPorNumero[numeroTren]}`;
-  }
+    // 4) commercialProduct si existe en la regla
+    if (regla.commercialProduct) {
+        const prod = opeProComPro.commercialProduct?.toUpperCase();
+        if (prod && regla.commercialProduct[prod]) {
+            return `img/operadores/${regla.commercialProduct[prod]}`;
+        }
+    }
 
-  // 5) default de este trafficType, si lo hay
-  if (regla.default) {
-    return `img/operadores/${regla.default}`;
-  }
+    // 5) default de este trafficType, si lo hay
+    if (regla.default) {
+        return `img/operadores/${regla.default}`;
+    }
 
-  // 6) sin default: nada
-  return '';
+    // 6) sin default: nada
+    return '';
 }
 
 // TELEINDICADOR
 
 export function renderizarPanelTeleindicador(datos) {
-  datos = datos.slice(0, 25); //MOSTRAR SOLO PRIMEROS 25
+    datos = datos.slice(0, 25); //MOSTRAR SOLO PRIMEROS 25
 
-  const tbody             = document.getElementById("tablaTeleindicadorBody");
-  const estaciones        = getEstaciones();
-  const tipo              = getTipoPanel();
+    const tbody = document.getElementById("tablaTeleindicadorBody");
+    const estaciones = getEstaciones();
+    const tipo = getTipoPanel();
 
-  document.getElementById("tablaTeleindicador").classList.remove("hidden");
-  document.getElementById("btnFullScreenTele").classList.remove("hidden");
+    document.getElementById("tablaTeleindicador").classList.remove("hidden");
+    document.getElementById("btnFullScreenTele").classList.remove("hidden");
 
-  // Función auxiliar para obtener el timestamp real (planificado + retraso)
-  datos.sort((a, b) => {
-    // Determinamos si usamos los datos de llegada o salida para cada tren
-    const pasoA = tipo === 'llegadas'
-      ? a.passthroughStep?.arrivalPassthroughStepSides
-      : a.passthroughStep?.departurePassthroughStepSides;
-    
-    const pasoB = tipo === 'llegadas'
-      ? b.passthroughStep?.arrivalPassthroughStepSides
-      : b.passthroughStep?.departurePassthroughStepSides;
+    // Función auxiliar para obtener el timestamp real (planificado + retraso)
+    datos.sort((a, b) => {
+        // Determinamos si usamos los datos de llegada o salida para cada tren
+        const pasoA = tipo === 'llegadas'
 
-    // Usamos la función que ya existía
-    const timestampA = getTimestampReal(pasoA || {});
-    const timestampB = getTimestampReal(pasoB || {});
-    
-    return timestampA - timestampB;
-  });
+            ? a.passthroughStep?.arrivalPassthroughStepSides
+            : a.passthroughStep?.departurePassthroughStepSides;
 
-  if (!tbody) {
-    console.error("No se encontró el tbody de la tabla del teleindicador");
-    return;
-  }
+        const pasoB = tipo === 'llegadas'
+            ? b.passthroughStep?.arrivalPassthroughStepSides
+            : b.passthroughStep?.departurePassthroughStepSides;
 
-  tbody.innerHTML = "";
-  if (!Array.isArray(datos) || datos.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">No hay datos disponibles</td></tr>`;
-    return;
-  }
+        // Usamos la función que ya existía
+        const timestampA = getTimestampReal(pasoA || {});
+        const timestampB = getTimestampReal(pasoB || {});
 
-  datos.forEach((tren) => {
-    const info      = tren.commercialPathInfo || {};
-    const infoextra = tipo === 'llegadas'
-      ? tren.passthroughStep?.arrivalPassthroughStepSides   || {}
-      : tren.passthroughStep?.departurePassthroughStepSides || {};
-    const estadoTrad = traducirEstado(infoextra.circulationState || "");
+        return timestampA - timestampB;
+    });
 
-    const delaySec  = infoextra.forecastedOrAuditedDelay || 0;
-    const tacharHora = delaySec !== null
-      && (delaySec >= 60 || delaySec < 0)
-      && estadoTrad !== 'PENDIENTE DE CIRCULAR';
+    if (!tbody) {
+        console.error("No se encontró el tbody de la tabla del teleindicador");
+        return;
+    }
 
-    const plannedMs = infoextra.plannedTime || 0;
-    const horaPlan  = plannedMs
-      ? formatearTimestampHoraTele(plannedMs)
-      : "-";
-    let horaMostrada = horaPlan;
+    tbody.innerHTML = "";
+    if (!Array.isArray(datos) || datos.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">No hay datos disponibles</td></tr>`;
+        return;
+    }
 
-    // cálculo hora estimada (ms)
-    const horaEstimMs = plannedMs
-      ? plannedMs + delaySec * 1000
-      : null;
+    datos.forEach((tren) => {
+        const info = tren.commercialPathInfo || {};
+        const infoextra = tipo === 'llegadas'
+            ? tren.passthroughStep?.arrivalPassthroughStepSides || {}
+            : tren.passthroughStep?.departurePassthroughStepSides || {};
+        const estadoTrad = traducirEstado(infoextra.circulationState || "");
 
-    const horaEstimStr = calcularHoraRealTele(horaPlan, delaySec);
+        const delaySec = infoextra.forecastedOrAuditedDelay || 0;
+        const tacharHora = delaySec !== null
+            && (delaySec >= 60 || delaySec < 0)
+            && estadoTrad !== 'PENDIENTE DE CIRCULAR';
 
-    if (tacharHora) {
-      horaMostrada = `
+        const plannedMs = infoextra.plannedTime || 0;
+        const horaPlan = plannedMs
+            ? formatearTimestampHoraTele(plannedMs)
+            : "-";
+        let horaMostrada = horaPlan;
+
+        // cálculo hora estimada (ms)
+        const horaEstimMs = plannedMs
+            ? plannedMs + delaySec * 1000
+            : null;
+
+        const horaEstimStr = calcularHoraRealTele(horaPlan, delaySec);
+
+        if (tacharHora) {
+            horaMostrada = `
         <span style="text-decoration:line-through;color:gray;">${horaPlan}</span><br>
         <span class="${getColorClass(delaySec)}">${horaEstimStr}</span>
       `;
-    }
+        }
 
-    // estación origen/destino
-    const oriCode = info.commercialPathKey?.originStationCode || "-";
-    const desCode = info.commercialPathKey?.destinationStationCode || "-";
-    const origen  = oriCode
-      ? upperCamelCase(estaciones[oriCode.replace(/^0+/, '')] || oriCode)
-      : "-";
-    const destino = desCode
-      ? upperCamelCase(estaciones[desCode.replace(/^0+/, '')] || desCode)
-      : "-";
+        // estación origen/destino
+        const oriCode = info.commercialPathKey?.originStationCode || "-";
+        const desCode = info.commercialPathKey?.destinationStationCode || "-";
+        const origen = oriCode
+            ? upperCamelCase(estaciones[oriCode.replace(/^0+/, '')] || oriCode)
+            : "-";
+        const destino = desCode
+            ? upperCamelCase(estaciones[desCode.replace(/^0+/, '')] || desCode)
+            : "-";
 
-    // pictograma de línea
-    const pictograma = obtenerRutaPictograma(info.line, info.core, info);
+        // pictograma de línea
+        const pictograma = obtenerRutaPictograma(info.line, info.core, info);
 
-    // operador
-    const opCode = info.opeProComPro?.operator || "";
-    const opName = traducirOperador(opCode);
+        // operador
+        const opCode = info.opeProComPro?.operator || "";
+        const opName = traducirOperador(opCode);
 
-    // producto comercial / product
-    const commProd = info.opeProComPro?.commercialProduct?.trim() || "";
-    const prod    = info.opeProComPro?.product || "";
+        // producto comercial / product
+        const commProd = info.opeProComPro?.commercialProduct?.trim() || "";
+        const prod = info.opeProComPro?.product || "";
 
-    // número de tren
-    const numeroTren = info.commercialPathKey?.commercialCirculationKey?.commercialNumber || "-";
+        // número de tren
+        const numeroTren = info.commercialPathKey?.commercialCirculationKey?.commercialNumber || "-";
 
-    // vía
-    const llegada = tren.passthroughStep?.arrivalPassthroughStepSides;
-    const salida = tren.passthroughStep?.departurePassthroughStepSides;
-    const viaInfo = obtenerVia(salida, llegada); // Usamos la función existente
-    const via = viaInfo.plataforma || "-";      // Obtenemos la plataforma del resultado
+        // vía
+        const llegada = tren.passthroughStep?.arrivalPassthroughStepSides;
+        const salida = tren.passthroughStep?.departurePassthroughStepSides;
+        const viaInfo = obtenerVia(salida, llegada); // Usamos la función existente
+        const via = viaInfo.plataforma || "-";      // Obtenemos la plataforma del resultado
 
-    // — Celda Hora —
-    const fila = document.createElement("tr");
-    const tdHora = document.createElement("td");
-    tdHora.classList.add("hora-teleindicador");
-    const diffMin = horaEstimMs ? (horaEstimMs - Date.now()) / 60000 : null;
+        // — Celda Hora —
+        const fila = document.createElement("tr");
+        const tdHora = document.createElement("td");
+        tdHora.classList.add("hora-teleindicador");
+        const diffMin = horaEstimMs ? (horaEstimMs - Date.now()) / 60000 : null;
 
-    if (diffMin !== null && diffMin >= -5 && diffMin < 4 && estadoTrad !== 'SEGUIMIENTO PERDIDO') {
-      tdHora.classList.add("parpadeante");
-    }
+        if (diffMin !== null && diffMin >= -5 && diffMin < 4 && estadoTrad !== 'SEGUIMIENTO PERDIDO') {
+            tdHora.classList.add("parpadeante");
+        }
 
-    if (diffMin !== null && diffMin >= -1 && diffMin < 10 && estadoTrad !== 'SEGUIMIENTO PERDIDO') {
-      const minutosRestantes = Math.floor(diffMin);
-      const tiempoRestanteStr = `${Math.max(0, minutosRestantes)} min`;
-      tdHora.innerHTML = `
+        if (diffMin !== null && diffMin >= -1 && diffMin < 10 && estadoTrad !== 'SEGUIMIENTO PERDIDO') {
+            const minutosRestantes = Math.floor(diffMin);
+            const tiempoRestanteStr = `${Math.max(0, minutosRestantes)} min`;
+            tdHora.innerHTML = `
         <div class="countdown-container">
             <span">${tiempoRestanteStr}</span><br>
-            <span class="${
-            estadoTrad !== 'PENDIENTE DE CIRCULAR' ? getColorClass(delaySec) : ''
-            }">${horaEstimStr}</span>
+            <span class="${estadoTrad !== 'PENDIENTE DE CIRCULAR' ? getColorClass(delaySec) : ''
+                }">${horaEstimStr}</span>
         </div>
       `;
-    } else {
-        tdHora.innerHTML = horaMostrada;
-    }
-
-    // Comprobación si el tren es de mañana
-    if (horaEstimMs) {
-        const fechaTren = new Date(horaEstimMs);
-        const hoy = new Date();
-        hoy.setHours(0,0,0,0);
-        const manana = new Date(hoy);
-        manana.setDate(hoy.getDate() + 1);
-        const pasado = new Date(hoy);
-        pasado.setDate(hoy.getDate() + 2);
-
-        if (
-            fechaTren.getFullYear() === manana.getFullYear() &&
-            fechaTren.getMonth() === manana.getMonth() &&
-            fechaTren.getDate() === manana.getDate()
-        ) {
-            tdHora.innerHTML += `<br><span class="sin-parada-texto">Mañana</span>`;
-        } else if (
-            fechaTren.getFullYear() === pasado.getFullYear() &&
-            fechaTren.getMonth() === pasado.getMonth() &&
-            fechaTren.getDate() === pasado.getDate()
-        ) {
-            tdHora.innerHTML += `<br><span class="sin-parada-texto">Pasado</span>`;
+        } else {
+            tdHora.innerHTML = horaMostrada;
         }
-    }
 
-    fila.appendChild(tdHora);
+        // Comprobación si el tren es de mañana
+        if (horaEstimMs) {
+            const fechaTren = new Date(horaEstimMs);
+            const hoy = new Date();
+            hoy.setHours(0, 0, 0, 0);
+            const manana = new Date(hoy);
+            manana.setDate(hoy.getDate() + 1);
+            const pasado = new Date(hoy);
+            pasado.setDate(hoy.getDate() + 2);
 
-    // — Celda Destino/Origen —
-    const tdDest = document.createElement("td");
-    const wrapper = document.createElement("div");
-    wrapper.className = "destino-con-pastilla";
+            if (
+                fechaTren.getFullYear() === manana.getFullYear() &&
+                fechaTren.getMonth() === manana.getMonth() &&
+                fechaTren.getDate() === manana.getDate()
+            ) {
+                tdHora.innerHTML += `<br><span class="sin-parada-texto">Mañana</span>`;
+            } else if (
+                fechaTren.getFullYear() === pasado.getFullYear() &&
+                fechaTren.getMonth() === pasado.getMonth() &&
+                fechaTren.getDate() === pasado.getDate()
+            ) {
+                tdHora.innerHTML += `<br><span class="sin-parada-texto">Pasado</span>`;
+            }
+        }
 
-    // Pictograma de línea (ej: C-1)
-    if (pictograma) {
-        const img = document.createElement("img");
-        img.src = pictograma;
-        img.alt = info.line || "";
-        img.className = "pastilla-linea";
-        wrapper.appendChild(img);
-    }
+        fila.appendChild(tdHora);
 
-    // Contenedor para el texto (destino y aviso de "sin parada")
-    const textWrapper = document.createElement("div");
-    textWrapper.className = "destino-texto-container";
+        // — Celda Destino/Origen —
+        const tdDest = document.createElement("td");
+        const wrapper = document.createElement("div");
+        wrapper.className = "destino-con-pastilla";
 
-    // Nombre del destino/origen
-    const spanDest = document.createElement("span");
-    spanDest.classList.add("linea-divisible");
-    spanDest.classList.add("dividir-barra");
-    spanDest.textContent = tipo === 'llegadas' ? origen : destino;
-    textWrapper.appendChild(spanDest);
+        // Pictograma de línea (ej: C-1)
+        if (pictograma) {
+            const img = document.createElement("img");
+            img.src = pictograma;
+            img.alt = info.line || "";
+            img.className = "pastilla-linea";
+            wrapper.appendChild(img);
+        }
 
-    // Comprobación para añadir "Tren sin parada"
-    if (tren.passthroughStep?.stopType === "NO_STOP") {
-        const noStopSpan = document.createElement("span");
-        noStopSpan.textContent = "Tren sin parada";
-        noStopSpan.className = "sin-parada-texto";
-        textWrapper.appendChild(noStopSpan);
-    }
+        // Contenedor para el texto (destino y aviso de "sin parada")
+        const textWrapper = document.createElement("div");
+        textWrapper.className = "destino-texto-container";
 
-    wrapper.appendChild(textWrapper);
-    tdDest.appendChild(wrapper);
-    fila.appendChild(tdDest);
+        // Nombre del destino/origen
+        const spanDest = document.createElement("span");
+        spanDest.classList.add("linea-divisible");
+        spanDest.classList.add("dividir-barra");
+        spanDest.textContent = tipo === 'llegadas' ? origen : destino;
+        textWrapper.appendChild(spanDest);
 
-    // — Celda Operador —
-    let feveIcon = Number(localStorage.getItem('feveIcon')) || 0;
+        // Comprobación para añadir "Tren sin parada"
+        if (tren.passthroughStep?.stopType === "NO_STOP") {
+            const noStopSpan = document.createElement("span");
+            noStopSpan.textContent = "Tren sin parada";
+            noStopSpan.className = "sin-parada-texto";
+            textWrapper.appendChild(noStopSpan);
+        }
 
-    const tdOp = document.createElement("td");
-    let rutaOp = obtenerRutaIconoADIF(info);
-    if (rutaOp === 'img/operadores/FEVE.png') {
-        rutaOp = rutasOperadorFeve[feveIcon];
-    }
-    if (rutaOp) {
-      const spanOp = document.createElement("span");
-      spanOp.innerHTML = `
+        wrapper.appendChild(textWrapper);
+        tdDest.appendChild(wrapper);
+        fila.appendChild(tdDest);
+
+        // — Celda Operador —
+        let feveIcon = Number(localStorage.getItem('feveIcon')) || 0;
+
+        const tdOp = document.createElement("td");
+        let rutaOp = obtenerRutaIconoADIF(info);
+        if (rutaOp === 'img/operadores/FEVE.png') {
+            rutaOp = rutasOperadorFeve[feveIcon];
+        }
+        if (rutaOp) {
+            const spanOp = document.createElement("span");
+            spanOp.innerHTML = `
         <img src="${rutaOp}" 
              alt="${commProd || opCode}" 
              class="icono-operador" />
       `;
 
-        //CAMBIAR LOGO FEVE AL HACER CLIC
-        spanOp.querySelector("img.icono-operador").addEventListener("click", function () {
-            if (/FEVE\d*\.png$/.test(this.src)) {
-                feveIcon = (feveIcon + 1) % rutasOperadorFeve.length;
-                localStorage.setItem('feveIcon', feveIcon);
+            //CAMBIAR LOGO FEVE AL HACER CLIC
+            spanOp.querySelector("img.icono-operador").addEventListener("click", function () {
+                if (/FEVE\d*\.png$/.test(this.src)) {
+                    feveIcon = (feveIcon + 1) % rutasOperadorFeve.length;
+                    localStorage.setItem('feveIcon', feveIcon);
 
-                // Precargar la nueva imagen
-                const nuevaSrc = rutasOperadorFeve[feveIcon];
-                const imgPreload = new Image();
-                imgPreload.src = nuevaSrc;
-                imgPreload.onload = () => {
-                    // Animación flip solo cuando la imagen está lista
-                    this.classList.add('flip');
-                    setTimeout(() => {
-                        this.src = nuevaSrc;
-                        this.classList.remove('flip');
-                    }, 200);
+                    // Precargar la nueva imagen
+                    const nuevaSrc = rutasOperadorFeve[feveIcon];
+                    const imgPreload = new Image();
+                    imgPreload.src = nuevaSrc;
+                    imgPreload.onload = () => {
+                        // Animación flip solo cuando la imagen está lista
+                        this.classList.add('flip');
+                        setTimeout(() => {
+                            this.src = nuevaSrc;
+                            this.classList.remove('flip');
+                        }, 200);
 
-                    // Actualiza todos los FEVE*.png
-                    document.querySelectorAll('img.icono-operador').forEach(img => {
-                        if (img !== this && /FEVE\d*\.png$/.test(img.src)) {
-                            img.classList.add('flip');
-                            setTimeout(() => {
-                                img.src = nuevaSrc;
-                                img.classList.remove('flip');
-                            }, 200);
-                        }
-                    });
-                };
-            }
-        });
+                        // Actualiza todos los FEVE*.png
+                        document.querySelectorAll('img.icono-operador').forEach(img => {
+                            if (img !== this && /FEVE\d*\.png$/.test(img.src)) {
+                                img.classList.add('flip');
+                                setTimeout(() => {
+                                    img.src = nuevaSrc;
+                                    img.classList.remove('flip');
+                                }, 200);
+                            }
+                        });
+                    };
+                }
+            });
 
-      tdOp.appendChild(spanOp);
-    }
-    fila.appendChild(tdOp);
+            tdOp.appendChild(spanOp);
+        }
+        fila.appendChild(tdOp);
 
-    // — Celda Nº Tren —
-    const tdNum = document.createElement("td");
-    const spanNum = document.createElement("span");
-    spanNum.className = "numero-tren-clicable";
-    spanNum.style = "font-size: 1.1em";
-    spanNum.textContent = numeroTren;
-    const fechaInicio = tren.commercialPathInfo.commercialPathKey.commercialCirculationKey.launchingDate || '';
-    spanNum.setAttribute("onclick", `buscarTrenClick('${numeroTren}', '${fechaInicio}')`);
-    tdNum.appendChild(spanNum);
-    fila.appendChild(tdNum);
+        // — Celda Nº Tren —
+        const tdNum = document.createElement("td");
+        const spanNum = document.createElement("span");
+        spanNum.className = "numero-tren-clicable";
+        spanNum.style = "font-size: 1.1em";
+        spanNum.textContent = numeroTren;
+        const fechaInicio = tren.commercialPathInfo.commercialPathKey.commercialCirculationKey.launchingDate || '';
+        spanNum.setAttribute("onclick", `buscarTrenClick('${numeroTren}', '${fechaInicio}')`);
+        tdNum.appendChild(spanNum);
+        fila.appendChild(tdNum);
 
-    // — Celda Vía —
-    const tdVia = document.createElement("td");
-    tdVia.innerHTML = `<span style="font-size: 1.7em;">${via}</span>`;
-    fila.appendChild(tdVia);
+        // — Celda Vía —
+        const tdVia = document.createElement("td");
+        tdVia.innerHTML = `<span style="font-size: 1.7em;">${via}</span>`;
+        fila.appendChild(tdVia);
 
-    // Añade fila
-    tbody.appendChild(fila);
-  });
+        // Añade fila
+        tbody.appendChild(fila);
+    });
 
-  //PARA QUE SE DIVIDAN LAS BARRAS
-  document.querySelectorAll('.linea-divisible').forEach(el => {
+    //PARA QUE SE DIVIDAN LAS BARRAS
+    document.querySelectorAll('.linea-divisible').forEach(el => {
         el.innerHTML = el.textContent.replace(/([\/\-])/g, '$1\u200B');
-  });
+    });
 }
 
 function actualizarHoraCabeceraTele() {

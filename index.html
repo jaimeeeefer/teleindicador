@@ -20,7 +20,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="white">
   <meta property="og:title" content="Magallanes II" />
   <meta property="og:description" content="🤨🤨" />
-  <meta property="og:image" content="https://anderibarraa.github.io/magallanes/img/banner.png" />
+  <meta property="og:image" content="https://github.com/jaimeeeefer/teleindicador/img/banner.png" />
   <meta property="og:url" content="" id="og-url" />
   <meta property="og:type" content="website" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -30,7 +30,6 @@
   <link rel="stylesheet" href="css/style.css">
   <link href="https://fonts.googleapis.com/css2?family=Arvo:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -97,9 +96,6 @@
           <span id="contadorTren"></span>
           <button id="btnSiguiente">Siguiente</button>
         </div>
-        <div class="botones-centro">
-          <button id="descargarMarchaBtn">Descargar Marcha (Excel)</button>
-        </div>
         <h1>Datos del Tren</h1>
         <div class="header-tabla" id="infoTren"></div>
       </div>
@@ -124,6 +120,11 @@
           </thead>
           <tbody></tbody>
         </table>
+      </div>
+      <div class="botonesCentro2">
+        <div class="descargarMarcha">Descargar marcha:</div>
+        <button id="descargarMarchaBtn">XLSX</button>
+        <button id="descargarMarchaPDFBtn">PDF</button>
       </div>
     </div>
   </div>
@@ -161,7 +162,7 @@
           <div class="custom-select" id="customTipoPanel">
             <div class="custom-select-selected">Salidas</div>
             <div class="custom-select-options">
-              <div data-value="salidas">Salidas</div>
+              <div data-value="salidas" class="selected">Salidas</div>
               <div data-value="llegadas">Llegadas</div>
             </div>
             <input type="hidden" name="tipoPanel" id="tipoPanelCustom" value="salidas">
@@ -172,7 +173,7 @@
           <div class="custom-select" id="customTipoTren">
             <div class="custom-select-selected">Todos</div>
             <div class="custom-select-options">
-              <div data-value="ALL">Todos</div>
+              <div data-value="ALL" class="selected">Todos</div>
               <div data-value="GOODS">Mercancías</div>
               <div data-value="AVLDMD">AVLDMD</div>
               <div data-value="CERCANIAS">Cercanías</div>
@@ -180,6 +181,14 @@
               <div data-value="OTHERS">Otros</div>
             </div>
             <input type="hidden" name="tipoTren" id="tipoTrenCustom" value="ALL">
+          </div>
+        </div>
+        <div class="form-row">
+          <span style="font-family: 'AdifHaussM';">Operador:</span>
+          <div class="custom-select" id="customOperador">
+            <div class="custom-select-selected">Todos</div>
+            <div class="custom-select-options"></div>
+            <input type="hidden" name="operador" id="operadorCustom" value="ALL">
           </div>
         </div>
       </div>
@@ -190,7 +199,7 @@
     <div id="resultadoEstacion" class="hidden">
       <div class="header-tabla" id="infoEstacion"></div>
       <h2 id="salidasLlegadasHeader" class="table-title">Salidas</h2>
-      <div class="table-wrapper">
+      <div class="table-wrapper noBottomMargin">
         <table id="tablaPanel">
           <thead>
             <tr>
@@ -211,6 +220,11 @@
         <div class="botonesCentro2">
           <button id="cargarMas">Cargar más</button>
         </div>
+      </div>
+      <div class="botonesCentro2">
+        <div class="descargarMarcha">Descargar tabla:</div>
+        <button id="descargarPanelBtn">XLSX</button>
+        <button id="descargarPanelPDFBtn">PDF</button>
       </div>
     </div>
 
@@ -255,5 +269,8 @@
   </div>
 
   <script type="module" src="js/main.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.7.0/dist/jspdf.plugin.autotable.min.js"></script>
 </body>
 </html>
