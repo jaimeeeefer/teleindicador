@@ -325,7 +325,21 @@ async function anunciarMegafonia(tren, tipoPanel, tipoAnuncio) {
     }
     // --- FIN LÓGICA DE VÍA ---
 
-    if (stopType === 'NO_STOP' && via) {
+    if (producto === 'MATERIAL VACIO') {
+        secuenciaDeAudios = [
+            'mgf/frases/Atención, por favor.wav',
+            'mgf/frases/tren estacionado en.wav',
+            `mgf/vías/VIA ${viaFormateada}.wav`,
+            'mgf/frases/no presta servicio.wav'
+        ];
+    } else if (producto === 'SERVICIO INTERNO') {
+        secuenciaDeAudios = [
+            'mgf/frases/Atención, por favor.wav',
+            'mgf/frases/tren estacionado en.wav',
+            `mgf/vías/VIA ${viaFormateada}.wav`,
+            'mgf/frases/no presta servicio.wav'
+        ];
+    } else if (stopType === 'NO_STOP' && via) {
         // Anuncio para tren sin parada
         secuenciaDeAudios = [
             'mgf/frases/Atención, atención, tren sin parada por.wav',
