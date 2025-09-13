@@ -210,12 +210,23 @@ function generatePrefixVariants(rawName) {
 
 // ===== Candidatos de nombre de archivo para un texto normalizado =====
 function buildFileNameCandidates(norm) {
-  return [
-    norm,                             // "MADRID CHAMARTIN"
-    norm.replace(/\s+/g, "-"),        // "MADRID-CHAMARTIN"
-    norm.replace(/\s+/g, "_"),        // "MADRID_CHAMARTIN"
-    norm.replace(/\s+/g, ""),         // "MADRIDCHAMARTIN"
+  const candidates = [
+    norm,                          // tal cual, "MADRID CHAMARTIN"
+    norm.replace(/\s+/g, "-"),     // todo con guiones: "MADRID-CHAMARTIN"
+    norm.replace(/\s+/g, ""),      // todo pegado: "MADRIDCHAMARTIN"
   ];
+
+  // --- NUEVO: híbridos con guion solo entre pares adyacentes ---
+  const tokens = norm.split(" ");
+  if (tokens.length > 1) {
+    for (let i = 0; i < tokens.length - 1; i++) {
+      const left = tokens.slice(0, i + 1).join(" ");
+      const right = tokens.slice(i + 1).join(" ");
+      candidates.push(`${left}-${right}`); // ej: "MADRID-PTA ATOCHA"
+    }
+  }
+
+  return candidates;
 }
 
 // ===== Comprobación de existencia =====
@@ -301,6 +312,19 @@ async function anunciarMegafonia(tren, tipoPanel, tipoAnuncio) {
 
     // --- LÓGICA MODIFICADA PARA CONSTRUIR EL ANUNCIO ---
     let secuenciaDeAudios = [];
+
+    // --- LÓGICA DE VÍA MODIFICADA ---
+    // Variable que contendrá el audio de la vía o el aviso de "vía por determinar"
+    let audioVia;
+    if (!via || via.trim() === '' || via === '*') {
+        // Si la vía está vacía, es un espacio o un asterisco
+        audioVia = 'mgf/frases/oportunamente indicaremos la vía en la que quedará estacionado.wav';
+    } else {
+        // Si la vía es válida
+        audioVia = `mgf/vías/VIA ${viaFormateada}.wav`;
+    }
+    // --- FIN LÓGICA DE VÍA ---
+
     if (stopType === 'NO_STOP' && via) {
         // Anuncio para tren sin parada
         secuenciaDeAudios = [
@@ -331,7 +355,7 @@ async function anunciarMegafonia(tren, tipoPanel, tipoAnuncio) {
                 `mgf/horas/${horasFormateadas} horas.wav`,
                 `mgf/motivos/MSG000 Y.wav`,
                 `mgf/minutos/${minutosFormateados} minutos.wav`,
-                `mgf/vías/VIA ${viaFormateada}.wav`
+                audioVia
             ];
         }
     }
