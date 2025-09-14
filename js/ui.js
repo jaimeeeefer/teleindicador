@@ -17,6 +17,7 @@ let trenesAnunciados = {}; // Para no repetir anuncios
 let colaDeAnuncios = []; // Para poner en cola los anuncios si ya hay uno sonando
 let estaReproduciendo = false; // Para saber si el "altavoz" está ocupado
 let audioActual = null;
+const retrasosAnunciados = {};
 
 let fechaConcreta = null;
 
@@ -204,49 +205,61 @@ function normalizeKeyKeepAccents(text) {
 const STOPWORDS = new Set(["DE","DEL","LA","LAS","LO","LOS","EL","SAN","SANTA","Y"]);
 
 function generatePrefixVariants(rawName) {
-  const fullNoAcc  = normalizeKey(rawName);             // SIN Tildes
-  const fullAcc   = normalizeKeyKeepAccents(rawName); // CON tildes
-  const variants = new Set();
+  const baseAcc   = normalizeKeyKeepAccents(rawName); // CON tildes
+  const baseNoAcc = normalizeKey(rawName);            // SIN tildes
+  const bases = [baseAcc, baseNoAcc];
 
-  for (const full of [fullAcc, fullNoAcc]) {
+  const variants = [];
+
+  for (const full of bases) {
     if (!full) continue;
     const tokens = full.split(" ");
 
-    // Prefijos n, n-1, ..., 1
+    // Prefijos n, n-1, ..., 1 (y su versión sin stopwords) en este orden
     for (let k = tokens.length; k >= 1; k--) {
       const pref = tokens.slice(0, k).join(" ");
-      variants.add(pref);
+      variants.push(pref);
 
-      const noStops = tokens.slice(0, k).filter(t => !STOPWORDS.has(t));
-      if (noStops.length) variants.add(noStops.join(" "));
+      const noStops = tokens.slice(0, k).filter(t => !STOPWORDS.has(t)).join(" ");
+      if (noStops && noStops !== pref) variants.push(noStops);
     }
-
-    // Pegado total de esa base
-    variants.add(full.replace(/\s+/g, "").replace(/-/g, ""));
   }
 
-  return Array.from(variants);
+  // Pegados al final (para ambas bases)
+  for (const full of bases) {
+    if (!full) continue;
+    variants.push(full.replace(/[ -]/g, "")); // sin espacios ni guiones
+  }
+
+  // Dedupe preservando el orden de aparición
+  const seen = new Set();
+  return variants.filter(v => v && !seen.has(v) && seen.add(v));
 }
 
 // ===== Candidatos de nombre de archivo para un texto normalizado =====
 function buildFileNameCandidates(norm) {
-  const candidates = [
-    norm,                          // tal cual, "MADRID CHAMARTIN"
-    norm.replace(/\s+/g, "-"),     // todo con guiones: "MADRID-CHAMARTIN"
-    norm.replace(/\s+/g, ""),      // todo pegado: "MADRIDCHAMARTIN"
-  ];
-
-  // --- NUEVO: híbridos con guion solo entre pares adyacentes ---
   const tokens = norm.split(" ");
+  const hybrids = [];
+
   if (tokens.length > 1) {
     for (let i = 0; i < tokens.length - 1; i++) {
-      const left = tokens.slice(0, i + 1).join(" ");
+      const left  = tokens.slice(0, i + 1).join(" ");
       const right = tokens.slice(i + 1).join(" ");
-      candidates.push(`${left}-${right}`); // ej: "MADRID-PTA ATOCHA"
+      hybrids.push(`${left}-${right}`);
     }
   }
 
-  return candidates;
+  const list = [
+    norm,                         // tal cual
+    ...hybrids,                   // ← prioridad a híbridos aquí
+    norm.replace(/ /g, "-"),      // todo con guiones
+    norm.replace(/-/g, " "),      // todo con espacios (si venía con guiones)
+    norm.replace(/[ -]/g, ""),    // pegado (sin espacios ni guiones)
+  ];
+
+  // Deduplicar manteniendo orden
+  const seen = new Set();
+  return list.filter(x => x && !seen.has(x) && seen.add(x));
 }
 
 // ===== Comprobación de existencia =====
@@ -326,6 +339,10 @@ async function anunciarMegafonia(tren, tipoPanel, tipoAnuncio) {
     const fecha = new Date(horaEstimMs);
     const horas = fecha.getHours();
     const minutos = fecha.getMinutes();
+    const delaySeg = Number(infoextra.forecastedOrAuditedDelay || 0);
+    const delayMin = Math.max(0, Math.round(delaySeg / 60));
+    const idTren = info.commercialPathKey.commercialCirculationKey.commercialNumber || ""; // usa un identificador único
+    const ultimoRetrasoAnunciado = retrasosAnunciados[idTren] ?? 0;
     const via = obtenerVia(tren.passthroughStep?.departurePassthroughStepSides, tren.passthroughStep?.arrivalPassthroughStepSides).plataforma;
 
     const normalizar = (texto) => {
@@ -345,6 +362,38 @@ async function anunciarMegafonia(tren, tipoPanel, tipoAnuncio) {
     // --- LÓGICA DE VÍA MODIFICADA ---
     let audioViaNumero = null;
     let audioViaLetra  = null;
+
+    // --- ANUNCIO RETRASO ---
+
+    if (delayMin > 5 && delayMin > ultimoRetrasoAnunciado) {
+        retrasosAnunciados[idTren] = delayMin;
+
+        const fechaRetraso = new Date(infoextra.plannedTime);
+        const horasRetraso = fechaRetraso.getHours();
+        const minutosRetraso = fechaRetraso.getMinutes();
+        const horasRetrasoFormateadas = String(horasRetraso).padStart(2, '0');
+        const minutosRetrasoFormateados = String(minutosRetraso).padStart(2, '0');
+
+        // Generar anuncio rápido de retraso
+        const anuncioRetraso = [
+        `mgf/frases/Atención, por favor.wav`,
+        `mgf/trenes/${(info.opeProComPro?.commercialProduct || 'TREN').toUpperCase()}.wav`,
+        `mgf/frases/destino.wav`,
+        await getStationAudioPath(
+            getEstaciones()[info.commercialPathKey?.destinationStationCode?.replace(/^0+/, '')] || ""
+        ),
+        `mgf/frases/con salida a las.wav`,
+        `mgf/horas/${horasRetrasoFormateadas} horas.wav`,
+        `mgf/motivos/MSG000 Y.wav`,
+        `mgf/minutos/${minutosRetrasoFormateados} minutos.wav`,
+        'mgf/frases/circula con un retraso de aproximadamente.wav',
+        `mgf/minutos/${String(delayMin).padStart(2, '0')} minutos.wav`,
+        'mgf/frases/Rogamos disculpen las molestias.wav',
+        ].filter(Boolean);
+
+        colaDeAnuncios.push(anuncioRetraso);
+        procesarColaDeAnuncios();
+    }
 
     if (!via || via.trim() === '' || via === '*') {
     audioViaNumero = 'mgf/frases/oportunamente indicaremos la vía en la que quedará estacionado.wav';
@@ -1824,7 +1873,7 @@ function obtenerRutaIconoADIF(adif) {
 
 // TELEINDICADOR
 
-export function renderizarPanelTeleindicador(datos) {
+export async function renderizarPanelTeleindicador(datos) {
     datos = datos.slice(0, 25); //MOSTRAR SOLO PRIMEROS 25
 
     const tbody = document.getElementById("tablaTeleindicadorBody");
@@ -1864,7 +1913,7 @@ export function renderizarPanelTeleindicador(datos) {
         return;
     }
 
-    datos.forEach((tren) => {
+    for (const tren of datos) {
         const info = tren.commercialPathInfo || {};
         const infoextra = tipo === 'llegadas'
             ? tren.passthroughStep?.arrivalPassthroughStepSides || {}
@@ -1948,6 +1997,72 @@ export function renderizarPanelTeleindicador(datos) {
       `;
         } else {
             tdHora.innerHTML = horaMostrada;
+        }
+
+        // --- AVISO DE RETRASO “LIBRE” (independiente del resto de anuncios) ---
+        try {
+        const paso = (tipo === 'llegadas')
+            ? tren.passthroughStep?.arrivalPassthroughStepSides
+            : tren.passthroughStep?.departurePassthroughStepSides;
+
+        const stopType = tren.passthroughStep?.stopType;
+        const delaySeg  = Number(paso?.forecastedOrAuditedDelay || 0);
+        const delayMin  = Math.max(0, Math.round(delaySeg / 60));
+        const megafoniaOn = localStorage.getItem('megafoniaActivada') === 'true';
+
+        // Solo anunciar si:
+        //  - megafonía activada
+        //  - el tren PARA en esta estación
+        //  - supera +5 minutos
+        //  - y el retraso es mayor que el último anunciado para este tren
+        if (megafoniaOn && stopType !== 'NO_STOP' && prod !== 'M' && delayMin > 5) {
+            const idTren = tren?.commercialPathInfo?.commercialPathKey?.commercialCirculationKey?.commercialNumber || '';
+            const ultimo = retrasosAnunciados[idTren] ?? 0;
+
+            if (delayMin > ultimo) {
+            retrasosAnunciados[idTren] = delayMin;
+
+            const estaciones = getEstaciones();
+            const codigoDestino = (tipo === 'llegadas')
+                ? tren.commercialPathInfo?.commercialPathKey?.originStationCode
+                : tren.commercialPathInfo?.commercialPathKey?.destinationStationCode;
+            const destino = estaciones[codigoDestino?.replace(/^0+/, '')] || codigoDestino;
+
+            // Hora planificada (para anunciar “con salida/llegada a las HH:MM”)
+            const fechaPlan = new Date(paso?.plannedTime || 0);
+            const hh = String(fechaPlan.getHours()).padStart(2, '0');
+            const mm = String(fechaPlan.getMinutes()).padStart(2, '0');
+
+            const producto = (tren.commercialPathInfo?.opeProComPro?.commercialProduct || 'TREN')
+                                .toString().trim().toUpperCase();
+
+            // Construye y encola el anuncio independiente de retraso
+            const anuncioRetraso = [
+                'mgf/frases/Atención, por favor.wav',
+                `mgf/trenes/${producto}.wav`,
+                'mgf/frases/destino.wav',
+                await getStationAudioPath(destino),
+                `mgf/frases/con salida a las.wav`,
+                `mgf/horas/${hh} horas.wav`,
+                'mgf/motivos/MSG000 Y.wav',
+                `mgf/minutos/${mm} minutos.wav`,
+                'mgf/frases/circula con un retraso de aproximadamente.wav',
+                `mgf/minutos/${String(delayMin).padStart(2,'0')} minutos.wav`,
+                'mgf/frases/Rogamos disculpen las molestias.wav',
+            ].filter(Boolean);
+
+            colaDeAnuncios.push(anuncioRetraso);
+            // usa la cola existente
+            (function procesar() {
+                // esta función ya existe más arriba; si es privada, llama a la visible en tu archivo
+                // aquí simplemente invocas la que tienes:
+                // procesarColaDeAnuncios();
+            })();
+            procesarColaDeAnuncios();
+            }
+        }
+        } catch (e) {
+        console.debug('Aviso retraso: omitido por error de datos', e);
         }
 
         // --- LÓGICA DE MEGAFONÍA MODIFICADA ---
@@ -2132,7 +2247,7 @@ export function renderizarPanelTeleindicador(datos) {
 
         // Añade fila
         tbody.appendChild(fila);
-    });
+    };
 
     //PARA QUE SE DIVIDAN LAS BARRAS
     document.querySelectorAll('.linea-divisible').forEach(el => {
