@@ -188,32 +188,44 @@ function normalizeKey(text) {
     .toUpperCase();
 }
 
+function normalizeKeyKeepAccents(text) {
+  if (!text) return "";
+  return text.toString()
+    // NO quitamos acentos aquí
+    .replace(/[\u00AD\u2010-\u2015\u2212\uFE58\uFE63\uFF0D]/g, "-") // todos los guiones unicode → "-"
+    .replace(/[.,;:(){}\[\]/\\]/g, " ")                             // otros signos → espacio
+    .replace(/\s+/g, " ")
+    .replace(/-\s+/g, "-").replace(/\s+-/g, "-")
+    .trim()
+    .toLocaleUpperCase("es-ES");
+}
+
 // ===== Genera prefijos progresivos y versiones sin stopwords =====
 const STOPWORDS = new Set(["DE","DEL","LA","LAS","LO","LOS","EL","SAN","SANTA","Y"]);
 
 function generatePrefixVariants(rawName) {
-  const full = normalizeKey(rawName);             // "MADRID CHAMARTIN CLARA CAMPOAMOR"
-  if (!full) return [];
-  const tokens = full.split(" ");
-
+  const fullNoAcc  = normalizeKey(rawName);             // SIN Tildes
+  const fullAcc   = normalizeKeyKeepAccents(rawName); // CON tildes
   const variants = new Set();
 
-  // 1) Prefijos completos: n, n-1, ..., 1
-  for (let k = tokens.length; k >= 1; k--) {
-    variants.add(tokens.slice(0, k).join(" "));
+  for (const full of [fullAcc, fullNoAcc]) {
+    if (!full) continue;
+    const tokens = full.split(" ");
+
+    // Prefijos n, n-1, ..., 1
+    for (let k = tokens.length; k >= 1; k--) {
+      const pref = tokens.slice(0, k).join(" ");
+      variants.add(pref);
+
+      const noStops = tokens.slice(0, k).filter(t => !STOPWORDS.has(t));
+      if (noStops.length) variants.add(noStops.join(" "));
+    }
+
+    // Pegado total de esa base
+    variants.add(full.replace(/\s+/g, "").replace(/-/g, ""));
   }
 
-  // 2) Para cada prefijo, añade versión sin stopwords (si queda algo)
-  for (let k = tokens.length; k >= 1; k--) {
-    const pref = tokens.slice(0, k);
-    const noStops = pref.filter(t => !STOPWORDS.has(t));
-    if (noStops.length) variants.add(noStops.join(" "));
-  }
-
-  // 3) Añade también la versión “pegada” del full (por si el fichero está sin espacios)
-  variants.add(full.replace(/\s+/g, ""));
-
-  return Array.from(variants).filter(Boolean);
+  return Array.from(variants);
 }
 
 // ===== Candidatos de nombre de archivo para un texto normalizado =====
@@ -239,14 +251,15 @@ function buildFileNameCandidates(norm) {
 
 // ===== Comprobación de existencia =====
 async function fileExists(url) {
+  const u = encodeURI(url); // soporta "Ó", "Í", etc.
   try {
-    const h = await fetch(url, { method: "HEAD", cache: "no-store" });
+    const h = await fetch(u, { method: "HEAD", cache: "no-store" });
     if (h.ok) return true;
-  } catch (_) {}
+  } catch {}
   try {
-    const r = await fetch(url, { method: "GET", cache: "no-store" });
+    const r = await fetch(u, { method: "GET", cache: "no-store" });
     if (r.ok) return true;
-  } catch (_) {}
+  } catch {}
   return false;
 }
 
