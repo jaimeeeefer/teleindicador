@@ -128,14 +128,30 @@ export function setVerifyingState(isVerifying, message = "Verificando sesión...
 
 // Función para limpiar los anuncios al hacer una nueva búsqueda
 export function limpiarAnuncios() {
+    // resetear trackers por referencia, no reasignar
     trenesAnunciados = {};
-    colaDeAnuncios.length = 0;        // ← vacía la cola
-    if (audioActual) {                // ← detén el audio en curso
-        try { audioActual.pause(); } catch {}
-        audioActual.src = "";
+    // vacía la cola en sitio
+    colaDeAnuncios.length = 0;
+    // Detén audio actual si existe
+    if (audioActual) {
+        try {
+        audioActual.onended = null;
+        audioActual.onerror = null;
+        audioActual.pause();
+        } catch (e) {}
+        try { audioActual.src = ""; } catch (e) {}
         audioActual = null;
     }
-    estaReproduciendo = false;        // ← desbloquea el altavoz
+    estaReproduciendo = false;
+
+    // limpiar retrasos anunciados en sitio (si lo usas)
+    for (const k of Object.keys(retrasosAnunciados)) delete retrasosAnunciados[k];
+
+    // si guardas timers globales para procesarCola, límpialos aquí (ejemplo)
+    if (typeof window !== 'undefined' && window._mgf_process_timer) {
+        clearTimeout(window._mgf_process_timer);
+        window._mgf_process_timer = null;
+    }
 }
 
 // Procesa la cola de anuncios
@@ -150,22 +166,58 @@ function procesarColaDeAnuncios() {
 
 // Reproduce una secuencia de archivos de audio uno tras otro
 function reproducirSecuencia(archivos, index = 0) {
-    if (index >= archivos.length) {
-        estaReproduciendo = false; // Se ha terminado la secuencia
-        setTimeout(procesarColaDeAnuncios, 1000); // Espera 1 segundo y mira si hay más en la cola
+    // Si la secuencia no es válida, pasa a la siguiente
+    if (!Array.isArray(archivos) || archivos.length === 0) {
+        estaReproduciendo = false;
+        setTimeout(procesarColaDeAnuncios, 1000);
         return;
     }
 
-    audioActual  = new Audio(archivos[index]);
-    audioActual.play().catch(e => console.error("Error al reproducir audio:", e));
+    // Si hemos terminado con el índice actual
+    if (index >= archivos.length) {
+        // limpia audioActual por si quedó algo
+        if (audioActual) {
+        try { audioActual.onended = null; } catch {}
+        audioActual = null;
+        }
+        estaReproduciendo = false;
+        // Esperamos un segundo y procesamos siguiente
+        setTimeout(procesarColaDeAnuncios, 1000);
+        return;
+    }
 
-    audioActual.onended = () => {
-        reproducirSecuencia(archivos, index + 1); // Llama a esta misma función para el siguiente audio
-    };
+    // Asegúrate de detener cualquier audio anterior y desvincular handlers
+    try {
+        if (audioActual) {
+        audioActual.onended = null;
+        audioActual.onerror = null;
+        audioActual.pause();
+        // no tocar src si quieres que el navegador no haga otra llamada
+        audioActual = null;
+        }
+    } catch (e) { /* ignore */ }
+
+    // Crea un único objeto global y así limpiarAnuncios podrá pararlo
+    audioActual = new Audio(archivos[index]);
+    // evita reproducir si la url está vacía
+    if (!audioActual.src) {
+        // salta al siguiente
+        reproducirSecuencia(archivos, index + 1);
+        return;
+    }
+
+    audioActual.play().catch(e => {
+        console.error("Error al reproducir audio:", e);
+        // si falla, intenta siguiente
+        setTimeout(() => reproducirSecuencia(archivos, index + 1), 100);
+    });
+
+    // Al terminar el fichero actual, reproducir siguiente de la misma secuencia
+    audioActual.onended = () => reproducirSecuencia(archivos, index + 1);
 
     audioActual.onerror = () => {
         console.warn(`No se encontró el archivo de audio: ${archivos[index]}`);
-        reproducirSecuencia(archivos, index + 1); // Si un archivo falla, salta al siguiente
+        reproducirSecuencia(archivos, index + 1);
     };
 }
 
@@ -363,38 +415,6 @@ async function anunciarMegafonia(tren, tipoPanel, tipoAnuncio) {
     let audioViaNumero = null;
     let audioViaLetra  = null;
 
-    // --- ANUNCIO RETRASO ---
-
-    if (delayMin > 5 && delayMin > ultimoRetrasoAnunciado) {
-        retrasosAnunciados[idTren] = delayMin;
-
-        const fechaRetraso = new Date(infoextra.plannedTime);
-        const horasRetraso = fechaRetraso.getHours();
-        const minutosRetraso = fechaRetraso.getMinutes();
-        const horasRetrasoFormateadas = String(horasRetraso).padStart(2, '0');
-        const minutosRetrasoFormateados = String(minutosRetraso).padStart(2, '0');
-
-        // Generar anuncio rápido de retraso
-        const anuncioRetraso = [
-        `mgf/frases/Atención, por favor.wav`,
-        `mgf/trenes/${(info.opeProComPro?.commercialProduct || 'TREN').toUpperCase()}.wav`,
-        `mgf/frases/destino.wav`,
-        await getStationAudioPath(
-            getEstaciones()[info.commercialPathKey?.destinationStationCode?.replace(/^0+/, '')] || ""
-        ),
-        `mgf/frases/con salida a las.wav`,
-        `mgf/horas/${horasRetrasoFormateadas} horas.wav`,
-        `mgf/motivos/MSG000 Y.wav`,
-        `mgf/minutos/${minutosRetrasoFormateados} minutos.wav`,
-        'mgf/frases/circula con un retraso de aproximadamente.wav',
-        `mgf/minutos/${String(delayMin).padStart(2, '0')} minutos.wav`,
-        'mgf/frases/Rogamos disculpen las molestias.wav',
-        ].filter(Boolean);
-
-        colaDeAnuncios.push(anuncioRetraso);
-        procesarColaDeAnuncios();
-    }
-
     if (!via || via.trim() === '' || via === '*') {
     audioViaNumero = 'mgf/frases/oportunamente indicaremos la vía en la que quedará estacionado.wav';
     } else {
@@ -458,7 +478,14 @@ async function anunciarMegafonia(tren, tipoPanel, tipoAnuncio) {
         }
     }
 
-    colaDeAnuncios.push(secuenciaDeAudios);
+    enqueueSequence(secuenciaDeAudios);
+}
+
+function enqueueSequence(seq) {
+    // Asegura que la secuencia es un array plano de strings, sin valores nulos ni arrays anidados
+    const flat = (Array.isArray(seq) ? seq : [seq]).flat(Infinity).filter(Boolean).map(String);
+    if (flat.length === 0) return;
+    colaDeAnuncios.push(flat);
     procesarColaDeAnuncios();
 }
 
@@ -1963,7 +1990,7 @@ export async function renderizarPanelTeleindicador(datos) {
         const opName = traducirOperador(opCode);
 
         // producto comercial / product
-        const commProd = info.opeProComPro?.commercialProduct?.trim() || "";
+        const commProd = info.opeProComPro?.commercialProduct?.trim().toUpperCase() || "";
         const prod = info.opeProComPro?.product || "";
 
         // número de tren
@@ -2009,56 +2036,72 @@ export async function renderizarPanelTeleindicador(datos) {
         const delaySeg  = Number(paso?.forecastedOrAuditedDelay || 0);
         const delayMin  = Math.max(0, Math.round(delaySeg / 60));
         const megafoniaOn = localStorage.getItem('megafoniaActivada') === 'true';
+        let threshold = 5;
+        if (commProd === "CERCANIAS") threshold = 10;
 
         // Solo anunciar si:
         //  - megafonía activada
         //  - el tren PARA en esta estación
         //  - supera +5 minutos
         //  - y el retraso es mayor que el último anunciado para este tren
-        if (megafoniaOn && stopType !== 'NO_STOP' && prod !== 'M' && delayMin > 5) {
+        if (megafoniaOn && stopType !== 'NO_STOP' && prod !== 'M' && commProd !== 'MATERIAL VACIO' && commProd !== 'MATERIAL VACIO RAM' && commProd !== 'SERVICIO INTERNO' && estadoTrad !== 'SEGUIMIENTO PERDIDO' && delayMin > threshold) {
             const idTren = tren?.commercialPathInfo?.commercialPathKey?.commercialCirculationKey?.commercialNumber || '';
             const ultimo = retrasosAnunciados[idTren] ?? 0;
+            const diff = delayMin - (ultimo || 0);
+            if (diff >= 2) {
+                retrasosAnunciados[idTren] = delayMin;
 
-            if (delayMin > ultimo) {
-            retrasosAnunciados[idTren] = delayMin;
+                const estaciones = getEstaciones();
+                const codigoDestino = (tipo === 'llegadas')
+                    ? tren.commercialPathInfo?.commercialPathKey?.originStationCode
+                    : tren.commercialPathInfo?.commercialPathKey?.destinationStationCode;
+                const destino = estaciones[codigoDestino?.replace(/^0+/, '')] || codigoDestino;
 
-            const estaciones = getEstaciones();
-            const codigoDestino = (tipo === 'llegadas')
-                ? tren.commercialPathInfo?.commercialPathKey?.originStationCode
-                : tren.commercialPathInfo?.commercialPathKey?.destinationStationCode;
-            const destino = estaciones[codigoDestino?.replace(/^0+/, '')] || codigoDestino;
+                // Hora planificada (para anunciar “con salida/llegada a las HH:MM”)
+                const fechaPlan = new Date(paso?.plannedTime || 0);
+                const hh = String(fechaPlan.getHours()).padStart(2, '0');
+                const mm = String(fechaPlan.getMinutes()).padStart(2, '0');
+                const delayHours = Math.floor(delayMin / 60);
+                const delayRemainMin = delayMin % 60;
+                const delayAudio = [];
+                delayAudio.push('mgf/frases/circula con un retraso de aproximadamente.wav');
 
-            // Hora planificada (para anunciar “con salida/llegada a las HH:MM”)
-            const fechaPlan = new Date(paso?.plannedTime || 0);
-            const hh = String(fechaPlan.getHours()).padStart(2, '0');
-            const mm = String(fechaPlan.getMinutes()).padStart(2, '0');
+                if (delayHours > 0) {
+                    delayAudio.push(`mgf/horas/${String(delayHours).padStart(2,'0')} horas.wav`);
+                    if (delayRemainMin > 0) {
+                        delayAudio.push('mgf/motivos/MSG000 Y.wav'); // "y"
+                        delayAudio.push(`mgf/minutos/${String(delayRemainMin).padStart(2,'0')} minutos.wav`);
+                    }
+                } else {
+                    // menos de una hora → solo minutos
+                    delayAudio.push(`mgf/minutos/${String(delayRemainMin).padStart(2,'0')} minutos.wav`);
+                }
 
-            const producto = (tren.commercialPathInfo?.opeProComPro?.commercialProduct || 'TREN')
-                                .toString().trim().toUpperCase();
+                const producto = (tren.commercialPathInfo?.opeProComPro?.commercialProduct || 'TREN')
+                                    .toString().trim().toUpperCase();
 
-            // Construye y encola el anuncio independiente de retraso
-            const anuncioRetraso = [
-                'mgf/frases/Atención, por favor.wav',
-                `mgf/trenes/${producto}.wav`,
-                'mgf/frases/destino.wav',
-                await getStationAudioPath(destino),
-                `mgf/frases/con salida a las.wav`,
-                `mgf/horas/${hh} horas.wav`,
-                'mgf/motivos/MSG000 Y.wav',
-                `mgf/minutos/${mm} minutos.wav`,
-                'mgf/frases/circula con un retraso de aproximadamente.wav',
-                `mgf/minutos/${String(delayMin).padStart(2,'0')} minutos.wav`,
-                'mgf/frases/Rogamos disculpen las molestias.wav',
-            ].filter(Boolean);
+                // Construye y encola el anuncio independiente de retraso
+                const anuncioRetraso = [
+                    'mgf/frases/Atención, por favor.wav',
+                    `mgf/trenes/${producto}.wav`,
+                    'mgf/frases/destino.wav',
+                    await getStationAudioPath(destino),
+                    `mgf/frases/con salida a las.wav`,
+                    `mgf/horas/${hh} horas.wav`,
+                    'mgf/motivos/MSG000 Y.wav',
+                    `mgf/minutos/${mm} minutos.wav`,
+                    ...delayAudio,
+                    'mgf/frases/Rogamos disculpen las molestias.wav',
+                ].filter(Boolean);
 
-            colaDeAnuncios.push(anuncioRetraso);
-            // usa la cola existente
-            (function procesar() {
-                // esta función ya existe más arriba; si es privada, llama a la visible en tu archivo
-                // aquí simplemente invocas la que tienes:
-                // procesarColaDeAnuncios();
-            })();
-            procesarColaDeAnuncios();
+                enqueueSequence(anuncioRetraso);
+                // usa la cola existente
+                (function procesar() {
+                    // esta función ya existe más arriba; si es privada, llama a la visible en tu archivo
+                    // aquí simplemente invocas la que tienes:
+                    // procesarColaDeAnuncios();
+                })();
+                procesarColaDeAnuncios();
             }
         }
         } catch (e) {
@@ -2089,25 +2132,40 @@ export async function renderizarPanelTeleindicador(datos) {
             }
             // REGLA 2: Para trenes sin parada comercial
             else if (stopType === 'NO_STOP') {
-                // Se anuncia una sola vez cuando entra en el rango de 10 minutos
+                // Se anuncia una sola vez cuando entra en el rango de 5 minutos
                 if (minutosReales < 5 && !estadoAnuncio.min5) {
-                    estadoAnuncio.min5 = true; // Usamos min10 como indicador de "ya anunciado"
+                    estadoAnuncio.min5 = true; // Usamos min5 como indicador de "ya anunciado"
                     anunciarMegafonia(tren, tipo, 'sinParada'); // Otro tipo de anuncio
                 }
             }
             // REGLA 3: Para el resto de trenes (anuncios normales)
             else {
-                if (minutosReales === 9 && !estadoAnuncio.min10) {
-                    estadoAnuncio.min10 = true;
-                    anunciarMegafonia(tren, tipo, 'normal');
-                }
-                if (minutosReales === 4 && !estadoAnuncio.min5) {
-                    estadoAnuncio.min5 = true;
-                    anunciarMegafonia(tren, tipo, 'normal');
-                }
-                if (minutosReales <= 1 && !estadoAnuncio.min1) {
-                    estadoAnuncio.min1 = true;
-                    anunciarMegafonia(tren, tipo, 'salidaInminente');
+                const isCercanias = producto === 'CERCANIAS';
+
+                if (!isCercanias) {
+                    // Trenes "normales": 10, 5 y 1 minuto (mismo comportamiento que antes)
+                    if (minutosReales === 9 && !estadoAnuncio.min10) {
+                        estadoAnuncio.min10 = true;
+                        anunciarMegafonia(tren, tipo, 'normal');
+                    }
+                    if (minutosReales === 4 && !estadoAnuncio.min5) {
+                        estadoAnuncio.min5 = true;
+                        anunciarMegafonia(tren, tipo, 'normal');
+                    }
+                    if (minutosReales <= 1 && !estadoAnuncio.min1) {
+                        estadoAnuncio.min1 = true;
+                        anunciarMegafonia(tren, tipo, 'salidaInminente');
+                    }
+                    } else {
+                    // Cercanías: solo a 5 y 1 minuto
+                    if (minutosReales <= 5 && !estadoAnuncio.min5) {
+                        estadoAnuncio.min5 = true;
+                        anunciarMegafonia(tren, tipo, 'normal');
+                    }
+                    if (minutosReales <= 1 && !estadoAnuncio.min1) {
+                        estadoAnuncio.min1 = true;
+                        anunciarMegafonia(tren, tipo, 'salidaInminente');
+                    }
                 }
             }
         }
