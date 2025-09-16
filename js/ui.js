@@ -2119,7 +2119,7 @@ export async function renderizarPanelTeleindicador(datos) {
         //  - el tren PARA en esta estación
         //  - supera +5 minutos
         //  - y el retraso es mayor que el último anunciado para este tren
-        if (megafoniaOn && stopType !== 'NO_STOP' && prod !== 'M' && commProd !== 'MATERIAL VACIO' && commProd !== 'MATERIAL VACIO RAM' && commProd !== 'SERVICIO INTERNO' && commProd !== 'CERCANIAS RAM' && estadoTrad !== 'SEGUIMIENTO PERDIDO' && delayMin > threshold) {
+        if (megafoniaOn && stopType !== 'NO_STOP' && prod !== 'M' && commProd !== 'MATERIAL VACIO' && commProd !== 'MATERIAL VACIO RAM' && commProd !== 'SERVICIO INTERNO' && commProd !== 'CERCANIAS RAM' && commProd !== 'REGIONAL RAM' && estadoTrad !== 'SEGUIMIENTO PERDIDO' && delayMin > threshold) {
             const idTren = tren?.commercialPathInfo?.commercialPathKey?.commercialCirculationKey?.commercialNumber || '';
             const ultimo = retrasosAnunciados[idTren] ?? 0;
             const diff = delayMin - (ultimo || 0);
