@@ -2238,7 +2238,7 @@ export async function renderizarPanelTeleindicador(datos) {
                     estadoAnuncio.min1 = true;
                     anunciarMegafonia(tren, tipo, 'salidaInminenteFeve');
                 }
-            } else if (isFeve) {
+            } else if (isFeveR) {
                 // FEVE → solo a 5 y 1 min, pero tipo "feve"
                 if (minutosReales === 4 && !estadoAnuncio.min5) {
                     estadoAnuncio.min5 = true;
