@@ -257,35 +257,38 @@ function normalizeKeyKeepAccents(text) {
 const STOPWORDS = new Set(["DE","DEL","LA","LAS","LO","LOS","EL","SAN","SANTA","Y"]);
 
 function generatePrefixVariants(rawName) {
-  const baseAcc   = normalizeKeyKeepAccents(rawName); // CON tildes
-  const baseNoAcc = normalizeKey(rawName);            // SIN tildes
-  const bases = [baseAcc, baseNoAcc];
+    const baseAcc   = normalizeKeyKeepAccents(rawName); // CON tildes
+    const baseNoAcc = normalizeKey(rawName);             // SIN tildes
+    const bases = [baseAcc, baseNoAcc];
 
-  const variants = [];
+    const variants = [];
+    
+    // AÑADE ESTA LÓGICA DE PRIORIDAD
+    if (baseAcc) variants.push(baseAcc);
+    if (baseNoAcc && baseNoAcc !== baseAcc) variants.push(baseNoAcc);
 
-  for (const full of bases) {
-    if (!full) continue;
-    const tokens = full.split(" ");
+    // Prefijos n-1, n-2, ..., 1 (y su versión sin stopwords) en este orden
+    for (const full of bases) {
+        if (!full) continue;
+        const tokens = full.split(" ");
+        for (let k = tokens.length - 1; k >= 1; k--) {
+            const pref = tokens.slice(0, k).join(" ");
+            variants.push(pref);
 
-    // Prefijos n, n-1, ..., 1 (y su versión sin stopwords) en este orden
-    for (let k = tokens.length; k >= 1; k--) {
-      const pref = tokens.slice(0, k).join(" ");
-      variants.push(pref);
-
-      const noStops = tokens.slice(0, k).filter(t => !STOPWORDS.has(t)).join(" ");
-      if (noStops && noStops !== pref) variants.push(noStops);
+            const noStops = tokens.slice(0, k).filter(t => !STOPWORDS.has(t)).join(" ");
+            if (noStops && noStops !== pref) variants.push(noStops);
+        }
     }
-  }
 
-  // Pegados al final (para ambas bases)
-  for (const full of bases) {
-    if (!full) continue;
-    variants.push(full.replace(/[ -]/g, "")); // sin espacios ni guiones
-  }
+    // Pegados al final (para ambas bases)
+    for (const full of bases) {
+        if (!full) continue;
+        variants.push(full.replace(/[ -]/g, "")); // sin espacios ni guiones
+    }
 
-  // Dedupe preservando el orden de aparición
-  const seen = new Set();
-  return variants.filter(v => v && !seen.has(v) && seen.add(v));
+    // Dedupe preservando el orden de aparición
+    const seen = new Set();
+    return variants.filter(v => v && !seen.has(v) && seen.add(v));
 }
 
 // ===== Candidatos de nombre de archivo para un texto normalizado =====
@@ -330,6 +333,7 @@ async function fileExists(url) {
 
 // ===== Cache en memoria para resoluciones previas =====
 const AUDIO_RESOLVE_CACHE = new Map();
+const AUDIO_RESOLVE_CACHE_FEVE = new Map();
 
 // ===== Resolver ruta real del audio de estación SIN índices fijos =====
 async function getStationAudioPath(nombreEstacion) {
@@ -347,6 +351,7 @@ async function getStationAudioPath(nombreEstacion) {
   for (const v of variants) {
     for (const base of buildFileNameCandidates(v)) {
       const url = `mgf/estaciones/${base}.wav`;
+      console.log("Probando URL:", url);
       // eslint-disable-next-line no-await-in-loop
       if (await fileExists(url)) {
         AUDIO_RESOLVE_CACHE.set(nombreEstacion, url);
@@ -358,6 +363,35 @@ async function getStationAudioPath(nombreEstacion) {
   // 3) Fallback: usa el normalizado completo con guiones (algo razonable)
   const fallback = `mgf/estaciones/${normalizeKey(nombreEstacion).replace(/\s+/g, "-")}.wav`;
   AUDIO_RESOLVE_CACHE.set(nombreEstacion, fallback);
+  return fallback;
+}
+
+async function getStationAudioPathFeve(nombreEstacion) {
+  if (!nombreEstacion) return null;
+
+  // Cache hit (FEVE)
+  if (AUDIO_RESOLVE_CACHE_FEVE.has(nombreEstacion)) {
+    return AUDIO_RESOLVE_CACHE_FEVE.get(nombreEstacion);
+  }
+
+  // 1) Genera prefijos decrecientes y derivados (reusa tu función existente)
+  const variants = generatePrefixVariants(nombreEstacion);
+
+  // 2) Prueba cada variante con múltiples formatos de nombre
+  for (const v of variants) {
+    for (const base of buildFileNameCandidates(v)) {
+      const url = `mgffeve/Castellano/Estaciones/${base}.wav`;
+      // eslint-disable-next-line no-await-in-loop
+      if (await fileExists(url)) {
+        AUDIO_RESOLVE_CACHE_FEVE.set(nombreEstacion, url);
+        return url;
+      }
+    }
+  }
+
+  // 3) Fallback: usa el normalizado completo con guiones (algo razonable)
+  const fallback = `mgffeve/Castellano/Estaciones/${normalizeKey(nombreEstacion).replace(/\s+/g, "-")}.wav`;
+  AUDIO_RESOLVE_CACHE_FEVE.set(nombreEstacion, fallback);
   return fallback;
 }
 
@@ -405,9 +439,7 @@ async function anunciarMegafonia(tren, tipoPanel, tipoAnuncio) {
     // --- LÓGICA AÑADIDA PARA FORMATEAR NÚMEROS ---
     const horasFormateadas = String(horas).padStart(2, '0');
     const minutosFormateados = String(minutos).padStart(2, '0');
-
-    const estacionAudioPath = await getStationAudioPath(destino);
-
+    
     // --- LÓGICA MODIFICADA PARA CONSTRUIR EL ANUNCIO ---
     let secuenciaDeAudios = [];
 
@@ -450,8 +482,52 @@ async function anunciarMegafonia(tren, tipoPanel, tipoAnuncio) {
             'mgf/frases/Rogamos no se acerquen a la vía.wav'
         ];
     } 
-    // 3. Lógica para trenes con parada
+    // 3. Anuncio FEVE
+    else if (tipoAnuncio === 'feve') {
+        const estacionAudioPathFeve = await getStationAudioPathFeve(destino);
+        secuenciaDeAudios = [
+            `mgffeve/DING.wav`,
+            `mgffeve/Castellano/Trenes/ES_tren_dest_C.wav`,
+            estacionAudioPathFeve,
+            `mgffeve/Castellano/Frases/ES_efectuara_su_salida.wav`,
+            `mgffeve/Castellano/Vias/ES_v${via}.wav`,
+        ];
+    }
+    else if (tipoAnuncio === 'salidaInminenteFeve') {
+        const estacionAudioPathFeve = await getStationAudioPathFeve(destino);
+        secuenciaDeAudios = [
+            `mgffeve/DING.wav`,
+            `mgffeve/Castellano/Trenes/ES_tren_dest_C.wav`,
+            estacionAudioPathFeve,
+            `mgffeve/Castellano/Frases/ES_situado_en_la_via.wav`,
+            `mgffeve/Castellano/Vias/ES_v${via}.wav`,
+            `mgffeve/Castellano/Frases/ES_va_a_efectuar_su_salida.wav`,
+        ];
+    }
+    else if (tipoAnuncio === 'feveRegional') {
+        const estacionAudioPathFeve = await getStationAudioPathFeve(destino);
+        secuenciaDeAudios = [
+            `mgffeve/DING.wav`,
+            `mgffeve/Castellano/Trenes/ES_tren_dest_R.wav`,
+            estacionAudioPathFeve,
+            `mgffeve/Castellano/Frases/ES_efectuara_su_salida.wav`,
+            `mgffeve/Castellano/Vias/ES_v${via}.wav`,
+        ];
+    }
+    else if (tipoAnuncio === 'salidaInminenteFeveRegional') {
+        const estacionAudioPathFeve = await getStationAudioPathFeve(destino);
+        secuenciaDeAudios = [
+            `mgffeve/DING.wav`,
+            `mgffeve/Castellano/Trenes/ES_tren_dest_R.wav`,
+            estacionAudioPathFeve,
+            `mgffeve/Castellano/Frases/ES_situado_en_la_via.wav`,
+            `mgffeve/Castellano/Vias/ES_v${via}.wav`,
+            `mgffeve/Castellano/Frases/ES_va_a_efectuar_su_salida.wav`,
+        ];
+    }
+    // 4. Lógica para trenes con parada normales
     else {
+        const estacionAudioPath = await getStationAudioPath(destino);
         const introAnuncio = [
             `mgf/trenes/${normalizar(producto)}.wav`,
             `mgf/frases/destino.wav`,
@@ -477,7 +553,6 @@ async function anunciarMegafonia(tren, tipoPanel, tipoAnuncio) {
             ];
         }
     }
-
     enqueueSequence(secuenciaDeAudios);
 }
 
@@ -2044,7 +2119,7 @@ export async function renderizarPanelTeleindicador(datos) {
         //  - el tren PARA en esta estación
         //  - supera +5 minutos
         //  - y el retraso es mayor que el último anunciado para este tren
-        if (megafoniaOn && stopType !== 'NO_STOP' && prod !== 'M' && commProd !== 'MATERIAL VACIO' && commProd !== 'MATERIAL VACIO RAM' && commProd !== 'SERVICIO INTERNO' && estadoTrad !== 'SEGUIMIENTO PERDIDO' && delayMin > threshold) {
+        if (megafoniaOn && stopType !== 'NO_STOP' && prod !== 'M' && commProd !== 'MATERIAL VACIO' && commProd !== 'MATERIAL VACIO RAM' && commProd !== 'SERVICIO INTERNO' && commProd !== 'CERCANIAS RAM' && estadoTrad !== 'SEGUIMIENTO PERDIDO' && delayMin > threshold) {
             const idTren = tren?.commercialPathInfo?.commercialPathKey?.commercialCirculationKey?.commercialNumber || '';
             const ultimo = retrasosAnunciados[idTren] ?? 0;
             const diff = delayMin - (ultimo || 0);
@@ -2121,6 +2196,10 @@ export async function renderizarPanelTeleindicador(datos) {
             // Identificamos el tipo de tren para aplicar reglas específicas
             const producto = info.opeProComPro?.commercialProduct?.trim().toUpperCase() || 'TREN';
             const stopType = tren.passthroughStep?.stopType || '';
+            const isCercanias = producto === 'CERCANIAS';
+            const isFeve = producto === 'CERCANIAS RAM';
+            const isFeveR = producto === 'REGIONAL RAM';
+            console.debug('Producto:', producto, 'isFeve:', isFeve, 'isCercanias:', isCercanias);
 
             // REGLA 1: Para "Material Vacio"
             if (producto === 'MATERIAL VACIO' || producto === 'MATERIAL VACIO RAM' || producto === 'SERVICIO INTERNO') {
@@ -2139,33 +2218,49 @@ export async function renderizarPanelTeleindicador(datos) {
                 }
             }
             // REGLA 3: Para el resto de trenes (anuncios normales)
-            else {
-                const isCercanias = producto === 'CERCANIAS';
-
-                if (!isCercanias) {
-                    // Trenes "normales": 10, 5 y 1 minuto (mismo comportamiento que antes)
-                    if (minutosReales === 9 && !estadoAnuncio.min10) {
-                        estadoAnuncio.min10 = true;
-                        anunciarMegafonia(tren, tipo, 'normal');
-                    }
-                    if (minutosReales === 4 && !estadoAnuncio.min5) {
-                        estadoAnuncio.min5 = true;
-                        anunciarMegafonia(tren, tipo, 'normal');
-                    }
-                    if (minutosReales <= 1 && !estadoAnuncio.min1) {
-                        estadoAnuncio.min1 = true;
-                        anunciarMegafonia(tren, tipo, 'salidaInminente');
-                    }
-                    } else {
-                    // Cercanías: solo a 5 y 1 minuto
-                    if (minutosReales <= 5 && !estadoAnuncio.min5) {
-                        estadoAnuncio.min5 = true;
-                        anunciarMegafonia(tren, tipo, 'normal');
-                    }
-                    if (minutosReales <= 1 && !estadoAnuncio.min1) {
-                        estadoAnuncio.min1 = true;
-                        anunciarMegafonia(tren, tipo, 'salidaInminente');
-                    }
+            else if (isCercanias) {
+                // CERCANÍAS → solo a 5 y 1 min
+                if (minutosReales === 4 && !estadoAnuncio.min5) {
+                    estadoAnuncio.min5 = true;
+                    anunciarMegafonia(tren, tipo, 'normal'); 
+                }
+                if (minutosReales <= 1 && !estadoAnuncio.min1) {
+                    estadoAnuncio.min1 = true;
+                    anunciarMegafonia(tren, tipo, 'salidaInminente');
+                }
+            } else if (isFeve) {
+                // FEVE → solo a 5 y 1 min, pero tipo "feve"
+                if (minutosReales === 4 && !estadoAnuncio.min5) {
+                    estadoAnuncio.min5 = true;
+                    anunciarMegafonia(tren, tipo, 'feve');
+                }
+                if (minutosReales <= 1 && !estadoAnuncio.min1) {
+                    estadoAnuncio.min1 = true;
+                    anunciarMegafonia(tren, tipo, 'salidaInminenteFeve');
+                }
+            } else if (isFeve) {
+                // FEVE → solo a 5 y 1 min, pero tipo "feve"
+                if (minutosReales === 4 && !estadoAnuncio.min5) {
+                    estadoAnuncio.min5 = true;
+                    anunciarMegafonia(tren, tipo, 'feveRegional');
+                }
+                if (minutosReales <= 1 && !estadoAnuncio.min1) {
+                    estadoAnuncio.min1 = true;
+                    anunciarMegafonia(tren, tipo, 'salidaInminenteFeveRegional');
+                }
+            } else {
+                // Resto de trenes → 10, 5 y 1 min
+                if (minutosReales === 9 && !estadoAnuncio.min10) {
+                    estadoAnuncio.min10 = true;
+                    anunciarMegafonia(tren, tipo, 'normal');
+                }
+                if (minutosReales === 4 && !estadoAnuncio.min5) {
+                    estadoAnuncio.min5 = true;
+                    anunciarMegafonia(tren, tipo, 'normal');
+                }
+                if (minutosReales <= 1 && !estadoAnuncio.min1) {
+                    estadoAnuncio.min1 = true;
+                    anunciarMegafonia(tren, tipo, 'salidaInminente');
                 }
             }
         }
