@@ -406,6 +406,9 @@ async function anunciarMegafonia(tren, tipoPanel, tipoAnuncio) {
 
     const productoOriginal = info.opeProComPro?.commercialProduct?.trim().toUpperCase() || 'TREN';
     const mapaProductos = {
+        "RODALIES-RG1": "REGIONAL",
+        "RODALIES-RL3": "REGIONAL",
+        "RODALIES-RL4": "REGIONAL",
         "RODALIES-R11": "REGIONAL",
         "RODALIES-R12": "REGIONAL",
         "RODALIES-R13": "REGIONAL",
@@ -416,6 +419,7 @@ async function anunciarMegafonia(tren, tipoPanel, tipoAnuncio) {
         // añade aquí más reglas si lo necesitas
     };
     const producto = mapaProductos[productoOriginal] || productoOriginal;
+    const opCode = info.opeProComPro?.operator || "";
     const estaciones = getEstaciones();
     const codigoDestino = tipoPanel === 'llegadas' 
         ? info.commercialPathKey?.originStationCode 
@@ -463,8 +467,36 @@ async function anunciarMegafonia(tren, tipoPanel, tipoAnuncio) {
     }
     // --- FIN LÓGICA DE VÍA ---
 
-    // 1. Condición combinada para trenes sin servicio
-    if (producto === 'MATERIAL VACIO' || producto === 'MATERIAL VACIO RAM' || producto === 'SERVICIO INTERNO') {
+    // 1. NUEVO: Regla de prioridad para FGC
+    if (opCode === 'FG') {
+        const estacionAudioPath = await getStationAudioPath(destino);
+        const introAnuncio = [
+            `mgf/trenes/FGC.wav`, // Audio específico para FGC
+            `mgf/frases/destino.wav`,
+            estacionAudioPath
+        ];
+
+        if (tipoAnuncio === 'salidaInminente') {
+            secuenciaDeAudios = [
+                ...introAnuncio,
+                audioViaNumero,
+                audioViaLetra,
+                `mgf/frases/va a efectuar su salida.wav`
+            ];
+        } else {
+            secuenciaDeAudios = [
+                ...introAnuncio,
+                `mgf/frases/con salida a las.wav`,
+                `mgf/horas/${horasFormateadas} horas.wav`,
+                `mgf/motivos/MSG000 Y.wav`,
+                `mgf/minutos/${minutosFormateados} minutos.wav`,
+                audioViaNumero,
+                audioViaLetra
+            ];
+        }
+    }
+    // 2. Condición combinada para trenes sin servicio
+    else if (producto === 'MATERIAL VACIO' || producto === 'MATERIAL VACIO RAM' || producto === 'SERVICIO INTERNO') {
         secuenciaDeAudios = [
             'mgf/frases/Atención, por favor.wav',
             'mgf/frases/tren estacionado en.wav',
@@ -473,7 +505,7 @@ async function anunciarMegafonia(tren, tipoPanel, tipoAnuncio) {
             'mgf/frases/no presta servicio.wav'
         ];
     } 
-    // 2. Anuncio para tren sin parada
+    // 3. Anuncio para tren sin parada
     else if (stopType === 'NO_STOP' && via) {
         secuenciaDeAudios = [
             'mgf/frases/Atención, atención, tren sin parada por.wav',
@@ -482,7 +514,7 @@ async function anunciarMegafonia(tren, tipoPanel, tipoAnuncio) {
             'mgf/frases/Rogamos no se acerquen a la vía.wav'
         ];
     } 
-    // 3. Anuncio FEVE
+    // 4. Anuncio FEVE
     else if (tipoAnuncio === 'feve') {
         const estacionAudioPathFeve = await getStationAudioPathFeve(destino);
         secuenciaDeAudios = [
@@ -525,7 +557,7 @@ async function anunciarMegafonia(tren, tipoPanel, tipoAnuncio) {
             `mgffeve/Castellano/Frases/ES_va_a_efectuar_su_salida.wav`,
         ];
     }
-    // 4. Lógica para trenes con parada normales
+    // 5. Lógica para trenes con parada normales
     else {
         const estacionAudioPath = await getStationAudioPath(destino);
         const introAnuncio = [
@@ -2152,8 +2184,20 @@ export async function renderizarPanelTeleindicador(datos) {
                     delayAudio.push(`mgf/minutos/${String(delayRemainMin).padStart(2,'0')} minutos.wav`);
                 }
 
-                const producto = (tren.commercialPathInfo?.opeProComPro?.commercialProduct || 'TREN')
-                                    .toString().trim().toUpperCase();
+                const mapaProductos = {
+                    "RODALIES-RG1": "REGIONAL",
+                    "RODALIES-RL3": "REGIONAL",
+                    "RODALIES-RL4": "REGIONAL",
+                    "RODALIES-R11": "REGIONAL",
+                    "RODALIES-R12": "REGIONAL",
+                    "RODALIES-R13": "REGIONAL",
+                    "RODALIES-R14": "REGIONAL",
+                    "RODALIES-R15": "REGIONAL",
+                    "RODALIES-R16": "REGIONAL",
+                    "RODALIES-R17": "REGIONAL",
+                    // añade aquí más reglas si lo necesitas
+                };
+                const producto = mapaProductos[productoOriginal] || productoOriginal;
 
                 // Construye y encola el anuncio independiente de retraso
                 const anuncioRetraso = [
