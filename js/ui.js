@@ -406,9 +406,9 @@ async function anunciarMegafonia(tren, tipoPanel, tipoAnuncio) {
 
     const productoOriginal = info.opeProComPro?.commercialProduct?.trim().toUpperCase() || 'TREN';
     const mapaProductos = {
-        "RODALIES-RG1": "REGIONAL",
-        "RODALIES-RL3": "REGIONAL",
-        "RODALIES-RL4": "REGIONAL",
+        "RODALIES-RG1": "CERCANIAS",
+        "RODALIES-RL3": "CERCANIAS",
+        "RODALIES-RL4": "CERCANIAS",
         "RODALIES-R11": "REGIONAL",
         "RODALIES-R12": "REGIONAL",
         "RODALIES-R13": "REGIONAL",
@@ -2140,8 +2140,6 @@ export async function renderizarPanelTeleindicador(datos) {
             : tren.passthroughStep?.departurePassthroughStepSides;
 
         const stopType = tren.passthroughStep?.stopType;
-        const delaySeg  = Number(paso?.forecastedOrAuditedDelay || 0);
-        const delayMin  = Math.max(0, Math.round(delaySeg / 60));
         const megafoniaOn = localStorage.getItem('megafoniaActivada') === 'true';
         let threshold = 5;
         if (commProd === "CERCANIAS") threshold = 10;
@@ -2151,76 +2149,77 @@ export async function renderizarPanelTeleindicador(datos) {
         //  - el tren PARA en esta estación
         //  - supera +5 minutos
         //  - y el retraso es mayor que el último anunciado para este tren
-        if (megafoniaOn && stopType !== 'NO_STOP' && prod !== 'M' && commProd !== 'MATERIAL VACIO' && commProd !== 'MATERIAL VACIO RAM' && commProd !== 'SERVICIO INTERNO' && commProd !== 'CERCANIAS RAM' && commProd !== 'REGIONAL RAM' && estadoTrad !== 'SEGUIMIENTO PERDIDO' && delayMin > threshold) {
-            const idTren = tren?.commercialPathInfo?.commercialPathKey?.commercialCirculationKey?.commercialNumber || '';
-            const ultimo = retrasosAnunciados[idTren] ?? 0;
-            const diff = delayMin - (ultimo || 0);
-            if (diff >= 2) {
-                retrasosAnunciados[idTren] = delayMin;
+        if (megafoniaOn && stopType !== 'NO_STOP' && prod !== 'M' && commProd !== 'MATERIAL VACIO' && commProd !== 'MATERIAL VACIO RAM' && commProd !== 'SERVICIO INTERNO' && commProd !== 'CERCANIAS RAM' && commProd !== 'REGIONAL RAM' && estadoTrad !== 'SEGUIMIENTO PERDIDO') {
+            const delaySeg = Number(paso?.forecastedOrAuditedDelay || 0);
+            const delayMin = Math.max(0, Math.round(delaySeg / 60));
 
-                const estaciones = getEstaciones();
-                const codigoDestino = (tipo === 'llegadas')
-                    ? tren.commercialPathInfo?.commercialPathKey?.originStationCode
-                    : tren.commercialPathInfo?.commercialPathKey?.destinationStationCode;
-                const destino = estaciones[codigoDestino?.replace(/^0+/, '')] || codigoDestino;
+            if (delayMin > 5) {
+                const idTren = tren?.commercialPathInfo?.commercialPathKey?.commercialCirculationKey?.commercialNumber || '';
+                const ultimoRetraso = retrasosAnunciados[idTren] ?? 0;
 
-                // Hora planificada (para anunciar “con salida/llegada a las HH:MM”)
-                const fechaPlan = new Date(paso?.plannedTime || 0);
-                const hh = String(fechaPlan.getHours()).padStart(2, '0');
-                const mm = String(fechaPlan.getMinutes()).padStart(2, '0');
-                const delayHours = Math.floor(delayMin / 60);
-                const delayRemainMin = delayMin % 60;
-                const delayAudio = [];
-                delayAudio.push('mgf/frases/circula con un retraso de aproximadamente.wav');
+                // 🔸 Solo anuncia si el retraso ha aumentado al menos 2 minutos
+                if (delayMin >= ultimoRetraso + 2) {
+                    retrasosAnunciados[idTren] = delayMin;
 
-                if (delayHours > 0) {
-                    delayAudio.push(`mgf/horas/${String(delayHours).padStart(2,'0')} horas.wav`);
-                    if (delayRemainMin > 0) {
-                        delayAudio.push('mgf/motivos/MSG000 Y.wav'); // "y"
-                        delayAudio.push(`mgf/minutos/${String(delayRemainMin).padStart(2,'0')} minutos.wav`);
+                    const estaciones = getEstaciones();
+                    const codigoDestino = (tipo === 'llegadas')
+                        ? tren.commercialPathInfo?.commercialPathKey?.originStationCode
+                        : tren.commercialPathInfo?.commercialPathKey?.destinationStationCode;
+                    const destino = estaciones[codigoDestino?.replace(/^0+/, '')] || codigoDestino;
+
+                    const fechaPlan = new Date(paso?.plannedTime || 0);
+                    const hh = String(fechaPlan.getHours()).padStart(2, '0');
+                    const mm = String(fechaPlan.getMinutes()).padStart(2, '0');
+                    const delayHours = Math.floor(delayMin / 60);
+                    const delayRemainMin = delayMin % 60;
+
+                    // --- Mapa de productos como en anunciarMegafonia ---
+                    const productoOriginal = tren.commercialPathInfo?.opeProComPro?.commercialProduct?.trim().toUpperCase() || 'TREN';
+                    const mapaProductos = {
+                        "RODALIES-RG1": "CERCANIAS",
+                        "RODALIES-RL3": "CERCANIAS",
+                        "RODALIES-RL4": "CERCANIAS",
+                        "RODALIES-R11": "REGIONAL",
+                        "RODALIES-R12": "REGIONAL",
+                        "RODALIES-R13": "REGIONAL",
+                        "RODALIES-R14": "REGIONAL",
+                        "RODALIES-R15": "REGIONAL",
+                        "RODALIES-R16": "REGIONAL",
+                        "RODALIES-R17": "REGIONAL",
+                        // añade aquí más reglas si lo necesitas
+                    };
+                    const producto = mapaProductos[productoOriginal] || productoOriginal;
+
+                    // --- Construcción del anuncio ---
+                    const delayAudio = [];
+                    delayAudio.push('mgf/frases/circula con un retraso de aproximadamente.wav');
+
+                    if (delayHours > 0) {
+                        delayAudio.push(`mgf/horas/${String(delayHours).padStart(2, '0')} horas.wav`);
+                        if (delayRemainMin > 0) {
+                            delayAudio.push('mgf/motivos/MSG000 Y.wav');
+                            delayAudio.push(`mgf/minutos/${String(delayRemainMin).padStart(2, '0')} minutos.wav`);
+                        }
+                    } else {
+                        delayAudio.push(`mgf/minutos/${String(delayRemainMin).padStart(2, '0')} minutos.wav`);
                     }
-                } else {
-                    // menos de una hora → solo minutos
-                    delayAudio.push(`mgf/minutos/${String(delayRemainMin).padStart(2,'0')} minutos.wav`);
+
+                    const anuncioRetraso = [
+                        'mgf/frases/Atención, por favor.wav',
+                        `mgf/trenes/${producto}.wav`,
+                        'mgf/frases/destino.wav',
+                        await getStationAudioPath(destino),
+                        `mgf/frases/con salida a las.wav`,
+                        `mgf/horas/${hh} horas.wav`,
+                        'mgf/motivos/MSG000 Y.wav',
+                        `mgf/minutos/${mm} minutos.wav`,
+                        ...delayAudio,
+                        'mgf/frases/Rogamos disculpen las molestias.wav',
+                    ].filter(Boolean);
+
+                    enqueueSequence(anuncioRetraso);
+                    procesarColaDeAnuncios();
                 }
-
-                const mapaProductos = {
-                    "RODALIES-RG1": "REGIONAL",
-                    "RODALIES-RL3": "REGIONAL",
-                    "RODALIES-RL4": "REGIONAL",
-                    "RODALIES-R11": "REGIONAL",
-                    "RODALIES-R12": "REGIONAL",
-                    "RODALIES-R13": "REGIONAL",
-                    "RODALIES-R14": "REGIONAL",
-                    "RODALIES-R15": "REGIONAL",
-                    "RODALIES-R16": "REGIONAL",
-                    "RODALIES-R17": "REGIONAL",
-                    // añade aquí más reglas si lo necesitas
-                };
-                const producto = mapaProductos[productoOriginal] || productoOriginal;
-
-                // Construye y encola el anuncio independiente de retraso
-                const anuncioRetraso = [
-                    'mgf/frases/Atención, por favor.wav',
-                    `mgf/trenes/${producto}.wav`,
-                    'mgf/frases/destino.wav',
-                    await getStationAudioPath(destino),
-                    `mgf/frases/con salida a las.wav`,
-                    `mgf/horas/${hh} horas.wav`,
-                    'mgf/motivos/MSG000 Y.wav',
-                    `mgf/minutos/${mm} minutos.wav`,
-                    ...delayAudio,
-                    'mgf/frases/Rogamos disculpen las molestias.wav',
-                ].filter(Boolean);
-
-                enqueueSequence(anuncioRetraso);
-                // usa la cola existente
-                (function procesar() {
-                    // esta función ya existe más arriba; si es privada, llama a la visible en tu archivo
-                    // aquí simplemente invocas la que tienes:
-                    // procesarColaDeAnuncios();
-                })();
-                procesarColaDeAnuncios();
             }
         }
         } catch (e) {
