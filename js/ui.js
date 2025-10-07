@@ -2149,7 +2149,7 @@ export async function renderizarPanelTeleindicador(datos) {
         //  - el tren PARA en esta estación
         //  - supera +5 minutos
         //  - y el retraso es mayor que el último anunciado para este tren
-        if (megafoniaOn && stopType !== 'NO_STOP' && prod !== 'M' && commProd !== 'MATERIAL VACIO' && commProd !== 'MATERIAL VACIO RAM' && commProd !== 'SERVICIO INTERNO' && commProd !== 'CERCANIAS RAM' && commProd !== 'REGIONAL RAM' && estadoTrad !== 'SEGUIMIENTO PERDIDO') {
+        if (megafoniaOn && stopType !== 'NO_STOP' && prod !== 'M' && commProd !== 'MATERIAL VACIO' && commProd !== 'MATERIAL VACIO RAM' && commProd !== 'SERVICIO INTERNO' && commProd !== 'CERCANIAS RAM' && commProd !== 'REGIONAL RAM' && estadoTrad !== 'SEGUIMIENTO PERDIDO' && estadoTrad !== 'PENDIENTE DE CIRCULAR') {
             const delaySeg = Number(paso?.forecastedOrAuditedDelay || 0);
             const delayMin = Math.max(0, Math.round(delaySeg / 60));
 
